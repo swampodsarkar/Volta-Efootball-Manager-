@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Volta Efootball Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* eFootball Theme Inspired Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0d1117; /* Dark background from image */
+            color: #ffffff;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        .nav-card, .stat-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .nav-card:hover, .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border-color: #00bcd4; /* Teal accent on hover */
+        }
+        .hidden {
+            display: none;
+        }
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.85);
+        }
+        #user-avatar-container:hover .overlay {
+            opacity: 1;
+        }
+        .overlay {
+            transition: opacity 0.3s ease;
+        }
+        @keyframes loading-progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        #loading-bar {
+            animation: loading-progress 2.5s ease-in-out infinite;
+        }
+        .animate-bounce {
+            animation: bounce 1.5s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(-25%);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            50% {
+                transform: translateY(0);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+        /* Teal button style */
+        .btn-primary {
+             background-color: #00bcd4; /* Teal 500 */
+             color: white;
+             font-weight: 700;
+             transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+             background-color: #00a5bb; /* Teal 600 */
+        }
+
+        /* Player card styles from original for other views */
+        .player-card, .tournament-card {
+            background-color: #161b22; /* Darker card background */
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .player-card:hover, .tournament-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 255, 255, 0.3); /* Teal glow */
+        }
+    </style>
+</head>
+<body class="h-screen overflow-x-hidden">
+    
+    <div id="game-container-wrapper" class="w-full h-full">
+
+        <div id="full-screen-loader" class="fixed inset-0 bg-[#0d1117] bg-opacity-95 flex flex-col items-center justify-center z-[100]">
+            <div class="flex flex-col items-center justify-center">
+                <div class="text-6xl mb-6 animate-bounce">⚽</div>
+                <h1 class="text-4xl font-extrabold text-teal-400 mb-4 tracking-wider">Volta Efootball Manager</h1>
+                <div class="w-full max-w-sm bg-gray-700 rounded-full h-2.5">
+                    <div id="loading-bar" class="bg-teal-400 h-2.5 rounded-full"></div>
+                </div>
+                <p class="text-lg font-bold text-gray-300 mt-4">Loading by SWAMPOD X MITHUN...</p>
+            </div>
+        </div>
+    
+        <div id="promo-banner-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-lg text-center border-4 border-yellow-500 relative">
+                <h3 id="promo-title" class="text-3xl font-extrabold text-yellow-400 mb-4"></h3>
+                <p id="promo-message" class="text-lg mb-6 text-gray-200"></p>
+                <a id="promo-link" href="#" target="_blank" class="hidden w-full py-3 btn-primary rounded-lg mb-4 hover:bg-teal-600"></a>
+                <button id="promo-close-btn" class="mt-4 py-2 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg">Close</button>
+            </div>
+        </div>
+        
+        <div id="maintenance-mode" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="text-center p-8 bg-gray-800 rounded-lg shadow-xl border border-teal-500">
+                <h2 id="maintenance-title" class="text-3xl font-bold text-yellow-400 mb-4">⚠️ Maintenance in Progress</h2>
+                <p id="maintenance-message" class="text-lg text-gray-300">The game is on maintenance, will back shortly.</p>
+            </div>
+        </div>
+        
+        <div id="custom-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-sm text-center border border-teal-500">
+                <p id="modal-message" class="text-lg mb-4"></p>
+                <button id="modal-close-btn" class="btn-primary py-2 px-6 rounded">OK</button>
+            </div>
+        </div>
+    
+        <div id="ad-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md text-center border border-teal-500">
+                <h3 class="text-2xl font-bold text-teal-400 mb-4">Advertisement Break</h3>
+                <div class="bg-gray-700 h-64 flex items-center justify-center rounded mb-4">
+                    <p>Your ad will be shown here</p>
+                </div>
+                <button id="skip-ad-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded" disabled>
+                    Skip (<span id="ad-timer">5</span>)
+                </button>
+            </div>
+        </div>
+    
+        <div id="auth-screen" class="w-full h-full flex items-center justify-center bg-gray-900 hidden">
+            <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-xl shadow-2xl border border-teal-500">
+                <div>
+                    <h2 class="text-center text-4xl font-extrabold text-teal-400">⚽ Volta Efootball Manager</h2>
+                    <p id="auth-title" class="mt-2 text-center text-sm text-gray-400">Login to your Club</p>
+                </div>
+                <form id="login-form" class="space-y-6">
+                    <input id="login-email" type="email" placeholder="Email" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <input id="login-password" type="password" placeholder="Password" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <button type="submit" class="w-full py-3 px-4 btn-primary rounded-lg transition duration-300">Login</button>
+                </form>
+                <form id="signup-form" class="space-y-6 hidden">
+                    <input id="signup-email" type="email" placeholder="Email" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <input id="signup-password" type="password" placeholder="Password" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <input id="signup-club-name" type="text" placeholder="Club Name" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <button type="submit" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition duration-300">Sign Up</button>
+                </form>
+                <p id="auth-toggle" class="text-center text-sm text-teal-400 hover:underline cursor-pointer">
+                    Don't have an account? Sign Up
+                </p>
+                <p id="auth-error" class="text-center text-sm text-red-400"></p>
+            </div>
+        </div>
+    
+        <div id="game-content" class="hidden w-full h-full">
+            <header class="py-4 px-6 flex flex-col items-center justify-center text-center">
+                <div id="user-avatar-container" class="relative w-24 h-24 mx-auto mb-3 group cursor-pointer">
+                    <img id="user-avatar" src="https://placehold.co/96x96/161b22/FFFFFF?text=S" alt="Club Logo" class="w-24 h-24 rounded-full border-4 border-teal-500 object-cover">
+                    <div class="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 overlay">
+                        <p class="text-white text-xs font-bold">Update</p>
+                    </div>
+                </div>
+                <input type="file" id="logo-upload" class="hidden" accept="image/*">
+                
+                <div class="flex items-center justify-center">
+                    <h1 id="user-club-name" class="text-2xl font-bold text-white truncate max-w-[200px]">SRS@</h1>
+                    <span id="edit-club-name" class="ml-2 cursor-pointer text-gray-400 hover:text-teal-400">✔️</span>
+                </div>
+                <p class="text-md text-yellow-400 mt-1">💰 Balance: <span id="user-balance" class="font-bold">1000</span> Coins</p>
+                <button id="logout-btn" class="mt-4 py-2 px-5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-sm transition duration-300">Logout</button>
+            </header>
+
+            <main class="main-container">
+                <div id="home-view" class="view">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <a href="#match" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                            <i class="fas fa-bolt text-2xl mb-2"></i>
+                            <span class="font-semibold">Play Match</span>
+                        </a>
+                        <a href="#squad" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                            <i class="fas fa-users text-2xl mb-2"></i>
+                            <span class="font-semibold">My Squad</span>
+                        </a>
+                        <a href="#transfers" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                           <i class="fas fa-exchange-alt text-2xl mb-2"></i>
+                            <span class="font-semibold">Transfers</span>
+                        </a>
+                        <a href="#store" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                            <i class="fas fa-store text-2xl mb-2"></i>
+                            <span class="font-semibold">Store</span>
+                        </a>
+                        <a href="#events" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                            <i class="fas fa-star text-2xl mb-2"></i>
+                            <span class="font-semibold">Events</span>
+                        </a>
+                        <a href="#leaderboard" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                            <i class="fas fa-trophy text-2xl mb-2"></i>
+                            <span class="font-semibold">Leaderboard</span>
+                        </a>
+                        <a href="#esports" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                            <i class="fas fa-gamepad text-2xl mb-2"></i>
+                            <span class="font-semibold">ESPORTS</span>
+                        </a>
+                        <a href="#about" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
+                            <i class="fas fa-info-circle text-2xl mb-2"></i>
+                            <span class="font-semibold">About</span>
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="stat-card p-5 text-center">
+                            <h2 class="text-lg font-semibold mb-1 text-gray-400">Team Power</h2>
+                            <p class="text-4xl font-extrabold text-yellow-400" id="team-power-stat">92</p>
+                        </div>
+                        <div class="stat-card p-5 text-center">
+                            <h2 class="text-lg font-semibold mb-1 text-gray-400">Match Wins</h2>
+                            <p class="text-4xl font-extrabold text-yellow-400" id="match-wins-stat">0</p>
+                        </div>
+                        <div class="stat-card p-5 text-center">
+                            <h2 class="text-lg font-semibold mb-1 text-gray-400">Leaderboard Rank</h2>
+                            <p class="text-4xl font-extrabold text-yellow-400" id="rank-stat">4</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="squad-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                    <h1 class="text-3xl font-bold mb-8 text-teal-400">My Squad (5-player team)</h1>
+                    <div id="squad-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+                </div>
+    
+                <div id="match-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                     <h1 class="text-3xl font-bold mb-8 text-teal-400">PvP Match</h1>
+                    <div id="match-initial-screen">
+                        <button id="find-match-btn" class="w-full max-w-lg mx-auto py-5 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-2xl transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                            Find Match
+                        </button>
+                    </div>
+                     <div id="matchmaking-screen" class="hidden text-center">
+                        <p class="text-2xl mb-4 text-yellow-400">Searching for opponent...</p>
+                        <div class="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-teal-500 mx-auto"></div>
+                        <button id="cancel-matchmaking-btn" class="mt-8 py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg">Cancel</button>
+                    </div>
+                    <div id="match-simulation-screen" class="hidden">
+                        <div class="flex justify-between items-center bg-gray-900 p-6 rounded-xl mb-6 shadow-2xl border-b-4 border-teal-500">
+                            <div class="text-center w-1/3">
+                                <p id="teamA-name" class="font-bold text-xl md:text-2xl truncate text-teal-400">Team A</p>
+                                <p id="teamA-score" class="text-5xl font-extrabold text-white">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p id="match-timer" class="text-3xl font-mono text-yellow-400 bg-gray-700 px-4 py-2 rounded">01:30</p>
+                            </div>
+                            <div class="text-center w-1/3">
+                                <p id="teamB-name" class="font-bold text-xl md:text-2xl truncate text-teal-400">Team B</p>
+                                <p id="teamB-score" class="text-5xl font-extrabold text-white">0</p>
+                            </div>
+                        </div>
+                        <div id="in-match-strategy-control" class="flex justify-center space-x-4 mb-6">
+                            <button data-strategy="Attack" class="strategy-btn flex-1 py-3 px-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition duration-300">Attack ⚽</button>
+                            <button data-strategy="Balanced" class="strategy-btn flex-1 py-3 px-2 btn-primary rounded-lg transition duration-300 border-2 border-teal-500">Balanced ⚖️</button>
+                            <button data-strategy="Defense" class="strategy-btn flex-1 py-3 px-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-300">Defense 🛡️</button>
+                        </div>
+                        <div id="live-commentary" class="bg-gray-900 p-5 rounded-xl h-96 overflow-y-auto border border-gray-700 shadow-inner text-gray-300"></div>
+                    </div>
+                </div>
+                
+                <div id="events-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                    <h1 class="text-3xl font-bold mb-8 text-teal-400">Club Events</h1>
+                    <div id="events-list" class="space-y-6"></div>
+                </div>
+    
+                <div id="leaderboard-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                    <h1 class="text-3xl font-bold mb-8 text-teal-400">World Leaderboard</h1>
+                    <div class="bg-gray-700 rounded-xl shadow-xl overflow-hidden border border-teal-500">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-900 border-b border-teal-500"><tr><th class="p-4 text-teal-400">Rank</th><th class="p-4 text-teal-400">Club Name</th><th class="p-4 text-teal-400">Points</th><th class="p-4 text-teal-400">Match Wins</th></tr></thead>
+                            <tbody id="leaderboard-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+    
+                <div id="store-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                    <h1 class="text-3xl font-bold mb-8 text-teal-400">Item Store</h1>
+                    <div id="store-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+                
+                <div id="transfers-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                    <h1 class="text-3xl font-bold mb-8 text-teal-400">Transfer Market</h1>
+                    <div class="mb-10">
+                        <h2 class="text-2xl font-semibold mb-4 border-b-2 border-gray-700 pb-2 text-teal-400">Buy Players</h2>
+                        <div id="transfer-market-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-semibold mb-4 border-b-2 border-gray-700 pb-2 text-teal-400">Sell Your Players</h2>
+                        <div id="sell-player-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+                    </div>
+                </div>
+    
+                <div id="esports-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                    <h1 class="text-3xl font-bold mb-8 text-teal-400">ESPORTS SECTION</h1>
+                    <div id="tournament-list" class="space-y-6"></div>
+                </div>
+
+                <div id="about-view" class="view hidden">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                    <h1 class="text-4xl font-extrabold mb-6 text-teal-400">About Volta Efootball Manager</h1>
+                    <div class="player-card p-8 text-center max-w-2xl mx-auto">
+                        <p class="text-2xl text-gray-200">This game was created by</p>
+                        <h2 class="text-5xl font-bold my-4 text-teal-300 tracking-wider">SWAMPOD & MITHUN</h2>
+                        <div class="border-t border-gray-600 my-8"></div>
+                        <p class="mt-4 text-lg text-gray-400">Version: <span class="font-bold text-yellow-400">0.1</span></p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue, update, serverTimestamp, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // IMPORTANT: Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhSjh1VxQFrzslIwOZ1yOxLYuNT2Le_sg",
+            authDomain: "fram-and-go.firebaseapp.com",
+            databaseURL: "https://fram-and-go-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "fram-and-go",
+            storageBucket: "fram-and-go.firebasestorage.app",
+            messagingSenderId: "781295119002",
+            appId: "1:781295119002:web:3d84890a0bb85e5d1c0d23",
+            measurementId: "G-H30RNBNE6X"
+        };
+        const IMGBB_API_KEY = "fe3e06e5bbecab856c63cf7e6a50a251";
+        const MARADONA_PLAYER_ID = "MARADONA_PRIME"; 
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        
+        let currentUserData = null; 
+        let teamPower = 0;
+        let matchListener = null;
+        let timerInterval = null;
+        let matchSimulationInterval = null;
+        let currentMatchId = null; 
+        
+        let currentLocalStrategy = 'Balanced';
+        let isLocalPlayerTeamA = false;
+
+
+        const authScreen = document.getElementById('auth-screen');
+        const gameContent = document.getElementById('game-content');
+        const maintenanceModeDiv = document.getElementById('maintenance-mode');
+        const modal = document.getElementById('custom-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const fullScreenLoader = document.getElementById('full-screen-loader');
+        const findMatchBtn = document.getElementById('find-match-btn');
+        
+        const promoBannerModal = document.getElementById('promo-banner-modal');
+        const promoCloseBtn = document.getElementById('promo-close-btn');
+        
+        const strategyButtons = document.querySelectorAll('#in-match-strategy-control .strategy-btn');
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        const views = document.querySelectorAll('.view');
+        const header = document.querySelector('header');
+
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+        }
+        modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        
+        promoCloseBtn.addEventListener('click', () => {
+            promoBannerModal.classList.add('hidden');
+            sessionStorage.setItem('promoBannerDismissed', 'true');
+        });
+
+        function showAd() {
+            const adModal = document.getElementById('ad-modal');
+            const skipAdBtn = document.getElementById('skip-ad-btn');
+            const adTimer = document.getElementById('ad-timer');
+            let countdown = 5;
+            
+            adModal.classList.remove('hidden');
+
+            const timerInterval = setInterval(() => {
+                countdown--;
+                adTimer.textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    adTimer.parentElement.textContent = 'Skip';
+                    skipAdBtn.disabled = false;
+                }
+            }, 1000);
+
+            skipAdBtn.addEventListener('click', () => {
+                adModal.classList.add('hidden');
+            }, { once: true });
+        }
+        
+        function navigateToView(viewId) {
+            views.forEach(view => view.classList.add('hidden'));
+            const targetView = document.getElementById(viewId);
+            if(targetView) targetView.classList.remove('hidden');
+            
+            if(header) {
+               if (viewId === 'home-view') {
+                   header.classList.remove('hidden');
+               } else {
+                   header.classList.add('hidden');
+               }
+            }
+        }
+        
+        document.querySelectorAll('.back-to-home').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateToView('home-view');
+            });
+        });
+
+        const settingsRef = ref(db, "settings/game");
+        onValue(settingsRef, (snapshot) => {
+            const settings = snapshot.val();
+            const isMaintenance = settings && settings.maintenance;
+
+            if (isMaintenance) {
+                authScreen.classList.add('hidden');
+                gameContent.classList.add('hidden');
+                fullScreenLoader.classList.add('hidden');
+
+                const titleElement = document.getElementById('maintenance-title');
+                const messageElement = document.getElementById('maintenance-message');
+                
+                let message = "The game is on maintenance, will back shortly.";
+                let title = "⚠️ Maintenance in Progress";
+
+                if (typeof isMaintenance === 'object' && isMaintenance !== null) {
+                    if(isMaintenance.title) title = isMaintenance.title;
+                    if(isMaintenance.message) message = isMaintenance.message;
+                }
+                
+                if (titleElement) titleElement.textContent = title;
+                if (messageElement) messageElement.textContent = message;
+
+                maintenanceModeDiv.classList.remove('hidden');
+            } else {
+                maintenanceModeDiv.classList.add('hidden');
+            }
+        });
+
+        async function loadAndShowPromoBanner() {
+            if (sessionStorage.getItem('promoBannerDismissed')) return; 
+
+            const promoRef = ref(db, 'promotionalBanner');
+            const snapshot = await get(promoRef);
+            if (snapshot.exists()) {
+                const bannerData = snapshot.val();
+                
+                document.getElementById('promo-title').textContent = bannerData.title || "New Update!";
+                document.getElementById('promo-message').textContent = bannerData.message || "Check out the latest features.";
+                
+                const promoLink = document.getElementById('promo-link');
+                if (bannerData.link && bannerData.linkText) {
+                    promoLink.href = bannerData.link;
+                    promoLink.textContent = bannerData.linkText;
+                    promoLink.classList.remove('hidden');
+                } else {
+                    promoLink.classList.add('hidden');
+                }
+
+                promoBannerModal.classList.remove('hidden');
+            }
+        }
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                authScreen.classList.add('hidden');
+                gameContent.classList.remove('hidden');
+                navigateToView('home-view'); // Default to home on login
+                loadUserData(user.uid);
+                listenForMatch(user.uid);
+                loadAndShowPromoBanner();
+                if (!sessionStorage.getItem('adShown')) {
+                    showAd();
+                    sessionStorage.setItem('adShown', 'true');
+                }
+            } else {
+                authScreen.classList.remove('hidden');
+                gameContent.classList.add('hidden');
+                currentUserData = null;
+                if(timerInterval) clearInterval(timerInterval);
+                if(matchSimulationInterval) clearInterval(matchSimulationInterval);
+            }
+
+            setTimeout(() => {
+                fullScreenLoader.classList.add('hidden');
+            }, 500);
+        });
+        
+        const authToggle = document.getElementById('auth-toggle');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const authTitle = document.getElementById('auth-title');
+
+        authToggle.addEventListener('click', () => {
+            loginForm.classList.toggle('hidden');
+            signupForm.classList.toggle('hidden');
+            if(signupForm.classList.contains('hidden')) {
+                authTitle.textContent = 'Login to your Club';
+                authToggle.textContent = "Don't have an account? Sign Up";
+            } else {
+                authTitle.textContent = 'Create a New Club';
+                authToggle.textContent = 'Already have an account? Login';
+            }
+        });
+
+        const authError = document.getElementById('auth-error');
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const clubName = document.getElementById('signup-club-name').value;
+            authError.textContent = '';
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                const playersSnapshot = await get(ref(db, "players"));
+                let allPlayerIds = [];
+                if (playersSnapshot.exists()) {
+                    allPlayerIds = Object.keys(playersSnapshot.val());
+                }
+
+                const shuffledPlayers = allPlayerIds.sort(() => 0.5 - Math.random());
+                const startingSquad = shuffledPlayers.slice(0, 5);
+
+                await set(ref(db, 'users/' + user.uid), {
+                    email: email, clubName: clubName, balance: 1000, points: 0, wins: 0, squad: startingSquad, avatarUrl: `https://placehold.co/96x96/0d1117/00bcd4?text=${clubName.charAt(0)}`, claimedMaradonaEvent: false
+                });
+                
+                await set(ref(db, 'players/' + MARADONA_PLAYER_ID), {
+                    name: "Maradona Prime", position: "CAM", rating: 99, value: 50000, imageUrl: "https://placehold.co/96x96/FFD700/000?text=M+P"
+                }, { merge: true });
+
+            } catch (error) { authError.textContent = "Signup failed: " + error.message; }
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            authError.textContent = '';
+            signInWithEmailAndPassword(auth, email, password).catch(error => authError.textContent = "Login failed: " + error.message);
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('adShown');
+            signOut(auth);
+        });
+        
+        function loadUserData(uid) {
+            const userRef = ref(db, 'users/' + uid);
+            onValue(userRef, async (snapshot) => {
+                if (snapshot.exists()) {
+                    currentUserData = snapshot.val();
+                    currentUserData.uid = uid; 
+                    document.getElementById('user-club-name').textContent = currentUserData.clubName;
+                    document.getElementById('user-balance').textContent = currentUserData.balance;
+                    document.getElementById('match-wins-stat').textContent = currentUserData.wins || 0;
+                    document.getElementById('user-avatar').src = currentUserData.avatarUrl || `https://placehold.co/96x96/0d1117/00bcd4?text=${currentUserData.clubName.charAt(0)}`;
+                    
+                    if (currentUserData.squad && currentUserData.squad.length > 0) {
+                        await loadSquad(currentUserData.squad);
+                        loadSellPlayers(currentUserData.squad);
+                    } else {
+                         document.getElementById('squad-list').innerHTML = '<p>You have no players in your squad.</p>';
+                         document.getElementById('sell-player-list').innerHTML = '<p>No players to sell.</p>';
+                         document.getElementById('team-power-stat').textContent = 0;
+                    }
+
+                    loadStoreItems();
+                    loadTransferMarket();
+                    loadLeaderboard();
+                    loadTournaments();
+                    loadEvents(); 
+                    
+                    findMatchBtn.disabled = false;
+                }
+            });
+        }
+        
+        async function loadSquad(squadIds) {
+            const squadListDiv = document.getElementById('squad-list');
+            squadListDiv.innerHTML = '';
+            let totalRating = 0;
+            const playerPromises = squadIds.map(playerId => get(ref(db, 'players/' + playerId)));
+            const playerSnapshots = await Promise.all(playerPromises);
+
+            playerSnapshots.forEach(playerSnap => {
+                if (playerSnap.exists()) {
+                    const playerData = playerSnap.val();
+                    totalRating += playerData.rating;
+                    squadListDiv.innerHTML += `
+                        <div class="player-card p-4 text-center shadow-lg border-l-4 border-teal-500">
+                            <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
+                            <h4 class="font-bold text-lg text-white">${playerData.name}</h4>
+                            <p class="text-sm text-gray-400">${playerData.position}</p>
+                            <p class="text-2xl font-black text-teal-400 mt-2">${playerData.rating}</p>
+                        </div>`;
+                }
+            });
+
+            teamPower = squadIds.length > 0 ? Math.round(totalRating / squadIds.length) : 0;
+            document.getElementById('team-power-stat').textContent = teamPower;
+        }
+        
+        async function loadLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            const rankStat = document.getElementById('rank-stat');
+            leaderboardBody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Loading...</td></tr>';
+            
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+
+            if (snapshot.exists()) {
+                const users = [];
+                snapshot.forEach(childSnapshot => {
+                    users.push({ uid: childSnapshot.key, ...childSnapshot.val() });
+                });
+
+                users.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+                leaderboardBody.innerHTML = '';
+                let userRank = 'Unranked';
+                users.forEach((user, index) => {
+                    const rank = index + 1;
+                    const isCurrentUser = currentUserData && user.uid === currentUserData.uid;
+                    leaderboardBody.innerHTML += `
+                        <tr class="border-b border-gray-800 ${isCurrentUser ? 'bg-teal-900 border-l-4 border-teal-500 font-semibold' : 'hover:bg-gray-800'}">
+                            <td class="p-4 font-bold">${rank}</td>
+                            <td class="p-4">${user.clubName}</td>
+                            <td class="p-4">${user.points || 0}</td>
+                            <td class="p-4">${user.wins || 0}</td>
+                        </tr>`;
+                    
+                    if (isCurrentUser) {
+                        userRank = rank;
+                    }
+                });
+                rankStat.textContent = userRank;
+            } else {
+                leaderboardBody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">No data on the leaderboard.</td></tr>';
+                rankStat.textContent = 'Unranked';
+            }
+        }
+        
+        async function loadEvents() {
+            const eventsListDiv = document.getElementById('events-list');
+            eventsListDiv.innerHTML = '';
+            
+            const eventsRef = ref(db, 'events');
+            const snapshot = await get(eventsRef);
+
+            const isMaradonaClaimed = currentUserData.claimedMaradonaEvent;
+            const maradonaHtml = `
+                <div class="player-card p-6 shadow-xl flex justify-between items-center border-l-4 border-yellow-400">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-1 text-yellow-400">1-Day Login Reward: Maradona Prime</h2>
+                        <p class="text-gray-300">Claim the legendary Diego Maradona Prime card to strengthen your squad!</p>
+                    </div>
+                    ${isMaradonaClaimed 
+                        ? `<button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Claimed</button>`
+                        : `<button onclick="claimReward('${MARADONA_PLAYER_ID}', 'claimedMaradonaEvent')" class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md transition duration-300">Claim Now</button>`
+                    }
+                </div>`;
+            eventsListDiv.innerHTML += maradonaHtml;
+            
+            if (snapshot.exists()) {
+                const events = snapshot.val();
+                for (const eventId in events) {
+                    const eventData = events[eventId];
+                    eventsListDiv.innerHTML += `
+                        <div class="player-card p-6 shadow-xl border-l-4 border-teal-500">
+                            <h2 class="text-2xl font-bold mb-2 text-teal-400">${eventData.title || 'Event'}</h2>
+                            <p class="text-gray-300">${eventData.description || 'New event data from Firebase.'}</p>
+                        </div>`;
+                }
+            }
+        }
+        
+        window.claimReward = async (playerId, eventFlag) => {
+            if (!currentUserData) return showModal("User data not loaded.");
+            if (currentUserData[eventFlag]) return showModal("Reward already claimed.");
+            if (currentUserData.squad && currentUserData.squad.includes(playerId)) return showModal("You already own this player.");
+
+            const newSquad = [...(currentUserData.squad || []), playerId];
+            
+            try {
+                await update(ref(db, 'users/' + currentUserData.uid), { squad: newSquad, [eventFlag]: true });
+                showModal("Reward claimed successfully! Maradona Prime is now in your squad.");
+                loadEvents(); 
+            } catch (error) {
+                showModal("Failed to claim reward: " + error.message);
+            }
+        };
+
+        async function loadStoreItems() {
+            const storeItemsDiv = document.getElementById('store-items');
+            storeItemsDiv.innerHTML = '';
+            const playersRef = ref(db, 'players');
+            const snapshot = await get(playersRef);
+
+            if (snapshot.exists()) {
+                const players = snapshot.val();
+                for (const playerId in players) {
+                    const playerData = players[playerId];
+                    const isOwned = currentUserData && currentUserData.squad && currentUserData.squad.includes(playerId);
+                    const buttonHtml = isOwned 
+                        ? `<button class="w-full mt-3 py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Owned</button>`
+                        : `<button onclick="buyPlayer('${playerId}', ${playerData.value})" class="w-full mt-3 py-2 px-4 btn-primary rounded-md transition duration-300">Buy (${playerData.value} C)</button>`;
+
+                    storeItemsDiv.innerHTML += `
+                        <div class="player-card p-4 text-center shadow-lg border-t-4 border-teal-500">
+                            <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
+                            <h4 class="font-bold text-lg">${playerData.name}</h4>
+                            <p class="text-sm text-gray-400">${playerData.position}</p>
+                            <p class="text-xl font-bold text-teal-400 mt-2">${playerData.rating}</p>
+                            ${buttonHtml}
+                        </div>`;
+                }
+            } else {
+                storeItemsDiv.innerHTML = '<p class="text-center p-4 text-gray-400">No players found in the store.</p>';
+            }
+        }
+
+        async function loadTransferMarket() {
+            const transferMarketListDiv = document.getElementById('transfer-market-list');
+            transferMarketListDiv.innerHTML = ''; 
+            const playersRef = ref(db, 'players');
+            const snapshot = await get(playersRef);
+
+            if (snapshot.exists()) {
+                const players = snapshot.val();
+                for (const playerId in players) {
+                    const playerData = players[playerId];
+                    const isOwned = currentUserData && currentUserData.squad && currentUserData.squad.includes(playerId);
+                    const buttonHtml = isOwned 
+                        ? `<button class="w-full mt-3 py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Owned</button>`
+                        : `<button onclick="buyPlayer('${playerId}', ${playerData.value})" class="w-full mt-3 py-2 px-4 btn-primary rounded-md transition duration-300">Buy (${playerData.value} C)</button>`;
+
+                    transferMarketListDiv.innerHTML += `
+                        <div class="player-card p-4 text-center shadow-lg border-t-4 border-teal-500">
+                            <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
+                            <h4 class="font-bold text-lg">${playerData.name}</h4>
+                            <p class="text-sm text-gray-400">${playerData.position}</p>
+                            <p class="text-xl font-bold text-teal-400 mt-2">${playerData.rating}</p>
+                            ${buttonHtml}
+                        </div>`;
+                }
+            } else {
+                transferMarketListDiv.innerHTML = '<p class="text-center p-4 text-gray-400">No players found in the transfer market.</p>';
+            }
+        }
+        
+        async function loadSellPlayers(squadIds) {
+            const sellPlayerListDiv = document.getElementById('sell-player-list');
+            sellPlayerListDiv.innerHTML = '';
+            if (!squadIds || squadIds.length === 0) {
+                sellPlayerListDiv.innerHTML = '<p class="text-gray-400">No players to sell.</p>';
+                return;
+            }
+
+            const playerPromises = squadIds.map(playerId => get(ref(db, 'players/' + playerId)));
+            const playerSnapshots = await Promise.all(playerPromises);
+
+            sellPlayerListDiv.innerHTML = ''; 
+            playerSnapshots.forEach((playerSnap, index) => {
+                if (playerSnap.exists()) {
+                    const playerData = playerSnap.val();
+                    const playerId = squadIds[index];
+                    const sellPrice = Math.round((playerData.value || 0) * 0.7);
+
+                    sellPlayerListDiv.innerHTML += `
+                        <div class="player-card p-4 text-center shadow-lg border-t-4 border-red-500">
+                            <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
+                            <h4 class="font-bold text-lg">${playerData.name}</h4>
+                            <p class="text-sm text-gray-400">${playerData.position}</p>
+                            <p class="text-xl font-bold text-teal-400 mt-2">${playerData.rating}</p>
+                            <button onclick="sellPlayer('${playerId}', ${sellPrice})" class="w-full mt-3 py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md transition duration-300">Sell (${sellPrice} C)</button>
+                        </div>`;
+                }
+            });
+        }
+        
+        async function loadTournaments() {
+            const tournamentListDiv = document.getElementById('tournament-list');
+            tournamentListDiv.innerHTML = '';
+            
+            const tournamentsRef = ref(db, 'tournaments');
+            const snapshot = await get(tournamentsRef);
+
+            if (snapshot.exists()) {
+                snapshot.forEach(childSnapshot => {
+                    const tournamentData = childSnapshot.val();
+                    const status = tournamentData.status || 'N/A';
+                    let statusClass = 'text-gray-400';
+                    let borderColor = 'border-teal-500';
+
+                    if (status.toLowerCase().includes('upcoming')) {
+                        statusClass = 'text-yellow-400';
+                        borderColor = 'border-yellow-500';
+                    } else if (status.toLowerCase().includes('ongoing')) {
+                        statusClass = 'text-green-400';
+                        borderColor = 'border-green-500';
+                    }
+
+                    tournamentListDiv.innerHTML += `
+                        <div class="tournament-card p-6 shadow-xl border-l-4 ${borderColor} hover:bg-gray-700 transition duration-200">
+                            <h2 class="text-2xl font-bold mb-2 text-white">${tournamentData.name || 'Tournament Name'}</h2>
+                            <p class="text-lg mb-1"><span class="font-semibold text-gray-300">Prize:</span> 💰 <span class="text-yellow-300 font-bold">${tournamentData.prize || 0} Coins</span></p>
+                            <p class="text-lg"><span class="font-semibold text-gray-300">Status:</span> <span class="${statusClass} font-bold">${status}</span></p>
+                            <button class="mt-3 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-md transition duration-300">View Details</button>
+                        </div>
+                    `;
+                });
+            } else {
+                tournamentListDiv.innerHTML = `
+                    <div class="text-center p-8 border border-gray-700 rounded-xl bg-gray-900">
+                        <h2 class="text-2xl font-bold mb-2 text-teal-400">No ESPORTS Events Available</h2>
+                        <p class="text-gray-400">Keep your team ready, new tournaments will be announced soon!</p>
+                    </div>
+                `;
+            }
+        }
+
+        window.buyPlayer = async (playerId, price) => {
+            if (!currentUserData) return showModal("User data not loaded.");
+            if (currentUserData.balance < price) return showModal("You do not have enough coins.");
+            if (currentUserData.squad && currentUserData.squad.includes(playerId)) return showModal("This player is already in your squad.");
+            
+            const newBalance = currentUserData.balance - price;
+            const newSquad = [...(currentUserData.squad || []), playerId];
+            
+            try {
+                await update(ref(db, 'users/' + currentUserData.uid), { balance: newBalance, squad: newSquad });
+                showModal("Player purchased successfully!");
+            } catch (error) {
+                showModal("Failed to purchase player: " + error.message);
+            }
+        };
+
+        window.sellPlayer = async (playerId, sellPrice) => {
+            if (!currentUserData) return showModal("User data not loaded.");
+            if (!currentUserData.squad || !currentUserData.squad.includes(playerId)) return showModal("This player is not in your squad.");
+            if (currentUserData.squad.length <= 5) return showModal("You must have at least 5 players in your squad to play a match.");
+
+            const newBalance = currentUserData.balance + sellPrice;
+            const newSquad = currentUserData.squad.filter(id => id !== playerId);
+
+            try {
+                await update(ref(db, 'users/' + currentUserData.uid), { balance: newBalance, squad: newSquad });
+                showModal("Player sold successfully!");
+            } catch (error) {
+                showModal("Failed to sell player: " + error.message);
+            }
+        };
+
+        document.getElementById('edit-club-name').addEventListener('click', () => {
+            if (!currentUserData) return;
+            const newClubName = prompt("Enter your new Club Name:", currentUserData.clubName);
+            if (newClubName && newClubName.trim() !== "") {
+                update(ref(db, 'users/' + currentUserData.uid), { clubName: newClubName.trim() })
+                    .then(() => showModal("Club name changed successfully."))
+                    .catch((error) => showModal("Error: " + error.message));
+            }
+        });
+        
+        document.getElementById('user-avatar-container').addEventListener('click', () => {
+            document.getElementById('logo-upload').click();
+        });
+
+        document.getElementById('logo-upload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            showModal('Uploading Logo...');
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
+                const result = await response.json();
+                if(result.success) {
+                    await update(ref(db, 'users/' + currentUserData.uid), { avatarUrl: result.data.url });
+                    showModal('Logo updated successfully!');
+                } else {
+                    throw new Error(result.error.message);
+                }
+            } catch (error) {
+                showModal(`Upload failed: ${error.message}`);
+            }
+        });
+        
+        strategyButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                if (!currentMatchId || !currentUserData) return;
+
+                const targetButton = e.currentTarget;
+                const newStrategy = targetButton.getAttribute('data-strategy');
+                if(newStrategy === currentLocalStrategy) return;
+
+                currentLocalStrategy = newStrategy; 
+                strategyButtons.forEach(btn => btn.classList.remove('border-2', 'border-teal-500'));
+                targetButton.classList.add('border-2', 'border-teal-500');
+
+                const matchSnapshot = await get(ref(db, `matches/${currentMatchId}`));
+                if (!matchSnapshot.exists()) return;
+                const matchData = matchSnapshot.val();
+                
+                let strategyPath;
+                if (currentUserData.uid === matchData.teamA.uid) {
+                    strategyPath = 'teamAStrategy';
+                } else if (currentUserData.uid === matchData.teamB.uid) {
+                    strategyPath = 'teamBStrategy';
+                } else {
+                    return;
+                }
+
+                await update(ref(db, `matches/${currentMatchId}`), { [strategyPath]: newStrategy });
+                
+                let seconds = 0;
+                if(matchData.startTime){
+                    seconds = Math.floor((Date.now() - matchData.startTime) / 1000);
+                }
+
+                push(ref(db, `matches/${currentMatchId}/events`), { 
+                    time: `${Math.floor(seconds/1)}'`, 
+                    text: `🔄 ${currentUserData.clubName} changed strategy to ${newStrategy}.` 
+                });
+            });
+        });
+
+        const cancelMatchmakingBtn = document.getElementById('cancel-matchmaking-btn');
+
+        findMatchBtn.addEventListener('click', async () => {
+            if (!currentUserData || !currentUserData.uid) return showModal("Your data is still loading. Please wait a moment.");
+            if (!currentUserData.squad || currentUserData.squad.length < 5) return showModal("You must have at least 5 players in your squad to play a match.");
+        
+            document.getElementById('match-initial-screen').classList.add('hidden');
+            document.getElementById('matchmaking-screen').classList.remove('hidden');
+
+            const matchmakingRef = ref(db, 'matchmaking');
+            const snapshot = await get(matchmakingRef);
+            let opponent = null;
+            if(snapshot.exists()){
+                snapshot.forEach(child => {
+                    if(!opponent && child.key !== currentUserData.uid) opponent = { uid: child.key, ...child.val() };
+                });
+            }
+
+            if(opponent){
+                const matchId = push(ref(db, 'matches')).key;
+                currentMatchId = matchId;
+                const matchData = {
+                    teamA: { uid: opponent.uid, clubName: opponent.clubName, teamPower: opponent.teamPower },
+                    teamB: { uid: currentUserData.uid, clubName: currentUserData.clubName, teamPower: teamPower },
+                    score: { teamA: 0, teamB: 0 },
+                    status: 'starting',
+                    startTime: serverTimestamp(),
+                    events: {},
+                    teamAStrategy: 'Balanced',
+                    teamBStrategy: 'Balanced'
+                };
+                const updates = {};
+                updates[`/matches/${matchId}`] = matchData;
+                updates[`/users/${opponent.uid}/currentMatch`] = matchId;
+                updates[`/users/${currentUserData.uid}/currentMatch`] = matchId;
+                updates[`/matchmaking/${opponent.uid}`] = null;
+                updates[`/matchmaking/${currentUserData.uid}`] = null;
+                await update(ref(db), updates);
+
+            } else {
+                await set(ref(db, `matchmaking/${currentUserData.uid}`), {
+                    clubName: currentUserData.clubName,
+                    teamPower: teamPower,
+                    timestamp: serverTimestamp()
+                });
+            }
+        });
+
+        cancelMatchmakingBtn.addEventListener('click', async () => {
+            if (!currentUserData || !currentUserData.uid) return;
+            await remove(ref(db, `matchmaking/${currentUserData.uid}`));
+            document.getElementById('matchmaking-screen').classList.add('hidden');
+            document.getElementById('match-initial-screen').classList.remove('hidden');
+        });
+
+        function listenForMatch(uid) {
+            const userMatchRef = ref(db, `users/${uid}/currentMatch`);
+            if(matchListener) matchListener(); 
+            matchListener = onValue(userMatchRef, (snapshot) => {
+                const matchId = snapshot.val();
+                if(matchId){
+                    currentMatchId = matchId;
+                    navigateToView('match-view');
+                    startMatch(matchId);
+                } else {
+                    currentMatchId = null;
+                    if(timerInterval) clearInterval(timerInterval);
+                    if(matchSimulationInterval) clearInterval(matchSimulationInterval);
+                    
+                    if(!document.getElementById('match-view').classList.contains('hidden')) {
+                        navigateToView('home-view');
+                    }
+                    
+                    document.getElementById('match-simulation-screen').classList.add('hidden');
+                    document.getElementById('matchmaking-screen').classList.add('hidden');
+                    document.getElementById('match-initial-screen').classList.remove('hidden');
+                }
+            });
+        }
+        
+        function startMatch(matchId) {
+            document.getElementById('matchmaking-screen').classList.add('hidden');
+            document.getElementById('match-initial-screen').classList.add('hidden');
+            document.getElementById('match-simulation-screen').classList.remove('hidden');
+            document.getElementById('live-commentary').innerHTML = '';
+            
+            const matchRef = ref(db, `matches/${matchId}`);
+            if(matchListener) matchListener(); 
+            
+            matchListener = onValue(matchRef, (snapshot) => {
+                const matchData = snapshot.val();
+                if(!matchData) return;
+
+                document.getElementById('teamA-name').textContent = matchData.teamA.clubName;
+                document.getElementById('teamB-name').textContent = matchData.teamB.clubName;
+                document.getElementById('teamA-score').textContent = matchData.score.teamA;
+                document.getElementById('teamB-score').textContent = matchData.score.teamB;
+                
+                if (currentUserData.uid === matchData.teamA.uid) {
+                    isLocalPlayerTeamA = true;
+                    currentLocalStrategy = matchData.teamAStrategy;
+                } else if (currentUserData.uid === matchData.teamB.uid) {
+                    isLocalPlayerTeamA = false;
+                    currentLocalStrategy = matchData.teamBStrategy;
+                }
+                
+                strategyButtons.forEach(btn => {
+                    btn.classList.remove('border-2', 'border-teal-500');
+                    if (btn.getAttribute('data-strategy') === currentLocalStrategy) {
+                        btn.classList.add('border-2', 'border-teal-500');
+                    }
+                });
+
+                if(timerInterval) clearInterval(timerInterval);
+                const matchDuration = 90; 
+                const timerDisplay = document.getElementById('match-timer');
+                
+                if (matchData.status === 'ongoing' && matchData.startTime) {
+                    const matchStartTimestamp = matchData.startTime;
+                    timerInterval = setInterval(() => {
+                        const elapsedSeconds = Math.floor((Date.now() - matchStartTimestamp) / 1000);
+                        const remaining = matchDuration - elapsedSeconds;
+                        
+                        if (remaining <= 0) {
+                             clearInterval(timerInterval);
+                             timerDisplay.textContent = '00:00';
+                        } else {
+                            const min = Math.floor(remaining / 60).toString().padStart(2, '0');
+                            const sec = (remaining % 60).toString().padStart(2, '0');
+                            timerDisplay.textContent = `${min}:${sec}`;
+                        }
+                    }, 1000);
+                } else if (matchData.status === 'completed') {
+                    timerDisplay.textContent = '00:00 (FT)';
+                } else {
+                    timerDisplay.textContent = '01:30';
+                }
+
+                if(currentUserData && matchData.status === 'starting' && matchData.teamA.uid === currentUserData.uid){
+                     runMatchSimulation(matchId, matchData);
+                }
+            });
+            
+            const commentaryRef = ref(db, `matches/${matchId}/events`);
+            onChildAdded(commentaryRef, (snapshot) => {
+                const event = snapshot.val();
+                const commentaryBox = document.getElementById('live-commentary');
+                commentaryBox.innerHTML += `<p class="mb-2 text-sm">${event.time}: ${event.text}</p>`;
+                commentaryBox.scrollTop = commentaryBox.scrollHeight;
+            });
+        }
+
+        async function runMatchSimulation(matchId, initialMatchData){
+            if (!currentUserData) return;
+            if(matchSimulationInterval) clearInterval(matchSimulationInterval);
+            
+            await update(ref(db, `matches/${matchId}`), { status: 'ongoing', startTime: serverTimestamp() });
+            
+            let seconds = 0;
+            const matchDuration = 90;
+            
+            const attackBonus = 0.2;
+            const defenseBonus = 0.2;
+
+            function getOffenseModifier(strategy) {
+                if (strategy === 'Attack') return 1 + attackBonus;
+                if (strategy === 'Defense') return 1 - attackBonus;
+                return 1.0;
+            }
+
+            function getDefenseModifier(strategy) {
+                if (strategy === 'Defense') return 1 + defenseBonus;
+                if (strategy === 'Attack') return 1 - defenseBonus;
+                return 1.0;
+            }
+
+            matchSimulationInterval = setInterval(async () => {
+                seconds += 1;
+                
+                const matchSnapshot = await get(ref(db, `matches/${matchId}`));
+                if (!matchSnapshot.exists()) {
+                    clearInterval(matchSimulationInterval);
+                    return;
+                }
+                let matchData = matchSnapshot.val();
+                let scoreUpdated = false;
+
+                if (seconds % 10 === 0 && seconds <= matchDuration) {
+                    const powerA = matchData.teamA.teamPower;
+                    const powerB = matchData.teamB.teamPower;
+                    const totalPower = powerA + powerB;
+                    const baseChance = 0.45; 
+                    let eventText = "";
+
+                    const strategyA = matchData.teamAStrategy || 'Balanced';
+                    const strategyB = matchData.teamBStrategy || 'Balanced';
+
+                    const offenseChanceA = (powerA / totalPower) * baseChance * getOffenseModifier(strategyA);
+                    
+                    if (Math.random() < offenseChanceA) {
+                        const defensePowerB = (powerB / totalPower) * getDefenseModifier(strategyB);
+                        if(Math.random() > defensePowerB){
+                            matchData.score.teamA++;
+                            scoreUpdated = true;
+                            eventText = `🚀 GOAL! ${matchData.teamA.clubName} scores! (Strategy: ${strategyA})`;
+                        } else {
+                            eventText = `❌ Defense holds! ${matchData.teamB.clubName}'s (Strategy: ${strategyB}) defense blocked the attack!`;
+                        }
+                    } else {
+                        const offenseChanceB = (powerB / totalPower) * baseChance * getOffenseModifier(strategyB);
+                        if(Math.random() < offenseChanceB){
+                            const defensePowerA = (powerA / totalPower) * getDefenseModifier(strategyA);
+                            if(Math.random() > defensePowerA){
+                                matchData.score.teamB++;
+                                scoreUpdated = true;
+                                eventText = `🚀 GOAL! ${matchData.teamB.clubName} scores! (Strategy: ${strategyB})`;
+                            } else {
+                                eventText = `❌ Defense holds! ${matchData.teamA.clubName}'s (Strategy: ${strategyA}) defense blocked the attack!`;
+                            }
+                        } else {
+                             eventText = "⚔️ Battle for possession in the midfield. Both sides holding strong.";
+                        }
+                    }
+
+                    await push(ref(db, `matches/${matchId}/events`), { time: `${Math.floor(seconds/1)}'`, text: eventText });
+                    if(scoreUpdated) await update(ref(db, `matches/${matchId}/score`), matchData.score);
+                }
+
+                if (seconds >= matchDuration) {
+                    clearInterval(matchSimulationInterval);
+                    let resultText = "The match ended in a draw!";
+                    let winnerUid = null;
+                    if(matchData.score.teamA > matchData.score.teamB){
+                        winnerUid = matchData.teamA.uid;
+                        resultText = `${matchData.teamA.clubName} wins the match!`;
+                    } else if (matchData.score.teamB > matchData.score.teamA){
+                        winnerUid = matchData.teamB.uid;
+                        resultText = `${matchData.teamB.clubName} wins the match!`;
+                    }
+
+                    await push(ref(db, `matches/${matchId}/events`), { time: 'Final', text: `🏁 ${resultText}` });
+                    await update(ref(db, `matches/${matchId}`), { status: 'completed' });
+                    
+                    if(winnerUid){
+                        const winnerRef = ref(db, `users/${winnerUid}`);
+                        const winnerSnap = await get(winnerRef);
+                        if (winnerSnap.exists()) {
+                            const winnerData = winnerSnap.val();
+                            await update(winnerRef, {
+                                points: (winnerData.points || 0) + 10,
+                                wins: (winnerData.wins || 0) + 1,
+                                balance: (winnerData.balance || 0) + 500
+                            });
+                        }
+                    }
+                    
+                    const loserUid = (winnerUid === matchData.teamA.uid) ? matchData.teamB.uid : ((winnerUid === matchData.teamB.uid) ? matchData.teamA.uid : null);
+                    if (loserUid) {
+                        const loserRef = ref(db, `users/${loserUid}`);
+                        const loserSnap = await get(loserRef);
+                        if (loserSnap.exists()) {
+                            const loserData = loserSnap.val();
+                             await update(loserRef, {
+                                balance: (loserData.balance || 0) + 100
+                            });
+                        }
+                    }
+                    
+                    // INSTANTLY clear the match and return to the dashboard
+                    await update(ref(db), {
+                        [`/users/${matchData.teamA.uid}/currentMatch`]: null,
+                        [`/users/${matchData.teamB.uid}/currentMatch`]: null
+                    });
+                    await remove(ref(db, `matches/${matchId}`));
+                }
+            }, 1000);
+        }
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1) + '-view';
+                navigateToView(targetId);
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
+            if(balancedBtn) balancedBtn.classList.add('border-2', 'border-teal-500');
+            
+            if (!auth.currentUser) {
+                // Auth screen handled by onAuthStateChanged
+            } else {
+                 navigateToView('home-view');
+            }
+        });
+
+    </script>
+</body>
+</html>

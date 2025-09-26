@@ -107,9 +107,8 @@
     
         <div id="promo-banner-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
             <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-lg text-center border-4 border-yellow-500 relative">
-                <h3 id="promo-title" class="text-3xl font-extrabold text-yellow-400 mb-4"></h3>
-                <p id="promo-message" class="text-lg mb-6 text-gray-200"></p>
-                <a id="promo-link" href="#" target="_blank" class="hidden w-full py-3 btn-primary rounded-lg mb-4 hover:bg-teal-600"></a>
+                <img id="promo-image" src="" alt="Promotional Banner" class="w-full h-auto rounded-lg mb-4 hidden">
+                <a id="promo-link" href="#" target="_blank" class="hidden w-full py-3 btn-primary rounded-lg mb-4 hover:bg-teal-600">Learn More</a>
                 <button id="promo-close-btn" class="mt-4 py-2 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg">Close</button>
             </div>
         </div>
@@ -125,18 +124,6 @@
             <div class="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-sm text-center border border-teal-500">
                 <p id="modal-message" class="text-lg mb-4"></p>
                 <button id="modal-close-btn" class="btn-primary py-2 px-6 rounded">OK</button>
-            </div>
-        </div>
-    
-        <div id="ad-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
-            <div class="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md text-center border border-teal-500">
-                <h3 class="text-2xl font-bold text-teal-400 mb-4">Advertisement Break</h3>
-                <div class="bg-gray-700 h-64 flex items-center justify-center rounded mb-4">
-                    <p>Your ad will be shown here</p>
-                </div>
-                <button id="skip-ad-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded" disabled>
-                    Skip (<span id="ad-timer">5</span>)
-                </button>
             </div>
         </div>
     
@@ -338,17 +325,18 @@
 
         // IMPORTANT: Replace with your actual Firebase config
         const firebaseConfig = {
-            apiKey: "AIzaSyAhSjh1VxQFrzslIwOZ1yOxLYuNT2Le_sg",
-            authDomain: "fram-and-go.firebaseapp.com",
-            databaseURL: "https://fram-and-go-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "fram-and-go",
-            storageBucket: "fram-and-go.firebasestorage.app",
-            messagingSenderId: "781295119002",
-            appId: "1:781295119002:web:3d84890a0bb85e5d1c0d23",
-            measurementId: "G-H30RNBNE6X"
+            apiKey: "AIzaSyAVs3SuUH0P9hGu57v0A9kZ5dwBulMD80Y",
+  authDomain: "voltefootball.firebaseapp.com",
+  databaseURL: "https://voltefootball-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "voltefootball",
+  storageBucket: "voltefootball.firebasestorage.app",
+  messagingSenderId: "549298882625",
+  appId: "1:549298882625:web:1aaecf96ebbb64c5c7dec0",
+  measurementId: "G-0F5B1D98Y3"
         };
         const IMGBB_API_KEY = "fe3e06e5bbecab856c63cf7e6a50a251";
         const MARADONA_PLAYER_ID = "MARADONA_PRIME"; 
+        const MARADONA_CLAIM_MIN_POWER = 60; // NEW: Minimum Team Power to claim Maradona
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -389,34 +377,14 @@
         }
         modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
         
+        // UPDATED EVENT LISTENER
         promoCloseBtn.addEventListener('click', () => {
             promoBannerModal.classList.add('hidden');
-            sessionStorage.setItem('promoBannerDismissed', 'true');
+            // The line that stored the "dismissed" state has been removed, so the banner can appear again on the next login.
         });
 
-        function showAd() {
-            const adModal = document.getElementById('ad-modal');
-            const skipAdBtn = document.getElementById('skip-ad-btn');
-            const adTimer = document.getElementById('ad-timer');
-            let countdown = 5;
-            
-            adModal.classList.remove('hidden');
+        // showAd function REMOVED
 
-            const timerInterval = setInterval(() => {
-                countdown--;
-                adTimer.textContent = countdown;
-                if (countdown <= 0) {
-                    clearInterval(timerInterval);
-                    adTimer.parentElement.textContent = 'Skip';
-                    skipAdBtn.disabled = false;
-                }
-            }, 1000);
-
-            skipAdBtn.addEventListener('click', () => {
-                adModal.classList.add('hidden');
-            }, { once: true });
-        }
-        
         function navigateToView(viewId) {
             views.forEach(view => view.classList.add('hidden'));
             const targetView = document.getElementById(viewId);
@@ -468,27 +436,37 @@
             }
         });
 
+        // UPDATED FUNCTION: Correctly runs on authentication
         async function loadAndShowPromoBanner() {
-            if (sessionStorage.getItem('promoBannerDismissed')) return; 
-
-            const promoRef = ref(db, 'promotionalBanner');
+            const promoRef = ref(db, 'settings/game/promotionalBanner');
             const snapshot = await get(promoRef);
             if (snapshot.exists()) {
                 const bannerData = snapshot.val();
                 
-                document.getElementById('promo-title').textContent = bannerData.title || "New Update!";
-                document.getElementById('promo-message').textContent = bannerData.message || "Check out the latest features.";
-                
+                const promoImage = document.getElementById('promo-image');
                 const promoLink = document.getElementById('promo-link');
-                if (bannerData.link && bannerData.linkText) {
-                    promoLink.href = bannerData.link;
-                    promoLink.textContent = bannerData.linkText;
+
+                let hasContent = false;
+
+                if (bannerData.imageUrl) {
+                    promoImage.src = bannerData.imageUrl;
+                    promoImage.classList.remove('hidden');
+                    hasContent = true;
+                } else {
+                    promoImage.classList.add('hidden');
+                }
+                
+                if (bannerData.linkUrl && bannerData.linkUrl.trim() !== "") {
+                    promoLink.href = bannerData.linkUrl;
                     promoLink.classList.remove('hidden');
+                    hasContent = true;
                 } else {
                     promoLink.classList.add('hidden');
                 }
 
-                promoBannerModal.classList.remove('hidden');
+                if (hasContent) {
+                    promoBannerModal.classList.remove('hidden');
+                }
             }
         }
 
@@ -496,14 +474,11 @@
             if (user) {
                 authScreen.classList.add('hidden');
                 gameContent.classList.remove('hidden');
-                navigateToView('home-view'); // Default to home on login
+                navigateToView('home-view');
                 loadUserData(user.uid);
                 listenForMatch(user.uid);
-                loadAndShowPromoBanner();
-                if (!sessionStorage.getItem('adShown')) {
-                    showAd();
-                    sessionStorage.setItem('adShown', 'true');
-                }
+                loadAndShowPromoBanner(); // Show promotional banner after login
+                // showAd call removed
             } else {
                 authScreen.classList.remove('hidden');
                 gameContent.classList.add('hidden');
@@ -603,7 +578,7 @@
                     loadTransferMarket();
                     loadLeaderboard();
                     loadTournaments();
-                    loadEvents(); 
+                    loadEvents(); // Load events after teamPower is calculated
                     
                     findMatchBtn.disabled = false;
                 }
@@ -675,37 +650,60 @@
             }
         }
         
+        // UPDATED FUNCTION: Added claim criteria
         async function loadEvents() {
             const eventsListDiv = document.getElementById('events-list');
             eventsListDiv.innerHTML = '';
             
-            const eventsRef = ref(db, 'events');
-            const snapshot = await get(eventsRef);
-
             const isMaradonaClaimed = currentUserData.claimedMaradonaEvent;
+            const canClaimMaradona = teamPower >= MARADONA_CLAIM_MIN_POWER;
+            
+            let maradonaButtonHtml;
+            if (isMaradonaClaimed) {
+                maradonaButtonHtml = `<button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Claimed</button>`;
+            } else if (canClaimMaradona) {
+                 maradonaButtonHtml = `<button onclick="claimReward('${MARADONA_PLAYER_ID}', 'claimedMaradonaEvent')" class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md transition duration-300">Claim Now</button>`;
+            } else {
+                 maradonaButtonHtml = `<button class="py-2 px-4 bg-yellow-700 text-white font-bold rounded-md cursor-not-allowed" disabled>Min Power ${MARADONA_CLAIM_MIN_POWER} Required</button>`;
+            }
+
             const maradonaHtml = `
                 <div class="player-card p-6 shadow-xl flex justify-between items-center border-l-4 border-yellow-400">
                     <div>
                         <h2 class="text-2xl font-bold mb-1 text-yellow-400">1-Day Login Reward: Maradona Prime</h2>
                         <p class="text-gray-300">Claim the legendary Diego Maradona Prime card to strengthen your squad!</p>
+                        ${!isMaradonaClaimed && !canClaimMaradona ? `<p class="text-red-400 font-bold mt-2">Requirement: Team Power ${MARADONA_CLAIM_MIN_POWER} (Current: ${teamPower})</p>` : ''}
                     </div>
-                    ${isMaradonaClaimed 
-                        ? `<button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Claimed</button>`
-                        : `<button onclick="claimReward('${MARADONA_PLAYER_ID}', 'claimedMaradonaEvent')" class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md transition duration-300">Claim Now</button>`
-                    }
+                    ${maradonaButtonHtml}
                 </div>`;
             eventsListDiv.innerHTML += maradonaHtml;
             
+            const eventsRef = ref(db, 'events');
+            const snapshot = await get(eventsRef);
+
             if (snapshot.exists()) {
                 const events = snapshot.val();
                 for (const eventId in events) {
                     const eventData = events[eventId];
+                    const rewardHtml = eventData.reward_type === 'currency'
+                        ? `💰 <span class="text-yellow-300 font-bold">${eventData.value || 0} Coins</span>`
+                        : `${eventData.value || ''} ${eventData.reward_type || ''}`;
+
                     eventsListDiv.innerHTML += `
                         <div class="player-card p-6 shadow-xl border-l-4 border-teal-500">
-                            <h2 class="text-2xl font-bold mb-2 text-teal-400">${eventData.title || 'Event'}</h2>
-                            <p class="text-gray-300">${eventData.description || 'New event data from Firebase.'}</p>
+                            <h2 class="text-2xl font-bold mb-2 text-teal-400">${eventData.name || 'New Event'}</h2>
+                            <p class="text-gray-300 mb-3">${eventData.description || 'Check out this new event!'}</p>
+                            <p class="text-lg"><span class="font-semibold text-gray-300">Reward:</span> ${rewardHtml}</p>
+                            <button class="mt-3 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-md transition duration-300">Participate</button>
                         </div>`;
                 }
+            } else {
+                // This message is shown if no dynamic events are found in Firebase.
+                eventsListDiv.innerHTML += `
+                    <div class="player-card p-6 text-center">
+                        <p class="text-gray-400">No other special events are active right now. Check back later!</p>
+                    </div>
+                `;
             }
         }
         
@@ -713,6 +711,11 @@
             if (!currentUserData) return showModal("User data not loaded.");
             if (currentUserData[eventFlag]) return showModal("Reward already claimed.");
             if (currentUserData.squad && currentUserData.squad.includes(playerId)) return showModal("You already own this player.");
+
+            // NEW: Check criteria before claiming
+            if (eventFlag === 'claimedMaradonaEvent' && teamPower < MARADONA_CLAIM_MIN_POWER) {
+                 return showModal(`Cannot claim. Minimum Team Power of ${MARADONA_CLAIM_MIN_POWER} is required.`);
+            }
 
             const newSquad = [...(currentUserData.squad || []), playerId];
             
@@ -1227,7 +1230,6 @@
                         }
                     }
                     
-                    // INSTANTLY clear the match and return to the dashboard
                     await update(ref(db), {
                         [`/users/${matchData.teamA.uid}/currentMatch`]: null,
                         [`/users/${matchData.teamB.uid}/currentMatch`]: null

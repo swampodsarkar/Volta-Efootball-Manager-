@@ -92,6 +92,10 @@
 </head>
 <body class="h-screen overflow-x-hidden">
     
+    <audio id="main-menu-audio" loop>
+        <source src="asset/main menu.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
     <div id="game-container-wrapper" class="w-full h-full">
 
         <div id="full-screen-loader" class="fixed inset-0 bg-[#0d1117] bg-opacity-95 flex flex-col items-center justify-center z-[100]">
@@ -326,13 +330,13 @@
         // IMPORTANT: Replace with your actual Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyAVs3SuUH0P9hGu57v0A9kZ5dwBulMD80Y",
-  authDomain: "voltefootball.firebaseapp.com",
-  databaseURL: "https://voltefootball-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "voltefootball",
-  storageBucket: "voltefootball.firebasestorage.app",
-  messagingSenderId: "549298882625",
-  appId: "1:549298882625:web:1aaecf96ebbb64c5c7dec0",
-  measurementId: "G-0F5B1D98Y3"
+            authDomain: "voltefootball.firebaseapp.com",
+            databaseURL: "https://voltefootball-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "voltefootball",
+            storageBucket: "voltefootball.firebasestorage.app",
+            messagingSenderId: "549298882625",
+            appId: "1:549298882625:web:1aaecf96ebbb64c5c7dec0",
+            measurementId: "G-0F5B1D98Y3"
         };
         const IMGBB_API_KEY = "fe3e06e5bbecab856c63cf7e6a50a251";
         const MARADONA_PLAYER_ID = "MARADONA_PRIME"; 
@@ -352,7 +356,6 @@
         let currentLocalStrategy = 'Balanced';
         let isLocalPlayerTeamA = false;
 
-
         const authScreen = document.getElementById('auth-screen');
         const gameContent = document.getElementById('game-content');
         const maintenanceModeDiv = document.getElementById('maintenance-mode');
@@ -370,6 +373,9 @@
         const navLinks = document.querySelectorAll('.nav-link');
         const views = document.querySelectorAll('.view');
         const header = document.querySelector('header');
+        
+        // ADDED: Audio element
+        const mainMenuAudio = document.getElementById('main-menu-audio');
 
         function showModal(message) {
             modalMessage.textContent = message;
@@ -382,8 +388,22 @@
             promoBannerModal.classList.add('hidden');
             // The line that stored the "dismissed" state has been removed, so the banner can appear again on the next login.
         });
+        
+        // ADDED: Music control functions
+        function playMainMenuMusic() {
+            // Check if audio is paused and not currently playing to prevent errors
+            if (mainMenuAudio.paused) {
+                // Audio will only play if triggered by a user action (like a click on the login screen)
+                mainMenuAudio.play().catch(error => {
+                    console.error("Audio playback failed (usually requires user interaction first):", error);
+                    // Optionally show a message to the user that they might need to interact
+                });
+            }
+        }
 
-        // showAd function REMOVED
+        function pauseMainMenuMusic() {
+            mainMenuAudio.pause();
+        }
 
         function navigateToView(viewId) {
             views.forEach(view => view.classList.add('hidden'));
@@ -393,9 +413,17 @@
             if(header) {
                if (viewId === 'home-view') {
                    header.classList.remove('hidden');
+                   // ADDED: Re-enable music when going back to dashboard/menu
+                   playMainMenuMusic();
                } else {
                    header.classList.add('hidden');
                }
+            }
+            
+            // ADDED: Specific check for match view to pause music
+            if(viewId === 'match-view') {
+                // Music is paused when entering match-view, but re-enabled later if not in match-making/simulation
+                pauseMainMenuMusic(); 
             }
         }
         
@@ -415,6 +443,7 @@
                 authScreen.classList.add('hidden');
                 gameContent.classList.add('hidden');
                 fullScreenLoader.classList.add('hidden');
+                pauseMainMenuMusic(); // ADDED: Pause music during maintenance
 
                 const titleElement = document.getElementById('maintenance-title');
                 const messageElement = document.getElementById('maintenance-message');
@@ -436,9 +465,9 @@
             }
         });
 
-        // UPDATED FUNCTION: Correctly runs on authentication
+        // UPDATED FUNCTION: Correctly loads promotional banner from Firebase
         async function loadAndShowPromoBanner() {
-            const promoRef = ref(db, 'settings/game/promotionalBanner');
+            const promoRef = ref(db, 'settings/promotionalBanner');
             const snapshot = await get(promoRef);
             if (snapshot.exists()) {
                 const bannerData = snapshot.val();
@@ -477,14 +506,15 @@
                 navigateToView('home-view');
                 loadUserData(user.uid);
                 listenForMatch(user.uid);
-                loadAndShowPromoBanner(); // Show promotional banner after login
-                // showAd call removed
+                loadAndShowPromoBanner(); 
+                playMainMenuMusic(); // ADDED: Start music on successful login
             } else {
                 authScreen.classList.remove('hidden');
                 gameContent.classList.add('hidden');
                 currentUserData = null;
                 if(timerInterval) clearInterval(timerInterval);
                 if(matchSimulationInterval) clearInterval(matchSimulationInterval);
+                pauseMainMenuMusic(); // ADDED: Pause music on logout
             }
 
             setTimeout(() => {
@@ -970,6 +1000,7 @@
         
             document.getElementById('match-initial-screen').classList.add('hidden');
             document.getElementById('matchmaking-screen').classList.remove('hidden');
+            pauseMainMenuMusic(); // ADDED: Pause music during matchmaking
 
             const matchmakingRef = ref(db, 'matchmaking');
             const snapshot = await get(matchmakingRef);
@@ -1000,6 +1031,7 @@
                 updates[`/matchmaking/${opponent.uid}`] = null;
                 updates[`/matchmaking/${currentUserData.uid}`] = null;
                 await update(ref(db), updates);
+                // Music remains paused as match is starting
 
             } else {
                 await set(ref(db, `matchmaking/${currentUserData.uid}`), {
@@ -1007,6 +1039,7 @@
                     teamPower: teamPower,
                     timestamp: serverTimestamp()
                 });
+                // Music remains paused as matchmaking is ongoing
             }
         });
 
@@ -1015,6 +1048,7 @@
             await remove(ref(db, `matchmaking/${currentUserData.uid}`));
             document.getElementById('matchmaking-screen').classList.add('hidden');
             document.getElementById('match-initial-screen').classList.remove('hidden');
+            playMainMenuMusic(); // ADDED: Resume music after canceling matchmaking
         });
 
         function listenForMatch(uid) {
@@ -1025,14 +1059,19 @@
                 if(matchId){
                     currentMatchId = matchId;
                     navigateToView('match-view');
+                    // Music is already paused from findMatchBtn click
                     startMatch(matchId);
                 } else {
+                    // Match ended (currentMatch is null)
                     currentMatchId = null;
                     if(timerInterval) clearInterval(timerInterval);
                     if(matchSimulationInterval) clearInterval(matchSimulationInterval);
                     
                     if(!document.getElementById('match-view').classList.contains('hidden')) {
                         navigateToView('home-view');
+                        // Music resumes via navigateToView
+                    } else {
+                        playMainMenuMusic(); // Ensure music plays if they weren't in match-view but match ended unexpectedly
                     }
                     
                     document.getElementById('match-simulation-screen').classList.add('hidden');
@@ -1048,12 +1087,17 @@
             document.getElementById('match-simulation-screen').classList.remove('hidden');
             document.getElementById('live-commentary').innerHTML = '';
             
+            pauseMainMenuMusic(); // Ensure music is paused for the match simulation
+            
             const matchRef = ref(db, `matches/${matchId}`);
             if(matchListener) matchListener(); 
             
             matchListener = onValue(matchRef, (snapshot) => {
                 const matchData = snapshot.val();
-                if(!matchData) return;
+                if(!matchData) {
+                    playMainMenuMusic(); // Match was deleted
+                    return;
+                }
 
                 document.getElementById('teamA-name').textContent = matchData.teamA.clubName;
                 document.getElementById('teamB-name').textContent = matchData.teamB.clubName;
@@ -1235,6 +1279,7 @@
                         [`/users/${matchData.teamB.uid}/currentMatch`]: null
                     });
                     await remove(ref(db, `matches/${matchId}`));
+                    playMainMenuMusic(); // ADDED: Resume music after match is completed and deleted
                 }
             }, 1000);
         }
@@ -1256,7 +1301,23 @@
             } else {
                  navigateToView('home-view');
             }
+            
+            // ADDED: Attempt to play music as a user interaction handler is usually needed
+            // The user will likely click something (login/signup) which then allows this to work.
+            playMainMenuMusic(); 
         });
+        
+        // ADDED: General fallback to attempt playing music on any user interaction (like a click on the auth screen)
+        document.addEventListener('click', () => {
+             // We only want to play it if a user is logged in (game-content is visible) 
+             // and the main menu music is currently paused (e.g., first login click)
+             if (gameContent.classList.contains('hidden') && mainMenuAudio.paused) {
+                 // Do nothing here, as onAuthStateChanged handles the first play after login
+             } else if (!gameContent.classList.contains('hidden') && mainMenuAudio.paused && currentMatchId === null) {
+                 // Try to play if somehow paused while on game content (not in match)
+                 playMainMenuMusic();
+             }
+        }, { once: true }); 
 
     </script>
 </body>

@@ -96,6 +96,10 @@
         <source src="asset/main menu.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
+    <audio id="match-audio" loop>
+        <source src="asset/match.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
     <div id="game-container-wrapper" class="w-full h-full">
 
         <div id="full-screen-loader" class="fixed inset-0 bg-[#0d1117] bg-opacity-95 flex flex-col items-center justify-center z-[100]">
@@ -355,6 +359,149 @@
         
         let currentLocalStrategy = 'Balanced';
         let isLocalPlayerTeamA = false;
+        
+        // --- START: Updated Commentary Data (100+ English entries) ---
+        const ALL_COMMENTARIES = [
+            // Goal Commentaries (Placeholder for Player names)
+            "GOAL! What a stunning finish by $PLAYER! The crowd is on its feet!",
+            "Golazo! It's a marvelous strike, courtesy of $PLAYER! That pass from $ASSIST was perfect.",
+            "$PLAYER breaks the deadlock! An absolute thunderbolt from outside the box!",
+            "He scores! $PLAYER nets a crucial goal after a brilliant run.",
+            "That's a goal! $PLAYER calmly slots it home, an easy tap-in thanks to $ASSIST's vision.",
+            "GOAL! It's a rocket from $PLAYER! No chance for the keeper!",
+            "The net bulges! $PLAYER with the finish, $ASSIST with the wonderful setup!",
+            "He tucks it away! $PLAYER with the precision finish!",
+            "It's a screamer! $PLAYER fires it into the top corner!",
+            "A moment of magic from $PLAYER! That's what they call a big-game player!",
+            "The pressure pays off! $PLAYER finds the back of the net.",
+            "The goalkeeper had absolutely no chance! $PLAYER with a moment of brilliance!",
+            "The header is good! $PLAYER rises highest to nod it home from the cross!",
+            "They've done it! $PLAYER seals the deal with a cool, clinical finish.",
+            "A tap-in! Simple but effective, $PLAYER capitalizes on the defensive error.",
+            "What a beautiful, bending shot! $PLAYER makes it look effortless.",
+            "The chip is perfect! $PLAYER leaves the keeper stranded!",
+            "The stadium erupts! A decisive goal from $PLAYER!",
+
+            // Attack/Chance Commentaries
+            "An excellent chance for $ATTACKER! But the shot goes wide of the post.",
+            "Ooh, that was close! $ATTACKER almost found the target, just missing the frame.",
+            "$ATTACKER is through on goal, but the keeper $DEFENDER makes a brilliant save!",
+            "A dangerous free-kick for $TEAM just outside the box.",
+            "Corner awarded to $TEAM. Can they capitalize on this set-piece opportunity?",
+            "The attack is building up nicely for $TEAM down the flank.",
+            "Superb through ball for $ATTACKER, but $DEFENDER intercepts at the last moment!",
+            "$ATTACKER shoots! It hits the woodwork and rattles away!",
+            "A clear opportunity goes begging! $ATTACKER will regret that miss.",
+            "The ball is cut back, but the shot is blocked by a desperate lunge!",
+            "The keeper is off his line quickly to smother the attempt from $ATTACKER.",
+            "A venomous volley from $ATTACKER, but it just flies past the upright!",
+            "The defense is caught sleeping! But the final shot from $ATTACKER lacked power.",
+            "They're peppering the goal! $TEAM is dominating the attack now.",
+            "A one-two move opens up the defense, but the cross is slightly overhit.",
+
+            // Defense/Midfield/Save Commentaries
+            "A tactical foul in the midfield by $DEFENDER to break up the play.",
+            "The possession is back with $TEAM after a commanding interception.",
+            "Strong challenge by $DEFENDER to win the ball back cleanly.",
+            "Midfield battle is intense, neither team giving an inch in this ferocious contest.",
+            "A nice sequence of passes by $TEAM, retaining the ball under pressure.",
+            "The long ball strategy is not quite connecting for $TEAM today.",
+            "A patient build-up from the back line of $TEAM, controlling the tempo.",
+            "Brilliant tackle by $DEFENDER! He stopped a certain goal-scoring opportunity.",
+            "Off the post! The danger is cleared by $DEFENDER!",
+            "A low cross into the box... cleared by the towering $DEFENDER!",
+            "The team is pushing high, winning the ball back quickly with a great press.",
+            "The keeper $DEFENDER pulls off an acrobatic save to keep his side in it!",
+            "A critical interception in the penalty box! That was heroic defending.",
+            "The defensive line of $TEAM steps up perfectly to catch $ATTACKER offside.",
+            "A crucial block from $DEFENDER, sacrificing his body for the team.",
+            "The keeper tips a powerful long-range effort over the bar!",
+            "The full-back $DEFENDER recovers superbly to deny the counter-attack.",
+            "Possession changing hands quickly—it's a real end-to-end affair.",
+
+            // General & Dynamic Filler Commentaries (Ensuring 100+ Total)
+            "The intensity is palpable in the stadium. This is a fiercely contested match!",
+            "We are in for a tight finish here. The pressure is mounting!",
+            "Only a few minutes left in this half. Can they hold on?",
+            "The referee is having a very stern word with the players.",
+            "A moment of reflection as play pauses for an injured player.",
+            "Can either side find a winner? It's too close to call.",
+            "The clock is definitely a factor now. Time is running out!",
+            "A great atmosphere inside the arena. The fans are certainly enjoying this.",
+            "Both teams deserve credit for the sheer effort they are putting in.",
+            "We've reached the halfway mark of the second half. Fitness will be key.",
+            "The team needs a spark from somewhere, they look a little flat.",
+            "They are looking for the perfect final pass, trying to unlock the defense.",
+            "Defensive discipline is absolutely paramount at this stage of the game.",
+            "No clear advantage for either side yet. It's a testament to the balance of power.",
+            "A high-stakes encounter for both clubs, you can feel the tension.",
+            "This is typical cup-tie drama, full of twists and turns!",
+            "The substitution bench is warming up; a change must be imminent.",
+            "Will we see extra time tonight? It certainly looks possible.",
+            "A fantastic display of footballing skill on show.",
+            "They must keep their concentration now; one mistake could be fatal.",
+            "A little bit of frustration creeping in as tackles start flying.",
+            "Both sides are pressing hard, trying to force an error.",
+            "The game needs a moment of individual brilliance to settle it.",
+            "It's all about who blinks first in this tactical deadlock.",
+            "Tactical changes are being discussed on the sidelines.",
+            "They are controlling the tempo, slowing the game down deliberately.",
+            "The defensive line holds firm, refusing to be breached.",
+            "Playing out from the back, taking a risk but showing confidence.",
+            "Trying to exploit the flanks, looking for width in the attack.",
+            "Looking for the aerial threat from a deep cross.",
+            "The captain is visibly rallying his team, urging them forward.",
+            "Possession stats are nearly equal; a true reflection of the match.",
+            "A disciplined performance so far, keeping their shape well.",
+            "They are dictating the play, forcing the opposition to chase.",
+            "The long-range effort is well off target, a hopeful attempt at best.",
+            "The keeper's distribution is excellent, launching a rapid counter-attack.",
+            "The center-backs are dominant, winning every aerial duel.",
+            "Working hard off the ball, their fitness levels are impressive.",
+            "A rapid counter-attack opportunity! They need to be clinical!",
+            "The full-backs are bombing forward, adding extra men to the attack.",
+            "Finding space in the channels, exploiting the gaps between defense and midfield.",
+            "The tension is mounting with every passing second!",
+            "A very physical contest, the referee is letting a lot go.",
+            "They need to keep the ball better, too many turnovers in midfield.",
+            "The final ball is missing, letting themselves down in the critical area.",
+            "The crowd loves the effort and commitment on display.",
+            "Playing with a high press, looking to steal the ball deep in enemy territory.",
+            "A cautious approach for now, prioritizing defense.",
+            "Both managers look calm, but you know their heart rates are soaring.",
+            "A true test of character for both sets of players.",
+            "The defensive wall is set, ready for the free-kick.",
+            "Looking to switch the play quickly to the unattended side.",
+            "A promising attack fizzles out, poor decision-making at the end.",
+            "They are running out of time, must create something quickly!",
+            "Must be more clinical in front of goal; chances are rare.",
+            "The difference between the teams is marginal, a single goal may decide it.",
+            "The opponent is showing great resilience, refusing to break down.",
+            "An evenly matched contest, a delight for the neutral spectator.",
+            "All eyes are on the clock as the seconds tick away.",
+            "This could go either way; a moment of genius is all it takes.",
+            "The team is playing smart football, controlling their emotions.",
+            "Need to avoid mistakes now; the pressure is immense.",
+            "The game is on a knife-edge, one mistake and it's over.",
+            "The bench reaction tells a story—they sense a goal is coming.",
+            "It's a game of fine margins, where small details matter most.",
+            "A moment of hesitation costs them dearly in possession.",
+            "The pass accuracy is remarkably high despite the pressure.",
+            "They are absorbing the pressure well, sitting deep and defending.",
+            "A fantastic advertisement for the beautiful game!",
+            "Can they hold on for the win? They are defending with everything they have.",
+            "A vital three points at stake in this league fixture.",
+            "The intensity never drops, a non-stop, high-energy affair.",
+            "Every tackle is important now, controlling the middle ground.",
+            "They are hungry for the goal, pushing men forward fearlessly.",
+            "The defense has to be alert, especially against the pace of the forwards.",
+            "A battle of wits between the players and the opposing tactics.",
+            "The players are giving their all, absolutely exhausted.",
+            "The game is wide open, plenty of space to exploit.",
+            "The tension is almost unbearable for the supporters!",
+            "It's not over yet! They have time for one last attempt."
+        ];
+        // --- END: Updated Commentary Data (100+ English entries) ---
 
         const authScreen = document.getElementById('auth-screen');
         const gameContent = document.getElementById('game-content');
@@ -374,8 +521,9 @@
         const views = document.querySelectorAll('.view');
         const header = document.querySelector('header');
         
-        // ADDED: Audio element
+        // **UPDATED:** Audio elements
         const mainMenuAudio = document.getElementById('main-menu-audio');
+        const matchAudio = document.getElementById('match-audio'); 
 
         function showModal(message) {
             modalMessage.textContent = message;
@@ -383,27 +531,46 @@
         }
         modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
         
-        // UPDATED EVENT LISTENER
         promoCloseBtn.addEventListener('click', () => {
             promoBannerModal.classList.add('hidden');
-            // The line that stored the "dismissed" state has been removed, so the banner can appear again on the next login.
         });
         
-        // UPDATED: Music control functions for better reliability
+        // UPDATED: Main Menu Music control functions for better reliability
         function playMainMenuMusic() {
+            pauseMatchMusic(); // Ensure match music is off
             // Check if audio is paused and not currently playing to prevent errors
             if (mainMenuAudio.paused) {
                 mainMenuAudio.play().then(() => {
                     // Playback started successfully
                 }).catch(error => {
                     // Autoplay was prevented. This is the common issue.
-                    console.warn("Audio playback failed (Autoplay likely blocked). User interaction required:", error);
+                    console.warn("Main Menu Audio playback failed (Autoplay likely blocked). User interaction required:", error);
                 });
             }
         }
 
         function pauseMainMenuMusic() {
             mainMenuAudio.pause();
+        }
+
+        // **NEW ADDED:** Match Music control functions
+        function playMatchMusic() {
+             pauseMainMenuMusic(); // Stop menu music
+             if (matchAudio.paused) {
+                matchAudio.play().then(() => {
+                    // Playback started successfully
+                }).catch(error => {
+                    // If match music fails, log the error and ensure it's paused.
+                    console.warn("Match Audio playback failed (Autoplay likely blocked):", error);
+                    matchAudio.pause(); // Ensure it's paused if an error occurs
+                });
+            }
+        }
+        
+        function pauseMatchMusic() {
+            matchAudio.pause();
+            // Reset to beginning for next match (optional, but good practice)
+            matchAudio.currentTime = 0; 
         }
 
         function navigateToView(viewId) {
@@ -414,16 +581,18 @@
             if(header) {
                if (viewId === 'home-view') {
                    header.classList.remove('hidden');
-                   // ADDED: Re-enable music when going back to dashboard/menu
-                   playMainMenuMusic();
+                   // Re-enable menu music when going back to dashboard/menu
+                   if (!currentMatchId) { // Only play if not currently in a match (which is unlikely if navigating to home, but safe)
+                        playMainMenuMusic();
+                   }
                } else {
                    header.classList.add('hidden');
                }
             }
             
-            // ADDED: Specific check for match view to pause music
+            // Specific check for match view
             if(viewId === 'match-view') {
-                // Music is paused when entering match-view, but re-enabled later if not in match-making/simulation
+                // Music is paused when entering match-view, actual match music starts later in startMatch/runMatchSimulation
                 pauseMainMenuMusic(); 
             }
         }
@@ -444,7 +613,8 @@
                 authScreen.classList.add('hidden');
                 gameContent.classList.add('hidden');
                 fullScreenLoader.classList.add('hidden');
-                pauseMainMenuMusic(); // ADDED: Pause music during maintenance
+                pauseMainMenuMusic(); // Pause menu music during maintenance
+                pauseMatchMusic(); // Pause match music during maintenance
 
                 const titleElement = document.getElementById('maintenance-title');
                 const messageElement = document.getElementById('maintenance-message');
@@ -466,7 +636,6 @@
             }
         });
 
-        // UPDATED FUNCTION: Correctly loads promotional banner from Firebase
         async function loadAndShowPromoBanner() {
             const promoRef = ref(db, 'settings/promotionalBanner');
             const snapshot = await get(promoRef);
@@ -508,14 +677,14 @@
                 loadUserData(user.uid);
                 listenForMatch(user.uid);
                 loadAndShowPromoBanner(); 
-                // Removed playMainMenuMusic() here. It's now called explicitly after login/signup succeeds below.
             } else {
                 authScreen.classList.remove('hidden');
                 gameContent.classList.add('hidden');
                 currentUserData = null;
                 if(timerInterval) clearInterval(timerInterval);
                 if(matchSimulationInterval) clearInterval(matchSimulationInterval);
-                pauseMainMenuMusic(); // ADDED: Pause music on logout
+                pauseMainMenuMusic(); // Pause menu music on logout
+                pauseMatchMusic(); // Pause match music on logout
             }
 
             setTimeout(() => {
@@ -569,7 +738,7 @@
                     name: "Maradona Prime", position: "CAM", rating: 99, value: 50000, imageUrl: "https://placehold.co/96x96/FFD700/000?text=M+P"
                 }, { merge: true });
                 
-                // *** FIX: Call playMainMenuMusic() after successful user interaction ***
+                // Call playMainMenuMusic() after successful user interaction
                 playMainMenuMusic();
 
             } catch (error) { authError.textContent = "Signup failed: " + error.message; }
@@ -581,7 +750,7 @@
             const password = document.getElementById('login-password').value;
             authError.textContent = '';
             signInWithEmailAndPassword(auth, email, password).then(() => {
-                 // *** FIX: Call playMainMenuMusic() after successful user interaction ***
+                 // Call playMainMenuMusic() after successful user interaction
                 playMainMenuMusic(); 
             }).catch(error => authError.textContent = "Login failed: " + error.message);
         });
@@ -1001,13 +1170,21 @@
 
         const cancelMatchmakingBtn = document.getElementById('cancel-matchmaking-btn');
 
+        // NEW HELPER: Load players by IDs and return an array of names
+        async function getPlayerNamesBySquad(squadIds) {
+            if (!squadIds || squadIds.length === 0) return [];
+            const playerPromises = squadIds.map(playerId => get(ref(db, 'players/' + playerId)));
+            const playerSnapshots = await Promise.all(playerPromises);
+            return playerSnapshots.map(snap => snap.exists() ? snap.val().name : null).filter(name => name);
+        }
+
         findMatchBtn.addEventListener('click', async () => {
             if (!currentUserData || !currentUserData.uid) return showModal("Your data is still loading. Please wait a moment.");
             if (!currentUserData.squad || currentUserData.squad.length < 5) return showModal("You must have at least 5 players in your squad to play a match.");
         
             document.getElementById('match-initial-screen').classList.add('hidden');
             document.getElementById('matchmaking-screen').classList.remove('hidden');
-            pauseMainMenuMusic(); // ADDED: Pause music during matchmaking
+            pauseMainMenuMusic(); // Menu music paused during matchmaking
 
             const matchmakingRef = ref(db, 'matchmaking');
             const snapshot = await get(matchmakingRef);
@@ -1021,9 +1198,14 @@
             if(opponent){
                 const matchId = push(ref(db, 'matches')).key;
                 currentMatchId = matchId;
+                
+                // Fetch opponent's squad to include in match data (REQUIRED for simulation)
+                const opponentUserSnap = await get(ref(db, `users/${opponent.uid}`));
+                const opponentSquad = opponentUserSnap.exists() ? (opponentUserSnap.val().squad || []) : [];
+                
                 const matchData = {
-                    teamA: { uid: opponent.uid, clubName: opponent.clubName, teamPower: opponent.teamPower },
-                    teamB: { uid: currentUserData.uid, clubName: currentUserData.clubName, teamPower: teamPower },
+                    teamA: { uid: opponent.uid, clubName: opponent.clubName, teamPower: opponent.teamPower, squad: opponentSquad }, // Added squad
+                    teamB: { uid: currentUserData.uid, clubName: currentUserData.clubName, teamPower: teamPower, squad: currentUserData.squad }, // Added squad
                     score: { teamA: 0, teamB: 0 },
                     status: 'starting',
                     startTime: serverTimestamp(),
@@ -1038,15 +1220,12 @@
                 updates[`/matchmaking/${opponent.uid}`] = null;
                 updates[`/matchmaking/${currentUserData.uid}`] = null;
                 await update(ref(db), updates);
-                // Music remains paused as match is starting
-
             } else {
                 await set(ref(db, `matchmaking/${currentUserData.uid}`), {
                     clubName: currentUserData.clubName,
                     teamPower: teamPower,
                     timestamp: serverTimestamp()
                 });
-                // Music remains paused as matchmaking is ongoing
             }
         });
 
@@ -1055,7 +1234,8 @@
             await remove(ref(db, `matchmaking/${currentUserData.uid}`));
             document.getElementById('matchmaking-screen').classList.add('hidden');
             document.getElementById('match-initial-screen').classList.remove('hidden');
-            playMainMenuMusic(); // ADDED: Resume music after canceling matchmaking
+            pauseMatchMusic(); // Ensure match music is off
+            playMainMenuMusic(); // Resume menu music after canceling matchmaking
         });
 
         function listenForMatch(uid) {
@@ -1066,7 +1246,6 @@
                 if(matchId){
                     currentMatchId = matchId;
                     navigateToView('match-view');
-                    // Music is already paused from findMatchBtn click
                     startMatch(matchId);
                 } else {
                     // Match ended (currentMatch is null)
@@ -1074,11 +1253,13 @@
                     if(timerInterval) clearInterval(timerInterval);
                     if(matchSimulationInterval) clearInterval(matchSimulationInterval);
                     
+                    pauseMatchMusic(); // **FIX:** Stop match music when match ends/deleted
+                    
                     if(!document.getElementById('match-view').classList.contains('hidden')) {
                         navigateToView('home-view');
                         // Music resumes via navigateToView
                     } else {
-                        playMainMenuMusic(); // Ensure music plays if they weren't in match-view but match ended unexpectedly
+                        playMainMenuMusic(); // Ensure menu music plays if they weren't in match-view but match ended unexpectedly
                     }
                     
                     document.getElementById('match-simulation-screen').classList.add('hidden');
@@ -1088,15 +1269,23 @@
             });
         }
         
-        function startMatch(matchId) {
+        async function startMatch(matchId) {
             document.getElementById('matchmaking-screen').classList.add('hidden');
             document.getElementById('match-initial-screen').classList.add('hidden');
             document.getElementById('match-simulation-screen').classList.remove('hidden');
             document.getElementById('live-commentary').innerHTML = '';
             
-            pauseMainMenuMusic(); // Ensure music is paused for the match simulation
+            pauseMainMenuMusic(); // Ensure menu music is paused for the match simulation
             
             const matchRef = ref(db, `matches/${matchId}`);
+            const initialSnap = await get(matchRef); // Get initial data to fetch squads
+            if (!initialSnap.exists()) return;
+            const initialMatchData = initialSnap.val();
+
+            // Fetch player names for commentary
+            const teamA_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamA.squad);
+            const teamB_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamB.squad);
+
             if(matchListener) matchListener(); 
             
             matchListener = onValue(matchRef, (snapshot) => {
@@ -1131,6 +1320,11 @@
                 const timerDisplay = document.getElementById('match-timer');
                 
                 if (matchData.status === 'ongoing' && matchData.startTime) {
+                    // For the second player, start music when status changes to 'ongoing'
+                    if (matchData.teamA.uid !== currentUserData.uid) {
+                       playMatchMusic();
+                    }
+                    
                     const matchStartTimestamp = matchData.startTime;
                     timerInterval = setInterval(() => {
                         const elapsedSeconds = Math.floor((Date.now() - matchStartTimestamp) / 1000);
@@ -1152,7 +1346,7 @@
                 }
 
                 if(currentUserData && matchData.status === 'starting' && matchData.teamA.uid === currentUserData.uid){
-                     runMatchSimulation(matchId, matchData);
+                     runMatchSimulation(matchId, matchData, teamA_PlayerNames, teamB_PlayerNames);
                 }
             });
             
@@ -1165,9 +1359,47 @@
             });
         }
 
-        async function runMatchSimulation(matchId, initialMatchData){
+        // Helper to get a random item from an array
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+        
+        // Helper to get a random non-goal commentary
+        function getRandomCommentary(type = 'default', teamName = '', attacker = '', defender = '') {
+            let filteredCommentaries = ALL_COMMENTARIES;
+            
+            if (type === 'goal') {
+                filteredCommentaries = ALL_COMMENTARIES.filter(c => c.includes('GOAL') || c.includes('Golazo') || c.includes('The net bulges'));
+                if (filteredCommentaries.length === 0) return `🚀 GOAL! ${teamName} scores!`;
+            } else if (type === 'chance') {
+                filteredCommentaries = ALL_COMMENTARIES.filter(c => c.includes('chance') || c.includes('close') || c.includes('opportunity') || c.includes('shoots') || c.includes('volley'));
+                if (filteredCommentaries.length === 0) return `⚔️ Battle for possession in the midfield. Both sides holding strong.`;
+            } else if (type === 'save' || type === 'tackle') {
+                 filteredCommentaries = ALL_COMMENTARIES.filter(c => c.includes('save') || c.includes('tackle') || c.includes('Defense holds') || c.includes('cleared') || c.includes('block') || c.includes('keeper'));
+                 if (filteredCommentaries.length === 0) return `❌ Defense holds! ${teamName}'s defense blocked the attack!`;
+            } else {
+                 filteredCommentaries = ALL_COMMENTARIES.filter(c => !c.includes('GOAL') && !c.includes('Golazo') && !c.includes('The net bulges') && !c.includes('$PLAYER') && !c.includes('chance') && !c.includes('save') && !c.includes('tackle'));
+                 if (filteredCommentaries.length === 0) return `⚔️ Battle for possession in the midfield. Both sides holding strong.`;
+            }
+
+            let commentary = getRandomItem(filteredCommentaries);
+            
+            // Player name substitution logic
+            commentary = commentary.replace(/\$PLAYER/g, attacker || teamName);
+            commentary = commentary.replace(/\$ASSIST/g, getRandomItem([attacker, teamName]) || teamName); // Use attacker or team name as placeholder for assist
+            commentary = commentary.replace(/\$ATTACKER/g, attacker || teamName);
+            commentary = commentary.replace(/\$DEFENDER/g, defender || teamName);
+            commentary = commentary.replace(/\$TEAM/g, teamName);
+
+            return commentary;
+        }
+
+        async function runMatchSimulation(matchId, initialMatchData, teamA_Players, teamB_Players){
             if (!currentUserData) return;
             if(matchSimulationInterval) clearInterval(matchSimulationInterval);
+            
+            // **FIX:** Ensure match music starts for the player running the simulation
+            playMatchMusic(); 
             
             await update(ref(db, `matches/${matchId}`), { status: 'ongoing', startTime: serverTimestamp() });
             
@@ -1212,28 +1444,46 @@
 
                     const offenseChanceA = (powerA / totalPower) * baseChance * getOffenseModifier(strategyA);
                     
+                    // Team A Attack Chance
                     if (Math.random() < offenseChanceA) {
                         const defensePowerB = (powerB / totalPower) * getDefenseModifier(strategyB);
+                        
+                        // Team A Score Chance (Defense B Fails)
                         if(Math.random() > defensePowerB){
                             matchData.score.teamA++;
                             scoreUpdated = true;
-                            eventText = `🚀 GOAL! ${matchData.teamA.clubName} scores! (Strategy: ${strategyA})`;
+                            const scorer = getRandomItem(teamA_Players) || matchData.teamA.clubName;
+                            const assister = getRandomItem(teamA_Players.filter(p => p !== scorer)) || scorer;
+                            eventText = getRandomCommentary('goal', matchData.teamA.clubName, scorer, assister);
                         } else {
-                            eventText = `❌ Defense holds! ${matchData.teamB.clubName}'s (Strategy: ${strategyB}) defense blocked the attack!`;
+                            // Team A Attack Fails / Team B Save/Tackle
+                            const attacker = getRandomItem(teamA_Players) || matchData.teamA.clubName;
+                            const defender = getRandomItem(teamB_Players) || matchData.teamB.clubName;
+                            eventText = getRandomCommentary('save', matchData.teamB.clubName, attacker, defender);
                         }
                     } else {
                         const offenseChanceB = (powerB / totalPower) * baseChance * getOffenseModifier(strategyB);
+                        
+                        // Team B Attack Chance
                         if(Math.random() < offenseChanceB){
                             const defensePowerA = (powerA / totalPower) * getDefenseModifier(strategyA);
+                            
+                            // Team B Score Chance (Defense A Fails)
                             if(Math.random() > defensePowerA){
                                 matchData.score.teamB++;
                                 scoreUpdated = true;
-                                eventText = `🚀 GOAL! ${matchData.teamB.clubName} scores! (Strategy: ${strategyB})`;
+                                const scorer = getRandomItem(teamB_Players) || matchData.teamB.clubName;
+                                const assister = getRandomItem(teamB_Players.filter(p => p !== scorer)) || scorer;
+                                eventText = getRandomCommentary('goal', matchData.teamB.clubName, scorer, assister);
                             } else {
-                                eventText = `❌ Defense holds! ${matchData.teamA.clubName}'s (Strategy: ${strategyA}) defense blocked the attack!`;
+                                // Team B Attack Fails / Team A Save/Tackle
+                                const attacker = getRandomItem(teamB_Players) || matchData.teamB.clubName;
+                                const defender = getRandomItem(teamA_Players) || matchData.teamA.clubName;
+                                eventText = getRandomCommentary('save', matchData.teamA.clubName, attacker, defender);
                             }
                         } else {
-                             eventText = "⚔️ Battle for possession in the midfield. Both sides holding strong.";
+                             // No attack, general commentary
+                             eventText = getRandomCommentary('midfield', 'Both Teams');
                         }
                     }
 
@@ -1286,7 +1536,9 @@
                         [`/users/${matchData.teamB.uid}/currentMatch`]: null
                     });
                     await remove(ref(db, `matches/${matchId}`));
-                    playMainMenuMusic(); // ADDED: Resume music after match is completed and deleted
+                    
+                    pauseMatchMusic(); // **FIX:** Stop match music when match is completed
+                    playMainMenuMusic(); // Resume menu music
                 }
             }, 1000);
         }
@@ -1310,9 +1562,9 @@
             }
         });
         
-        // ADDED: General fallback to attempt playing music on any user interaction (like a click on the auth screen)
-        // This is a safety net for browsers that block the first play. The user's first click on the page should trigger this.
+        // General fallback to attempt playing music on any user interaction (like a click on the auth screen)
         document.addEventListener('click', () => {
+             // Only try to play main menu music if it's currently paused and no match is active.
              if (mainMenuAudio.paused && currentMatchId === null) {
                  playMainMenuMusic();
              }

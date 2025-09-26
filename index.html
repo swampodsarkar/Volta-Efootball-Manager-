@@ -389,14 +389,15 @@
             // The line that stored the "dismissed" state has been removed, so the banner can appear again on the next login.
         });
         
-        // ADDED: Music control functions
+        // UPDATED: Music control functions for better reliability
         function playMainMenuMusic() {
             // Check if audio is paused and not currently playing to prevent errors
             if (mainMenuAudio.paused) {
-                // Audio will only play if triggered by a user action (like a click on the login screen)
-                mainMenuAudio.play().catch(error => {
-                    console.error("Audio playback failed (usually requires user interaction first):", error);
-                    // Optionally show a message to the user that they might need to interact
+                mainMenuAudio.play().then(() => {
+                    // Playback started successfully
+                }).catch(error => {
+                    // Autoplay was prevented. This is the common issue.
+                    console.warn("Audio playback failed (Autoplay likely blocked). User interaction required:", error);
                 });
             }
         }
@@ -507,7 +508,7 @@
                 loadUserData(user.uid);
                 listenForMatch(user.uid);
                 loadAndShowPromoBanner(); 
-                playMainMenuMusic(); // ADDED: Start music on successful login
+                // Removed playMainMenuMusic() here. It's now called explicitly after login/signup succeeds below.
             } else {
                 authScreen.classList.remove('hidden');
                 gameContent.classList.add('hidden');
@@ -567,6 +568,9 @@
                 await set(ref(db, 'players/' + MARADONA_PLAYER_ID), {
                     name: "Maradona Prime", position: "CAM", rating: 99, value: 50000, imageUrl: "https://placehold.co/96x96/FFD700/000?text=M+P"
                 }, { merge: true });
+                
+                // *** FIX: Call playMainMenuMusic() after successful user interaction ***
+                playMainMenuMusic();
 
             } catch (error) { authError.textContent = "Signup failed: " + error.message; }
         });
@@ -576,7 +580,10 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             authError.textContent = '';
-            signInWithEmailAndPassword(auth, email, password).catch(error => authError.textContent = "Login failed: " + error.message);
+            signInWithEmailAndPassword(auth, email, password).then(() => {
+                 // *** FIX: Call playMainMenuMusic() after successful user interaction ***
+                playMainMenuMusic(); 
+            }).catch(error => authError.textContent = "Login failed: " + error.message);
         });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
@@ -1301,20 +1308,12 @@
             } else {
                  navigateToView('home-view');
             }
-            
-            // ADDED: Attempt to play music as a user interaction handler is usually needed
-            // The user will likely click something (login/signup) which then allows this to work.
-            playMainMenuMusic(); 
         });
         
         // ADDED: General fallback to attempt playing music on any user interaction (like a click on the auth screen)
+        // This is a safety net for browsers that block the first play. The user's first click on the page should trigger this.
         document.addEventListener('click', () => {
-             // We only want to play it if a user is logged in (game-content is visible) 
-             // and the main menu music is currently paused (e.g., first login click)
-             if (gameContent.classList.contains('hidden') && mainMenuAudio.paused) {
-                 // Do nothing here, as onAuthStateChanged handles the first play after login
-             } else if (!gameContent.classList.contains('hidden') && mainMenuAudio.paused && currentMatchId === null) {
-                 // Try to play if somehow paused while on game content (not in match)
+             if (mainMenuAudio.paused && currentMatchId === null) {
                  playMainMenuMusic();
              }
         }, { once: true }); 

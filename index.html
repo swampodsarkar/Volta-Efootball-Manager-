@@ -33,6 +33,34 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
             border-color: #00bcd4; /* Teal accent on hover */
         }
+        
+        /* NEW: Styles for Image Background Cards */
+        .nav-card-image {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #161b22; /* Fallback color */
+            padding: 0 !important; /* Remove padding from anchor tag to cover entire area */
+        }
+        
+        /* Ensure content (icon and text) is readable over the image */
+        .nav-card-image .fa-bolt,
+        .nav-card-image .fa-users,
+        .nav-card-image .fa-exchange-alt,
+        .nav-card-image .fa-store,
+        .nav-card-image .fa-star,
+        .nav-card-image .fa-trophy,
+        .nav-card-image .fa-gamepad,
+        .nav-card-image .fa-info-circle {
+            color: #fff !important; 
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.9); /* Subtle shadow for icon visibility */
+        }
+        .nav-card-image span {
+            color: #fff !important;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.9); /* Subtle shadow for text visibility */
+        }
+        /* END NEW STYLES */
+        
         .hidden {
             display: none;
         }
@@ -180,37 +208,61 @@
             <main class="main-container">
                 <div id="home-view" class="view">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <a href="#match" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                            <i class="fas fa-bolt text-2xl mb-2"></i>
-                            <span class="font-semibold">Play Match</span>
+                        <a href="#match" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Neymar_Jr_presentation_-_Press_conference_for_PSG_001_%28cropped%29.jpg/250px-Neymar_Jr_presentation_-_Press_conference_for_PSG_001_%28cropped%29.jpg">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-bolt text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">Play Match</span>
+                            </div>
                         </a>
-                        <a href="#squad" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                            <i class="fas fa-users text-2xl mb-2"></i>
-                            <span class="font-semibold">My Squad</span>
+                        <a href="#squad" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://fifpro.org/media/5chb3dva/lionel-messi_imago1019567000h.jpg?rxy=0.32986930611281567,0.18704579979466449&rnd=133378758718600000">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-users text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">My Squad</span>
+                            </div>
                         </a>
-                        <a href="#transfers" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                           <i class="fas fa-exchange-alt text-2xl mb-2"></i>
-                            <span class="font-semibold">Transfers</span>
+                        <a href="#transfers" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://backend.liverpoolfc.com/sites/default/files/styles/xs/public/2025-08/virgil-van-dijk-2526-action-shot_d021d7281d66a6d39e66088d65c27021.webp?itok=fGvmbvRx">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-exchange-alt text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">Transfers</span>
+                            </div>
                         </a>
-                        <a href="#store" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                            <i class="fas fa-store text-2xl mb-2"></i>
-                            <span class="font-semibold">Store</span>
+                        <a href="#store" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqbn1cw3_UXyR6SG1ooTlCs9NYpojbNOGtJQ&s">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-store text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">Store</span>
+                            </div>
                         </a>
-                        <a href="#events" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                            <i class="fas fa-star text-2xl mb-2"></i>
-                            <span class="font-semibold">Events</span>
+                        <a href="#events" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://image-service.onefootball.com/transform?w=280&h=210&dpr=2&image=https%3A%2F%2Fcdn.foot-africa.com%2F20250706%2Ff718ef553498d1ad6cf2076c55f7b0b80d5d9b2e823b141db89abd896dcbfee9.jpg">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-star text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">Events</span>
+                            </div>
                         </a>
-                        <a href="#leaderboard" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                            <i class="fas fa-trophy text-2xl mb-2"></i>
-                            <span class="font-semibold">Leaderboard</span>
+                        <a href="#leaderboard" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://placehold.co/300x112/00bcd4/white?text=Leaderboard">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-trophy text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">Leaderboard</span>
+                            </div>
                         </a>
-                        <a href="#esports" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                            <i class="fas fa-gamepad text-2xl mb-2"></i>
-                            <span class="font-semibold">ESPORTS</span>
+                        <a href="#esports" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://placehold.co/300x112/FFD700/000?text=ESPORTS+Championship">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-gamepad text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">ESPORTS</span>
+                            </div>
                         </a>
-                        <a href="#about" class="nav-link nav-card flex flex-col items-center justify-center p-4 h-28">
-                            <i class="fas fa-info-circle text-2xl mb-2"></i>
-                            <span class="font-semibold">About</span>
+                        <a href="#about" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://placehold.co/300x112/30363d/ffffff?text=About+The+Game">
+                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                                <i class="fas fa-info-circle text-2xl mb-2 text-white"></i>
+                                <span class="font-semibold text-white">About</span>
+                            </div>
                         </a>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1386,7 +1438,7 @@
             
             // Player name substitution logic
             commentary = commentary.replace(/\$PLAYER/g, attacker || teamName);
-            commentary = commentary.replace(/\$ASSIST/g, getRandomItem([attacker, teamName]) || teamName); // Use attacker or team name as placeholder for assist
+            commentary = commentary.replace(/\$ASSIST/g, getRandomItem([attacker, teamName]) || scorer); // Use attacker or team name as placeholder for assist
             commentary = commentary.replace(/\$ATTACKER/g, attacker || teamName);
             commentary = commentary.replace(/\$DEFENDER/g, defender || teamName);
             commentary = commentary.replace(/\$TEAM/g, teamName);
@@ -1554,6 +1606,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
             if(balancedBtn) balancedBtn.classList.add('border-2', 'border-teal-500');
+            
+            // NEW: Apply background images to nav cards
+            document.querySelectorAll('.nav-card-image').forEach(card => {
+                const imageUrl = card.getAttribute('data-bg-url');
+                if (imageUrl) {
+                    card.style.backgroundImage = `url('${imageUrl}')`;
+                    card.classList.remove('bg-gray-800'); 
+                }
+            });
             
             if (!auth.currentUser) {
                 // Auth screen handled by onAuthStateChanged

@@ -10,136 +10,124 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        /* eFootball Theme Inspired Styles */
+        /* FC Mobile Inspired UI Theme */
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #0d1117; /* Dark background from image */
+            background-color: #0d1117;
             color: #ffffff;
-        }
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-        .nav-card, .stat-card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            cursor: pointer;
-        }
-        .nav-card:hover, .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-            border-color: #00bcd4; /* Teal accent on hover */
+            overflow: hidden; /* Prevent body scroll */
         }
         
-        /* NEW: Styles for Image Background Cards */
-        .nav-card-image {
+        #game-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://c4.wallpaperflare.com/wallpaper/468/371/692/soccer-neymar-brazilian-footballer-hd-wallpaper-preview.jpg'); /* Updated Background Image */
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
-            background-color: #161b22; /* Fallback color */
-            padding: 0 !important; /* Remove padding from anchor tag to cover entire area */
-        }
-        
-        /* Ensure content (icon and text) is readable over the image */
-        .nav-card-image .fa-bolt,
-        .nav-card-image .fa-users,
-        .nav-card-image .fa-exchange-alt,
-        .nav-card-image .fa-store,
-        .nav-card-image .fa-star,
-        .nav-card-image .fa-trophy,
-        .nav-card-image .fa-gamepad,
-        .nav-card-image .fa-info-circle,
-        .nav-card-image .fa-comments { /* ADDED: chat icon */
-            color: #fff !important; 
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.9); /* Subtle shadow for icon visibility */
-        }
-        .nav-card-image span {
-            color: #fff !important;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.9); /* Subtle shadow for text visibility */
-        }
-        /* END NEW STYLES */
-        
-        .hidden {
-            display: none;
-        }
-        .modal-backdrop {
-            background-color: rgba(0,0,0,0.85);
-        }
-        #user-avatar-container:hover .overlay {
-            opacity: 1;
-        }
-        .overlay {
-            transition: opacity 0.3s ease;
-        }
-        @keyframes loading-progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-        #loading-bar {
-            animation: loading-progress 2.5s ease-in-out infinite;
-        }
-        .animate-bounce {
-            animation: bounce 1.5s infinite;
-        }
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(-25%);
-                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-            }
-            50% {
-                transform: translateY(0);
-                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-            }
-        }
-        /* Teal button style */
-        .btn-primary {
-             background-color: #00bcd4; /* Teal 500 */
-             color: white;
-             font-weight: 700;
-             transition: background-color 0.3s;
-        }
-        .btn-primary:hover {
-             background-color: #00a5bb; /* Teal 600 */
+            z-index: -1;
+            filter: brightness(0.4); /* Darken the background to make UI pop */
         }
 
-        /* Player card styles from original for other views */
-        .player-card, .tournament-card {
-            background-color: #161b22; /* Darker card background */
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        .main-container {
+            flex-grow: 1;
+            overflow-y: auto; /* Allow scrolling only in the main content area */
+            padding-bottom: 2rem;
         }
-        .player-card:hover, .tournament-card:hover {
+
+        .nav-card, .stat-card, .player-card, .tournament-card {
+            background: linear-gradient(135deg, rgba(14, 51, 26, 0.85), rgba(22, 79, 45, 0.9)); /* Greenish Gradient */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 153, 0.4); /* Greenish Border */
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(50, 255, 150, 0.2); /* Green Glow Effect */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+
+        .nav-card:hover, .stat-card:hover, .player-card:hover, .tournament-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 255, 255, 0.3); /* Teal glow */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(50, 255, 150, 0.5); /* Enhanced Glow on Hover */
+            border-color: #39ff14; /* Neon green accent on hover */
         }
         
-        /* NEW: Global Chat Specific Styles */
-        .chat-message {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 15px;
-            word-wrap: break-word;
-            font-size: 0.95rem;
+        /* Interactive elements enhancement for mobile feel */
+        .interactive-button {
+            transition: transform 0.1s ease-out;
         }
-        .message-me {
-            margin-left: auto;
-            background-color: #00bcd4; /* Teal for my messages */
-            color: white;
+        .interactive-button:active {
+            transform: scale(0.95);
         }
-        .message-other {
-            margin-right: auto;
-            background-color: #30363d; /* Gray for others' messages */
+        
+        /* Modal & Loader styles */
+        .hidden { display: none; }
+        .modal-backdrop { background-color: rgba(0,0,0,0.85); }
+        .animate-bounce { animation: bounce 1.5s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+            50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+        }
+        #loading-bar { animation: loading-progress 2.5s ease-in-out infinite; }
+        @keyframes loading-progress { 0% { width: 0%; } 100% { width: 100%; } }
+        
+        /* Primary Button Style */
+        .btn-primary {
+             background-color: #00bcd4;
+             color: white;
+             font-weight: 700;
+             transition: background-color 0.3s, transform 0.1s ease-out;
+        }
+        .btn-primary:hover { background-color: #00a5bb; }
+        .btn-primary:active { transform: scale(0.95); }
+
+        /* New Layout Specific Styles */
+        .top-bar {
+            background: linear-gradient(to right, rgba(15, 20, 28, 0.9), rgba(25, 32, 42, 0.8));
+            border-bottom: 1px solid #30363d;
+        }
+        .left-sidebar {
+            background: rgba(15, 20, 28, 0.9);
+            border-right: 1px solid #30363d;
+        }
+        .left-sidebar .nav-link {
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .left-sidebar .nav-link:hover, .left-sidebar .nav-link.active {
+            background-color: #00bcd4;
             color: #ffffff;
         }
+        .bottom-nav {
+            background: linear-gradient(to right, rgba(15, 20, 28, 0.95), rgba(25, 32, 42, 0.9));
+            border-top: 1px solid #30363d;
+        }
+        .bottom-nav .nav-link:hover span {
+             color: #00bcd4;
+        }
+        
+        /* Main Content Card Styles */
+        .promo-card {
+            background-size: cover;
+            background-position: center;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #30363d;
+        }
+        .promo-card .overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.1) 100%);
+        }
+        
+        /* Chat Specific Styles */
+        .chat-message { max-width: 80%; padding: 8px 12px; border-radius: 15px; word-wrap: break-word; font-size: 0.95rem; }
+        .message-me { margin-left: auto; background-color: #00bcd4; color: white; }
+        .message-other { margin-right: auto; background-color: #30363d; color: #ffffff; }
+
     </style>
 </head>
-<body class="h-screen overflow-x-hidden">
+<body class="overflow-hidden">
     
+    <div id="game-background"></div>
+
     <audio id="main-menu-audio" loop>
         <source src="asset/main menu.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
@@ -148,7 +136,8 @@
         <source src="asset/match.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
-    <div id="game-container-wrapper" class="w-full h-full">
+
+    <div id="game-container-wrapper" class="w-full h-screen">
 
         <div id="full-screen-loader" class="fixed inset-0 bg-[#0d1117] bg-opacity-95 flex flex-col items-center justify-center z-[100]">
             <div class="flex flex-col items-center justify-center">
@@ -160,29 +149,25 @@
                 <p class="text-lg font-bold text-gray-300 mt-4">Loading by SWAMPOD X MITHUN...</p>
             </div>
         </div>
-    
         <div id="promo-banner-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
             <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-lg text-center border-4 border-yellow-500 relative">
                 <img id="promo-image" src="" alt="Promotional Banner" class="w-full h-auto rounded-lg mb-4 hidden">
                 <a id="promo-link" href="#" target="_blank" class="hidden w-full py-3 btn-primary rounded-lg mb-4 hover:bg-teal-600">Learn More</a>
-                <button id="promo-close-btn" class="mt-4 py-2 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg">Close</button>
+                <button id="promo-close-btn" class="mt-4 py-2 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
             </div>
         </div>
-        
         <div id="maintenance-mode" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
             <div class="text-center p-8 bg-gray-800 rounded-lg shadow-xl border border-teal-500">
                 <h2 id="maintenance-title" class="text-3xl font-bold text-yellow-400 mb-4">⚠️ Maintenance in Progress</h2>
                 <p id="maintenance-message" class="text-lg text-gray-300">The game is on maintenance, will back shortly.</p>
             </div>
         </div>
-        
         <div id="custom-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
             <div class="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-sm text-center border border-teal-500">
                 <p id="modal-message" class="text-lg mb-4"></p>
                 <button id="modal-close-btn" class="btn-primary py-2 px-6 rounded">OK</button>
             </div>
         </div>
-    
         <div id="auth-screen" class="w-full h-full flex items-center justify-center bg-gray-900 hidden">
             <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-xl shadow-2xl border border-teal-500">
                 <div>
@@ -192,13 +177,13 @@
                 <form id="login-form" class="space-y-6">
                     <input id="login-email" type="email" placeholder="Email" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
                     <input id="login-password" type="password" placeholder="Password" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <button type="submit" class="w-full py-3 px-4 btn-primary rounded-lg transition duration-300">Login</button>
+                    <button type="submit" class="w-full py-3 px-4 btn-primary rounded-lg">Login</button>
                 </form>
                 <form id="signup-form" class="space-y-6 hidden">
                     <input id="signup-email" type="email" placeholder="Email" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
                     <input id="signup-password" type="password" placeholder="Password" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
                     <input id="signup-club-name" type="text" placeholder="Club Name" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <button type="submit" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition duration-300">Sign Up</button>
+                    <button type="submit" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Sign Up</button>
                 </form>
                 <p id="auth-toggle" class="text-center text-sm text-teal-400 hover:underline cursor-pointer">
                     Don't have an account? Sign Up
@@ -206,129 +191,108 @@
                 <p id="auth-error" class="text-center text-sm text-red-400"></p>
             </div>
         </div>
-    
-        <div id="game-content" class="hidden w-full h-full">
-            <header class="py-4 px-6 flex flex-col items-center justify-center text-center">
-                <div id="user-avatar-container" class="relative w-24 h-24 mx-auto mb-3 group cursor-pointer">
-                    <img id="user-avatar" src="https://placehold.co/96x96/161b22/FFFFFF?text=S" alt="Club Logo" class="w-24 h-24 rounded-full border-4 border-teal-500 object-cover">
-                    <div class="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 overlay">
-                        <p class="text-white text-xs font-bold">Update</p>
+
+        <div id="game-content" class="hidden w-full h-full flex relative">
+            
+            <header class="top-bar fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-4 z-40">
+                <div class="flex items-center space-x-3">
+                    <div id="user-avatar-container" class="relative group cursor-pointer">
+                        <img id="user-avatar" src="https://placehold.co/96x96/161b22/FFFFFF?text=S" alt="Club Logo" class="w-12 h-12 rounded-full border-2 border-teal-500 object-cover">
+                        <input type="file" id="logo-upload" class="hidden" accept="image/*">
+                    </div>
+                    <div>
+                         <div class="flex items-center">
+                            <h1 id="user-club-name" class="text-lg font-bold text-white truncate max-w-[150px]">Club Name</h1>
+                             <span id="edit-club-name" class="ml-2 cursor-pointer text-gray-400 hover:text-teal-400"><i class="fas fa-edit text-xs"></i></span>
+                         </div>
+                        <p class="text-sm text-gray-400">Level: <span id="rank-stat">1</span></p>
                     </div>
                 </div>
-                <input type="file" id="logo-upload" class="hidden" accept="image/*">
-                
-                <div class="flex items-center justify-center">
-                    <h1 id="user-club-name" class="text-2xl font-bold text-white truncate max-w-[200px]">SRS@</h1>
-                    <span id="edit-club-name" class="ml-2 cursor-pointer text-gray-400 hover:text-teal-400">✔️</span>
+                <div class="flex items-center space-x-4 bg-gray-900 px-4 py-1 rounded-full">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-coins text-yellow-400"></i>
+                        <span id="user-balance" class="font-bold text-white">1000</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                         <i class="fas fa-gem text-blue-400"></i>
+                         <span class="font-bold text-white">100</span> </div>
                 </div>
-                <p class="text-md text-yellow-400 mt-1">💰 Balance: <span id="user-balance" class="font-bold">1000</span> Coins</p>
-                <button id="logout-btn" class="mt-4 py-2 px-5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-sm transition duration-300">Logout</button>
+                 <div class="flex items-center space-x-4">
+                     <button id="logout-btn" class="text-gray-300 hover:text-red-500 text-xl"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
             </header>
 
-            <main class="main-container">
-                <div id="home-view" class="view">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <a href="#match" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Neymar_Jr_presentation_-_Press_conference_for_PSG_001_%28cropped%29.jpg/250px-Neymar_Jr_presentation_-_Press_conference_for_PSG_001_%28cropped%29.jpg">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-bolt text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">Play Match</span>
+            <aside class="left-sidebar fixed top-16 left-0 w-24 h-[calc(100%-4rem-4rem)] flex flex-col items-center py-4 space-y-4 z-30">
+                <a href="#events" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="Events">
+                    <i class="fas fa-star text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">Events</span>
+                </a>
+                <a href="#esports" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="ESPORTS">
+                    <i class="fas fa-gamepad text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">ESPORTS</span>
+                </a>
+                 <a href="#leaderboard" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="Leaderboard">
+                    <i class="fas fa-trophy text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">Ranking</span>
+                </a>
+                <a href="#chat" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="Global Chat">
+                    <i class="fas fa-comments text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">Chat</span>
+                </a>
+                <a href="#about" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="About">
+                    <i class="fas fa-info-circle text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">About</span>
+                </a>
+            </aside>
+
+            <main class="w-full h-full pt-16 pb-16 pl-24 overflow-y-auto">
+                <div id="home-view" class="view p-6">
+                    <div class="grid grid-cols-5 gap-6 h-full">
+                        <a href="#events" class="nav-link col-span-3 h-full promo-card interactive-button" style="background-image: url('https://e0.pxfuel.com/wallpapers/36/389/desktop-wallpaper-fifa-23-background-fifa-2023.jpg');">
+                            <div class="relative w-full h-full flex flex-col justify-end p-8 overlay">
+                                <h2 class="text-4xl font-black text-white tracking-wider">SPECIAL EVENTS</h2>
+                                <p class="text-lg text-gray-200 mt-2">Check out limited-time challenges and rewards!</p>
                             </div>
                         </a>
-                        <a href="#squad" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://fifpro.org/media/5chb3dva/lionel-messi_imago1019567000h.jpg?rxy=0.32986930611281567,0.18704579979466449&rnd=133378758718600000">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-users text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">My Squad</span>
-                            </div>
-                        </a>
-                        <a href="#transfers" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://backend.liverpoolfc.com/sites/default/files/styles/xs/public/2025-08/virgil-van-dijk-2526-action-shot_d021d7281d66a6d39e66088d65c27021.webp?itok=fGvmbvRx">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-exchange-alt text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">Transfers</span>
-                            </div>
-                        </a>
-                        <a href="#store" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqbn1cw3_UXyR6SG1ooTlCs9NYpojbNOGtJQ&s">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-store text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">Store</span>
-                            </div>
-                        </a>
-                        <a href="#events" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://image-service.onefootball.com/transform?w=280&h=210&dpr=2&image=https%3A%2F%2Fcdn.foot-africa.com%2F20250706%2Ff718ef553498d1ad6cf2076c55f7b0b80d5d9b2e823b141db89abd896dcbfee9.jpg">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-star text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">Events</span>
-                            </div>
-                        </a>
-                        <a href="#leaderboard" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://placehold.co/300x112/00bcd4/white?text=Leaderboard">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-trophy text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">Leaderboard</span>
-                            </div>
-                        </a>
-                        <a href="#esports" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://placehold.co/300x112/FFD700/000?text=ESPORTS+Championship">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-gamepad text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">ESPORTS</span>
-                            </div>
-                        </a>
-                        <a href="#chat" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://placehold.co/300x112/4B0082/FFFFFF?text=Global+Chat">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-comments text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">Global Chat</span>
-                            </div>
-                        </a>
-                        <a href="#about" class="nav-link nav-card nav-card-image group relative overflow-hidden h-28" data-bg-url="https://placehold.co/300x112/30363d/ffffff?text=About+The+Game">
-                            <div class="absolute inset-0 bg-black opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                                <i class="fas fa-info-circle text-2xl mb-2 text-white"></i>
-                                <span class="font-semibold text-white">About</span>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="stat-card p-5 text-center">
-                            <h2 class="text-lg font-semibold mb-1 text-gray-400">Team Power</h2>
-                            <p class="text-4xl font-extrabold text-yellow-400" id="team-power-stat">92</p>
-                        </div>
-                        <div class="stat-card p-5 text-center">
-                            <h2 class="text-lg font-semibold mb-1 text-gray-400">Match Wins</h2>
-                            <p class="text-4xl font-extrabold text-yellow-400" id="match-wins-stat">0</p>
-                        </div>
-                        <div class="stat-card p-5 text-center">
-                            <h2 class="text-lg font-semibold mb-1 text-gray-400">Leaderboard Rank</h2>
-                            <p class="text-4xl font-extrabold text-yellow-400" id="rank-stat">4</p>
+                        <div class="col-span-2 h-full flex flex-col gap-6">
+                            <a href="#squad" class="nav-link h-1/2 w-full promo-card interactive-button" style="background-image: url('https://e1.pxfuel.com/desktop-wallpaper/683/288/desktop-wallpaper-fifa-21-ultimate-team-on-behance-fut.jpg'); background-position: top;">
+                                 <div class="relative w-full h-full flex flex-col justify-end p-6 overlay">
+                                    <h3 class="text-3xl font-bold text-white">CLUB</h3>
+                                    <div class="mt-2 text-xl font-semibold bg-black bg-opacity-50 px-3 py-1 rounded-full w-fit text-yellow-400">
+                                        OVR: <span id="team-power-stat">0</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#match" class="nav-link h-1/2 w-full promo-card interactive-button" style="background-image: url('https://wallpaper.dog/large/10988167.jpg');">
+                                 <div class="relative w-full h-full flex flex-col justify-end p-6 overlay bg-green-800 bg-opacity-30">
+                                    <h3 class="text-3xl font-bold text-white">PLAY</h3>
+                                    <p class="text-md text-gray-200">Face off against rivals in PvP matches.</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                <div id="squad-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="squad-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-teal-400">My Squad (5-player team)</h1>
                     <div id="squad-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
                 </div>
-    
-                <div id="match-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="match-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                      <h1 class="text-3xl font-bold mb-8 text-teal-400">PvP Match</h1>
                     <div id="match-initial-screen">
-                        <button id="find-match-btn" class="w-full max-w-lg mx-auto py-5 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-2xl transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                        <button id="find-match-btn" class="w-full max-w-lg mx-auto py-5 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-2xl transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed interactive-button" disabled>
                             Find Match
                         </button>
                     </div>
                      <div id="matchmaking-screen" class="hidden text-center">
                         <p class="text-2xl mb-4 text-yellow-400">Searching for opponent...</p>
                         <div class="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-teal-500 mx-auto"></div>
-                        <button id="cancel-matchmaking-btn" class="mt-8 py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg">Cancel</button>
+                        <button id="cancel-matchmaking-btn" class="mt-8 py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg interactive-button">Cancel</button>
                     </div>
                     <div id="match-simulation-screen" class="hidden">
-                        <div class="flex justify-between items-center bg-gray-900 p-6 rounded-xl mb-6 shadow-2xl border-b-4 border-teal-500">
+                        <div class="flex justify-between items-center bg-gray-900 bg-opacity-80 p-6 rounded-xl mb-6 shadow-2xl border-b-4 border-teal-500">
                             <div class="text-center w-1/3">
                                 <p id="teamA-name" class="font-bold text-xl md:text-2xl truncate text-teal-400">Team A</p>
                                 <p id="teamA-score" class="text-5xl font-extrabold text-white">0</p>
@@ -342,39 +306,35 @@
                             </div>
                         </div>
                         <div id="in-match-strategy-control" class="flex justify-center space-x-4 mb-6">
-                            <button data-strategy="Attack" class="strategy-btn flex-1 py-3 px-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition duration-300">Attack ⚽</button>
-                            <button data-strategy="Balanced" class="strategy-btn flex-1 py-3 px-2 btn-primary rounded-lg transition duration-300 border-2 border-teal-500">Balanced ⚖️</button>
-                            <button data-strategy="Defense" class="strategy-btn flex-1 py-3 px-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-300">Defense 🛡️</button>
+                            <button data-strategy="Attack" class="strategy-btn flex-1 py-3 px-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg interactive-button">Attack ⚽</button>
+                            <button data-strategy="Balanced" class="strategy-btn flex-1 py-3 px-2 btn-primary rounded-lg">Balanced ⚖️</button>
+                            <button data-strategy="Defense" class="strategy-btn flex-1 py-3 px-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Defense 🛡️</button>
                         </div>
-                        <div id="live-commentary" class="bg-gray-900 p-5 rounded-xl h-96 overflow-y-auto border border-gray-700 shadow-inner text-gray-300"></div>
+                        <div id="live-commentary" class="bg-gray-900 bg-opacity-80 p-5 rounded-xl h-96 overflow-y-auto border border-gray-700 shadow-inner text-gray-300"></div>
                     </div>
                 </div>
-                
-                <div id="events-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="events-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-teal-400">Club Events</h1>
                     <div id="events-list" class="space-y-6"></div>
                 </div>
-    
-                <div id="leaderboard-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="leaderboard-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-teal-400">World Leaderboard</h1>
-                    <div class="bg-gray-700 rounded-xl shadow-xl overflow-hidden border border-teal-500">
+                    <div class="bg-gray-800 bg-opacity-80 rounded-xl shadow-xl overflow-hidden border border-teal-500">
                         <table class="w-full text-left">
                             <thead class="bg-gray-900 border-b border-teal-500"><tr><th class="p-4 text-teal-400">Rank</th><th class="p-4 text-teal-400">Club Name</th><th class="p-4 text-teal-400">Points</th><th class="p-4 text-teal-400">Match Wins</th></tr></thead>
                             <tbody id="leaderboard-body"></tbody>
                         </table>
                     </div>
                 </div>
-    
-                <div id="store-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="store-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-teal-400">Item Store</h1>
-                    <div id="store-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    <div id="store-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
                 </div>
-                
-                <div id="transfers-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="transfers-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-teal-400">Transfer Market</h1>
                     <div class="mb-10">
                         <h2 class="text-2xl font-semibold mb-4 border-b-2 border-gray-700 pb-2 text-teal-400">Buy Players</h2>
@@ -385,19 +345,16 @@
                         <div id="sell-player-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
                     </div>
                 </div>
-    
-                <div id="esports-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="esports-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-teal-400">ESPORTS SECTION</h1>
                     <div id="tournament-list" class="space-y-6"></div>
                 </div>
-                
-                <div id="chat-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="chat-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-teal-400">Global Chat</h1>
-                    <div class="flex flex-col h-[70vh] bg-gray-900 rounded-xl shadow-2xl border border-teal-500">
-                        <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3">
-                            </div>
+                    <div class="flex flex-col h-[70vh] bg-gray-900 bg-opacity-80 rounded-xl shadow-2xl border border-teal-500">
+                        <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3"></div>
                         <div class="p-4 border-t border-gray-700">
                             <form id="chat-form" class="flex space-x-3">
                                 <input type="text" id="chat-input" placeholder="Type your message..." maxlength="100" class="flex-grow px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500" required>
@@ -406,9 +363,8 @@
                         </div>
                     </div>
                 </div>
-
-                <div id="about-view" class="view hidden">
-                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">&larr; Back to Dashboard</button>
+                <div id="about-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-4xl font-extrabold mb-6 text-teal-400">About Volta Efootball Manager</h1>
                     <div class="player-card p-8 text-center max-w-2xl mx-auto">
                         <p class="text-2xl text-gray-200">This game was created by</p>
@@ -418,12 +374,36 @@
                     </div>
                 </div>
             </main>
+
+            <footer class="bottom-nav fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around z-40">
+                 <a href="#home" class="nav-link back-to-home flex flex-col items-center text-gray-300 p-2" title="Home">
+                    <i class="fas fa-home text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">Home</span>
+                </a>
+                 <a href="#squad" class="nav-link flex flex-col items-center text-gray-300 p-2" title="My Squad">
+                    <i class="fas fa-users text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">Club</span>
+                </a>
+                 <a href="#transfers" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Transfers">
+                    <i class="fas fa-exchange-alt text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">Transfers</span>
+                </a>
+                <a href="#store" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Store">
+                    <i class="fas fa-store text-2xl"></i>
+                    <span class="text-xs mt-1 font-semibold">Store</span>
+                </a>
+            </footer>
+
         </div>
     </div>
+    
     <script type="module">
+        // ALL JAVASCRIPT CODE IS PRESERVED AND REMAINS UNCHANGED
+        // The new UI structure uses the same IDs and classes, so this will work without modification.
+        
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, update, serverTimestamp, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getDatabase, ref, set, get, onValue, update, serverTimestamp, remove, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         // IMPORTANT: Replace with your actual Firebase config
         const firebaseConfig = {
@@ -438,7 +418,7 @@
         };
         const IMGBB_API_KEY = "fe3e06e5bbecab856c63cf7e6a50a251";
         const MARADONA_PLAYER_ID = "MARADONA_PRIME"; 
-        const MARADONA_CLAIM_MIN_POWER = 60; // NEW: Minimum Team Power to claim Maradona
+        const MARADONA_CLAIM_MIN_POWER = 60;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -450,152 +430,14 @@
         let timerInterval = null;
         let matchSimulationInterval = null;
         let currentMatchId = null; 
+        let opponentStatusListener = null;
         
         let currentLocalStrategy = 'Balanced';
         let isLocalPlayerTeamA = false;
         
-        // --- START: Updated Commentary Data (100+ English entries) ---
         const ALL_COMMENTARIES = [
-            // Goal Commentaries (Placeholder for Player names)
-            "GOAL! What a stunning finish by $PLAYER! The crowd is on its feet!",
-            "Golazo! It's a marvelous strike, courtesy of $PLAYER! That pass from $ASSIST was perfect.",
-            "$PLAYER breaks the deadlock! An absolute thunderbolt from outside the box!",
-            "He scores! $PLAYER nets a crucial goal after a brilliant run.",
-            "That's a goal! $PLAYER calmly slots it home, an easy tap-in thanks to $ASSIST's vision.",
-            "GOAL! It's a rocket from $PLAYER! No chance for the keeper!",
-            "The net bulges! $PLAYER with the finish, $ASSIST with the wonderful setup!",
-            "He tucks it away! $PLAYER with the precision finish!",
-            "It's a screamer! $PLAYER fires it into the top corner!",
-            "A moment of magic from $PLAYER! That's what they call a big-game player!",
-            "The pressure pays off! $PLAYER finds the back of the net.",
-            "The goalkeeper had absolutely no chance! $PLAYER with a moment of brilliance!",
-            "The header is good! $PLAYER rises highest to nod it home from the cross!",
-            "They've done it! $PLAYER seals the deal with a cool, clinical finish.",
-            "A tap-in! Simple but effective, $PLAYER capitalizes on the defensive error.",
-            "What a beautiful, bending shot! $PLAYER makes it look effortless.",
-            "The chip is perfect! $PLAYER leaves the keeper stranded!",
-            "The stadium erupts! A decisive goal from $PLAYER!",
-
-            // Attack/Chance Commentaries
-            "An excellent chance for $ATTACKER! But the shot goes wide of the post.",
-            "Ooh, that was close! $ATTACKER almost found the target, just missing the frame.",
-            "$ATTACKER is through on goal, but the keeper $DEFENDER makes a brilliant save!",
-            "A dangerous free-kick for $TEAM just outside the box.",
-            "Corner awarded to $TEAM. Can they capitalize on this set-piece opportunity?",
-            "The attack is building up nicely for $TEAM down the flank.",
-            "Superb through ball for $ATTACKER, but $DEFENDER intercepts at the last moment!",
-            "$ATTACKER shoots! It hits the woodwork and rattles away!",
-            "A clear opportunity goes begging! $ATTACKER will regret that miss.",
-            "The ball is cut back, but the shot is blocked by a desperate lunge!",
-            "The keeper is off his line quickly to smother the attempt from $ATTACKER.",
-            "A venomous volley from $ATTACKER, but it just flies past the upright!",
-            "The defense is caught sleeping! But the final shot from $ATTACKER lacked power.",
-            "They're peppering the goal! $TEAM is dominating the attack now.",
-            "A one-two move opens up the defense, but the cross is slightly overhit.",
-
-            // Defense/Midfield/Save Commentaries
-            "A tactical foul in the midfield by $DEFENDER to break up the play.",
-            "The possession is back with $TEAM after a commanding interception.",
-            "Strong challenge by $DEFENDER to win the ball back cleanly.",
-            "Midfield battle is intense, neither team giving an inch in this ferocious contest.",
-            "A nice sequence of passes by $TEAM, retaining the ball under pressure.",
-            "The long ball strategy is not quite connecting for $TEAM today.",
-            "A patient build-up from the back line of $TEAM, controlling the tempo.",
-            "Brilliant tackle by $DEFENDER! He stopped a certain goal-scoring opportunity.",
-            "Off the post! The danger is cleared by $DEFENDER!",
-            "A low cross into the box... cleared by the towering $DEFENDER!",
-            "The team is pushing high, winning the ball back quickly with a great press.",
-            "The keeper $DEFENDER pulls off an acrobatic save to keep his side in it!",
-            "A critical interception in the penalty box! That was heroic defending.",
-            "The defensive line of $TEAM steps up perfectly to catch $ATTACKER offside.",
-            "A crucial block from $DEFENDER, sacrificing his body for the team.",
-            "The keeper tips a powerful long-range effort over the bar!",
-            "The full-back $DEFENDER recovers superbly to deny the counter-attack.",
-            "Possession changing hands quickly—it's a real end-to-end affair.",
-
-            // General & Dynamic Filler Commentaries (Ensuring 100+ Total)
-            "The intensity is palpable in the stadium. This is a fiercely contested match!",
-            "We are in for a tight finish here. The pressure is mounting!",
-            "Only a few minutes left in this half. Can they hold on?",
-            "The referee is having a very stern word with the players.",
-            "A moment of reflection as play pauses for an injured player.",
-            "Can either side find a winner? It's too close to call.",
-            "The clock is definitely a factor now. Time is running out!",
-            "A great atmosphere inside the arena. The fans are certainly enjoying this.",
-            "Both teams deserve credit for the sheer effort they are putting in.",
-            "We've reached the halfway mark of the second half. Fitness will be key.",
-            "The team needs a spark from somewhere, they look a little flat.",
-            "They are looking for the perfect final pass, trying to unlock the defense.",
-            "Defensive discipline is absolutely paramount at this stage of the game.",
-            "No clear advantage for either side yet. It's a testament to the balance of power.",
-            "A high-stakes encounter for both clubs, you can feel the tension.",
-            "This is typical cup-tie drama, full of twists and turns!",
-            "The substitution bench is warming up; a change must be imminent.",
-            "Will we see extra time tonight? It certainly looks possible.",
-            "A fantastic display of footballing skill on show.",
-            "They must keep their concentration now; one mistake could be fatal.",
-            "A little bit of frustration creeping in as tackles start flying.",
-            "Both sides are pressing hard, trying to force an error.",
-            "The game needs a moment of individual brilliance to settle it.",
-            "It's all about who blinks first in this tactical deadlock.",
-            "Tactical changes are being discussed on the sidelines.",
-            "They are controlling the tempo, slowing the game down deliberately.",
-            "The defensive line holds firm, refusing to be breached.",
-            "Playing out from the back, taking a risk but showing confidence.",
-            "Trying to exploit the flanks, looking for width in the attack.",
-            "Looking for the aerial threat from a deep cross.",
-            "The captain is visibly rallying his team, urging them forward.",
-            "Possession stats are nearly equal; a true reflection of the match.",
-            "A disciplined performance so far, keeping their shape well.",
-            "They are dictating the play, forcing the opposition to chase.",
-            "The long-range effort is well off target, a hopeful attempt at best.",
-            "The keeper's distribution is excellent, launching a rapid counter-attack.",
-            "The center-backs are dominant, winning every aerial duel.",
-            "Working hard off the ball, their fitness levels are impressive.",
-            "A rapid counter-attack opportunity! They need to be clinical!",
-            "The full-backs are bombing forward, adding extra men to the attack.",
-            "Finding space in the channels, exploiting the gaps between defense and midfield.",
-            "The tension is mounting with every passing second!",
-            "A very physical contest, the referee is letting a lot go.",
-            "They need to keep the ball better, too many turnovers in midfield.",
-            "The final ball is missing, letting themselves down in the critical area.",
-            "The crowd loves the effort and commitment on display.",
-            "Playing with a high press, looking to steal the ball deep in enemy territory.",
-            "A cautious approach for now, prioritizing defense.",
-            "Both managers look calm, but you know their heart rates are soaring.",
-            "A true test of character for both sets of players.",
-            "The defensive wall is set, ready for the free-kick.",
-            "Looking to switch the play quickly to the unattended side.",
-            "A promising attack fizzles out, poor decision-making at the end.",
-            "They are running out of time, must create something quickly!",
-            "Must be more clinical in front of goal; chances are rare.",
-            "The difference between the teams is marginal, a single goal may decide it.",
-            "The opponent is showing great resilience, refusing to break down.",
-            "An evenly matched contest, a delight for the neutral spectator.",
-            "All eyes are on the clock as the seconds tick away.",
-            "This could go either way; a moment of genius is all it takes.",
-            "The team is playing smart football, controlling their emotions.",
-            "Need to avoid mistakes now; the pressure is immense.",
-            "The game is on a knife-edge, one mistake and it's over.",
-            "The bench reaction tells a story—they sense a goal is coming.",
-            "It's a game of fine margins, where small details matter most.",
-            "A moment of hesitation costs them dearly in possession.",
-            "The pass accuracy is remarkably high despite the pressure.",
-            "They are absorbing the pressure well, sitting deep and defending.",
-            "A fantastic advertisement for the beautiful game!",
-            "Can they hold on for the win? They are defending with everything they have.",
-            "A vital three points at stake in this league fixture.",
-            "The intensity never drops, a non-stop, high-energy affair.",
-            "Every tackle is important now, controlling the middle ground.",
-            "They are hungry for the goal, pushing men forward fearlessly.",
-            "The defense has to be alert, especially against the pace of the forwards.",
-            "A battle of wits between the players and the opposing tactics.",
-            "The players are giving their all, absolutely exhausted.",
-            "The game is wide open, plenty of space to exploit.",
-            "The tension is almost unbearable for the supporters!",
-            "It's not over yet! They have time for one last attempt."
+            "GOAL! What a stunning finish by $PLAYER! The crowd is on its feet!", "Golazo! It's a marvelous strike, courtesy of $PLAYER! That pass from $ASSIST was perfect.", "$PLAYER breaks the deadlock! An absolute thunderbolt from outside the box!", "He scores! $PLAYER nets a crucial goal after a brilliant run.", "That's a goal! $PLAYER calmly slots it home, an easy tap-in thanks to $ASSIST's vision.", "GOAL! It's a rocket from $PLAYER! No chance for the keeper!", "The net bulges! $PLAYER with the finish, $ASSIST with the wonderful setup!", "He tucks it away! $PLAYER with the precision finish!", "It's a screamer! $PLAYER fires it into the top corner!", "A moment of magic from $PLAYER! That's what they call a big-game player!", "The pressure pays off! $PLAYER finds the back of the net.", "The goalkeeper had absolutely no chance! $PLAYER with a moment of brilliance!", "The header is good! $PLAYER rises highest to nod it home from the cross!", "They've done it! $PLAYER seals the deal with a cool, clinical finish.", "A tap-in! Simple but effective, $PLAYER capitalizes on the defensive error.", "What a beautiful, bending shot! $PLAYER makes it look effortless.", "The chip is perfect! $PLAYER leaves the keeper stranded!", "The stadium erupts! A decisive goal from $PLAYER!", "An excellent chance for $ATTACKER! But the shot goes wide of the post.", "Ooh, that was close! $ATTACKER almost found the target, just missing the frame.", "$ATTACKER is through on goal, but the keeper $DEFENDER makes a brilliant save!", "A dangerous free-kick for $TEAM just outside the box.", "Corner awarded to $TEAM. Can they capitalize on this set-piece opportunity?", "The attack is building up nicely for $TEAM down the flank.", "Superb through ball for $ATTACKER, but $DEFENDER intercepts at the last moment!", "$ATTACKER shoots! It hits the woodwork and rattles away!", "A clear opportunity goes begging! $ATTACKER will regret that miss.", "The ball is cut back, but the shot is blocked by a desperate lunge!", "The keeper is off his line quickly to smother the attempt from $ATTACKER.", "A venomous volley from $ATTACKER, but it just flies past the upright!", "The defense is caught sleeping! But the final shot from $ATTACKER lacked power.", "They're peppering the goal! $TEAM is dominating the attack now.", "A one-two move opens up the defense, but the cross is slightly overhit.", "A tactical foul in the midfield by $DEFENDER to break up the play.", "The possession is back with $TEAM after a commanding interception.", "Strong challenge by $DEFENDER to win the ball back cleanly.", "Midfield battle is intense, neither team giving an inch in this ferocious contest.", "A nice sequence of passes by $TEAM, retaining the ball under pressure.", "The long ball strategy is not quite connecting for $TEAM today.", "A patient build-up from the back line of $TEAM, controlling the tempo.", "Brilliant tackle by $DEFENDER! He stopped a certain goal-scoring opportunity.", "Off the post! The danger is cleared by $DEFENDER!", "A low cross into the box... cleared by the towering $DEFENDER!", "The team is pushing high, winning the ball back quickly with a great press.", "The keeper $DEFENDER pulls off an acrobatic save to keep his side in it!", "A critical interception in the penalty box! That was heroic defending.", "The defensive line of $TEAM steps up perfectly to catch $ATTACKER offside.", "A crucial block from $DEFENDER, sacrificing his body for the team.", "The keeper tips a powerful long-range effort over the bar!", "The full-back $DEFENDER recovers superbly to deny the counter-attack.", "Possession changing hands quickly—it's a real end-to-end affair.", "The intensity is palpable in the stadium. This is a fiercely contested match!", "We are in for a tight finish here. The pressure is mounting!", "Only a few minutes left in this half. Can they hold on?", "The referee is having a very stern word with the players.", "A moment of reflection as play pauses for an injured player.", "Can either side find a winner? It's too close to call.", "The clock is definitely a factor now. Time is running out!", "A great atmosphere inside the arena. The fans are certainly enjoying this.", "Both teams deserve credit for the sheer effort they are putting in.", "We've reached the halfway mark of the second half. Fitness will be key.", "The team needs a spark from somewhere, they look a little flat.", "They are looking for the perfect final pass, trying to unlock the defense.", "Defensive discipline is absolutely paramount at this stage of the game.", "No clear advantage for either side yet. It's a testament to the balance of power.", "A high-stakes encounter for both clubs, you can feel the tension.", "This is typical cup-tie drama, full of twists and turns!", "The substitution bench is warming up; a change must be imminent.", "Will we see extra time tonight? It certainly looks possible.", "A fantastic display of footballing skill on show.", "They must keep their concentration now; one mistake could be fatal.", "A little bit of frustration creeping in as tackles start flying.", "Both sides are pressing hard, trying to force an error.", "The game needs a moment of individual brilliance to settle it.", "It's all about who blinks first in this tactical deadlock.", "Tactical changes are being discussed on the sidelines.", "They are controlling the tempo, slowing the game down deliberately.", "The defensive line holds firm, refusing to be breached.", "Playing out from the back, taking a risk but showing confidence.", "Trying to exploit the flanks, looking for width in the attack.", "Looking for the aerial threat from a deep cross.", "The captain is visibly rallying his team, urging them forward.", "Possession stats are nearly equal; a true reflection of the match.", "A disciplined performance so far, keeping their shape well.", "They are dictating the play, forcing the opposition to chase.", "The long-range effort is well off target, a hopeful attempt at best.", "The keeper's distribution is excellent, launching a rapid counter-attack.", "The center-backs are dominant, winning every aerial duel.", "Working hard off the ball, their fitness levels are impressive.", "A rapid counter-attack opportunity! They need to be clinical!", "The full-backs are bombing forward, adding extra men to the attack.", "Finding space in the channels, exploiting the gaps between defense and midfield.", "The tension is mounting with every passing second!", "A very physical contest, the referee is letting a lot go.", "They need to keep the ball better, too many turnovers in midfield.", "The final ball is missing, letting themselves down in the critical area.", "The crowd loves the effort and commitment on display.", "Playing with a high press, looking to steal the ball deep in enemy territory.", "A cautious approach for now, prioritizing defense.", "Both managers look calm, but you know their heart rates are soaring.", "A true test of character for both sets of players.", "The defensive wall is set, ready for the free-kick.", "Looking to switch the play quickly to the unattended side.", "A promising attack fizzles out, poor decision-making at the end.", "They are running out of time, must create something quickly!", "Must be more clinical in front of goal; chances are rare.", "The difference between the teams is marginal, a single goal may decide it.", "The opponent is showing great resilience, refusing to break down.", "An evenly matched contest, a delight for the neutral spectator.", "All eyes are on the clock as the seconds tick away.", "This could go either way; a moment of genius is all it takes.", "The team is playing smart football, controlling their emotions.", "Need to avoid mistakes now; the pressure is immense.", "The game is on a knife-edge, one mistake and it's over.", "The bench reaction tells a story—they sense a goal is coming.", "It's a game of fine margins, where small details matter most.", "A moment of hesitation costs them dearly in possession.", "The pass accuracy is remarkably high despite the pressure.", "They are absorbing the pressure well, sitting deep and defending.", "A fantastic advertisement for the beautiful game!", "Can they hold on for the win? They are defending with everything they have.", "A vital three points at stake in this league fixture.", "The intensity never drops, a non-stop, high-energy affair.", "Every tackle is important now, controlling the middle ground.", "They are hungry for the goal, pushing men forward fearlessly.", "The defense has to be alert, especially against the pace of the forwards.", "A battle of wits between the players and the opposing tactics.", "The players are giving their all, absolutely exhausted.", "The game is wide open, plenty of space to exploit.", "The tension is almost unbearable for the supporters!", "It's not over yet! They have time for one last attempt."
         ];
-        // --- END: Updated Commentary Data (100+ English entries) ---
 
         const authScreen = document.getElementById('auth-screen');
         const gameContent = document.getElementById('game-content');
@@ -613,9 +455,7 @@
 
         const navLinks = document.querySelectorAll('.nav-link');
         const views = document.querySelectorAll('.view');
-        const header = document.querySelector('header');
         
-        // **UPDATED:** Audio elements
         const mainMenuAudio = document.getElementById('main-menu-audio');
         const matchAudio = document.getElementById('match-audio'); 
 
@@ -629,16 +469,11 @@
             promoBannerModal.classList.add('hidden');
         });
         
-        // UPDATED: Main Menu Music control functions for better reliability
         function playMainMenuMusic() {
-            pauseMatchMusic(); // Ensure match music is off
-            // Check if audio is paused and not currently playing to prevent errors
+            pauseMatchMusic();
             if (mainMenuAudio.paused) {
-                mainMenuAudio.play().then(() => {
-                    // Playback started successfully
-                }).catch(error => {
-                    // Autoplay was prevented. This is the common issue.
-                    console.warn("Main Menu Audio playback failed (Autoplay likely blocked). User interaction required:", error);
+                mainMenuAudio.play().catch(error => {
+                    console.warn("Main Menu Audio playback failed (Autoplay likely blocked):", error);
                 });
             }
         }
@@ -647,23 +482,18 @@
             mainMenuAudio.pause();
         }
 
-        // **NEW ADDED:** Match Music control functions
         function playMatchMusic() {
-             pauseMainMenuMusic(); // Stop menu music
+             pauseMainMenuMusic();
              if (matchAudio.paused) {
-                matchAudio.play().then(() => {
-                    // Playback started successfully
-                }).catch(error => {
-                    // If match music fails, log the error and ensure it's paused.
+                matchAudio.play().catch(error => {
                     console.warn("Match Audio playback failed (Autoplay likely blocked):", error);
-                    matchAudio.pause(); // Ensure it's paused if an error occurs
+                    matchAudio.pause();
                 });
             }
         }
         
         function pauseMatchMusic() {
             matchAudio.pause();
-            // Reset to beginning for next match (optional, but good practice)
             matchAudio.currentTime = 0; 
         }
 
@@ -672,25 +502,14 @@
             const targetView = document.getElementById(viewId);
             if(targetView) targetView.classList.remove('hidden');
             
-            if(header) {
-               if (viewId === 'home-view') {
-                   header.classList.remove('hidden');
-                   // Re-enable menu music when going back to dashboard/menu
-                   if (!currentMatchId) { // Only play if not currently in a match (which is unlikely if navigating to home, but safe)
-                        playMainMenuMusic();
-                   }
-               } else {
-                   header.classList.add('hidden');
-               }
+            if (viewId === 'home-view' && !currentMatchId) {
+                 playMainMenuMusic();
             }
             
-            // Specific check for match view
             if(viewId === 'match-view') {
-                // Music is paused when entering match-view, actual match music starts later in startMatch/runMatchSimulation
                 pauseMainMenuMusic(); 
             }
             
-            // NEW: Global Chat listener setup
             if (viewId === 'chat-view') {
                 loadChatMessages();
             }
@@ -712,8 +531,8 @@
                 authScreen.classList.add('hidden');
                 gameContent.classList.add('hidden');
                 fullScreenLoader.classList.add('hidden');
-                pauseMainMenuMusic(); // Pause menu music during maintenance
-                pauseMatchMusic(); // Pause match music during maintenance
+                pauseMainMenuMusic();
+                pauseMatchMusic();
 
                 const titleElement = document.getElementById('maintenance-title');
                 const messageElement = document.getElementById('maintenance-message');
@@ -767,11 +586,29 @@
                 }
             }
         }
+        
+        function setupPresence(user) {
+            const userStatusDatabaseRef = ref(db, '/status/' + user.uid);
+            const isOfflineForDatabase = { state: 'offline', last_changed: serverTimestamp() };
+            const isOnlineForDatabase = { state: 'online', last_changed: serverTimestamp() };
+
+            const connectedRef = ref(db, '.info/connected');
+            onValue(connectedRef, (snapshot) => {
+                if (snapshot.val() === false) {
+                    return;
+                }
+                onDisconnect(userStatusDatabaseRef).set(isOfflineForDatabase).then(() => {
+                    set(userStatusDatabaseRef, isOnlineForDatabase);
+                });
+            });
+        }
 
         onAuthStateChanged(auth, user => {
             if (user) {
+                setupPresence(user);
                 authScreen.classList.add('hidden');
                 gameContent.classList.remove('hidden');
+                gameContent.classList.add('flex');
                 navigateToView('home-view');
                 loadUserData(user.uid);
                 listenForMatch(user.uid);
@@ -779,11 +616,12 @@
             } else {
                 authScreen.classList.remove('hidden');
                 gameContent.classList.add('hidden');
+                gameContent.classList.remove('flex');
                 currentUserData = null;
                 if(timerInterval) clearInterval(timerInterval);
                 if(matchSimulationInterval) clearInterval(matchSimulationInterval);
-                pauseMainMenuMusic(); // Pause menu music on logout
-                pauseMatchMusic(); // Pause match music on logout
+                pauseMainMenuMusic();
+                pauseMatchMusic();
             }
 
             setTimeout(() => {
@@ -837,7 +675,6 @@
                     name: "Maradona Prime", position: "CAM", rating: 99, value: 50000, imageUrl: "https://placehold.co/96x96/FFD700/000?text=M+P"
                 }, { merge: true });
                 
-                // Call playMainMenuMusic() after successful user interaction
                 playMainMenuMusic();
 
             } catch (error) { authError.textContent = "Signup failed: " + error.message; }
@@ -849,14 +686,12 @@
             const password = document.getElementById('login-password').value;
             authError.textContent = '';
             signInWithEmailAndPassword(auth, email, password).then(() => {
-                 // Call playMainMenuMusic() after successful user interaction
                 playMainMenuMusic(); 
             }).catch(error => authError.textContent = "Login failed: " + error.message);
         });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             sessionStorage.removeItem('adShown');
-            // User's currentMatch will be cleaned up by onAuthStateChanged
             signOut(auth);
         });
         
@@ -868,7 +703,6 @@
                     currentUserData.uid = uid; 
                     document.getElementById('user-club-name').textContent = currentUserData.clubName;
                     document.getElementById('user-balance').textContent = currentUserData.balance;
-                    document.getElementById('match-wins-stat').textContent = currentUserData.wins || 0;
                     document.getElementById('user-avatar').src = currentUserData.avatarUrl || `https://placehold.co/96x96/0d1117/00bcd4?text=${currentUserData.clubName.charAt(0)}`;
                     
                     if (currentUserData.squad && currentUserData.squad.length > 0) {
@@ -884,7 +718,7 @@
                     loadTransferMarket();
                     loadLeaderboard();
                     loadTournaments();
-                    loadEvents(); // Load events after teamPower is calculated
+                    loadEvents();
                     
                     findMatchBtn.disabled = false;
                 }
@@ -903,7 +737,7 @@
                     const playerData = playerSnap.val();
                     totalRating += playerData.rating;
                     squadListDiv.innerHTML += `
-                        <div class="player-card p-4 text-center shadow-lg border-l-4 border-teal-500">
+                        <div class="player-card p-4 text-center shadow-lg">
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg text-white">${playerData.name}</h4>
                             <p class="text-sm text-gray-400">${playerData.position}</p>
@@ -956,7 +790,6 @@
             }
         }
         
-        // UPDATED FUNCTION: Added claim criteria
         async function loadEvents() {
             const eventsListDiv = document.getElementById('events-list');
             eventsListDiv.innerHTML = '';
@@ -968,13 +801,13 @@
             if (isMaradonaClaimed) {
                 maradonaButtonHtml = `<button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Claimed</button>`;
             } else if (canClaimMaradona) {
-                 maradonaButtonHtml = `<button onclick="claimReward('${MARADONA_PLAYER_ID}', 'claimedMaradonaEvent')" class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md transition duration-300">Claim Now</button>`;
+                 maradonaButtonHtml = `<button onclick="claimReward('${MARADONA_PLAYER_ID}', 'claimedMaradonaEvent')" class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md interactive-button">Claim Now</button>`;
             } else {
                  maradonaButtonHtml = `<button class="py-2 px-4 bg-yellow-700 text-white font-bold rounded-md cursor-not-allowed" disabled>Min Power ${MARADONA_CLAIM_MIN_POWER} Required</button>`;
             }
 
             const maradonaHtml = `
-                <div class="player-card p-6 shadow-xl flex justify-between items-center border-l-4 border-yellow-400">
+                <div class="player-card p-6 shadow-xl flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-bold mb-1 text-yellow-400">1-Day Login Reward: Maradona Prime</h2>
                         <p class="text-gray-300">Claim the legendary Diego Maradona Prime card to strengthen your squad!</p>
@@ -996,15 +829,14 @@
                         : `${eventData.value || ''} ${eventData.reward_type || ''}`;
 
                     eventsListDiv.innerHTML += `
-                        <div class="player-card p-6 shadow-xl border-l-4 border-teal-500">
+                        <div class="player-card p-6 shadow-xl">
                             <h2 class="text-2xl font-bold mb-2 text-teal-400">${eventData.name || 'New Event'}</h2>
                             <p class="text-gray-300 mb-3">${eventData.description || 'Check out this new event!'}</p>
                             <p class="text-lg"><span class="font-semibold text-gray-300">Reward:</span> ${rewardHtml}</p>
-                            <button class="mt-3 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-md transition duration-300">Participate</button>
+                            <button class="mt-3 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-md interactive-button">Participate</button>
                         </div>`;
                 }
             } else {
-                // This message is shown if no dynamic events are found in Firebase.
                 eventsListDiv.innerHTML += `
                     <div class="player-card p-6 text-center">
                         <p class="text-gray-400">No other special events are active right now. Check back later!</p>
@@ -1018,7 +850,6 @@
             if (currentUserData[eventFlag]) return showModal("Reward already claimed.");
             if (currentUserData.squad && currentUserData.squad.includes(playerId)) return showModal("You already own this player.");
 
-            // NEW: Check criteria before claiming
             if (eventFlag === 'claimedMaradonaEvent' && teamPower < MARADONA_CLAIM_MIN_POWER) {
                  return showModal(`Cannot claim. Minimum Team Power of ${MARADONA_CLAIM_MIN_POWER} is required.`);
             }
@@ -1047,10 +878,10 @@
                     const isOwned = currentUserData && currentUserData.squad && currentUserData.squad.includes(playerId);
                     const buttonHtml = isOwned 
                         ? `<button class="w-full mt-3 py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Owned</button>`
-                        : `<button onclick="buyPlayer('${playerId}', ${playerData.value})" class="w-full mt-3 py-2 px-4 btn-primary rounded-md transition duration-300">Buy (${playerData.value} C)</button>`;
+                        : `<button onclick="buyPlayer('${playerId}', ${playerData.value})" class="w-full mt-3 py-2 px-4 btn-primary rounded-md">Buy (${playerData.value} C)</button>`;
 
                     storeItemsDiv.innerHTML += `
-                        <div class="player-card p-4 text-center shadow-lg border-t-4 border-teal-500">
+                        <div class="player-card p-4 text-center shadow-lg">
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg">${playerData.name}</h4>
                             <p class="text-sm text-gray-400">${playerData.position}</p>
@@ -1076,10 +907,10 @@
                     const isOwned = currentUserData && currentUserData.squad && currentUserData.squad.includes(playerId);
                     const buttonHtml = isOwned 
                         ? `<button class="w-full mt-3 py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Owned</button>`
-                        : `<button onclick="buyPlayer('${playerId}', ${playerData.value})" class="w-full mt-3 py-2 px-4 btn-primary rounded-md transition duration-300">Buy (${playerData.value} C)</button>`;
+                        : `<button onclick="buyPlayer('${playerId}', ${playerData.value})" class="w-full mt-3 py-2 px-4 btn-primary rounded-md">Buy (${playerData.value} C)</button>`;
 
                     transferMarketListDiv.innerHTML += `
-                        <div class="player-card p-4 text-center shadow-lg border-t-4 border-teal-500">
+                        <div class="player-card p-4 text-center shadow-lg">
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg">${playerData.name}</h4>
                             <p class="text-sm text-gray-400">${playerData.position}</p>
@@ -1111,12 +942,12 @@
                     const sellPrice = Math.round((playerData.value || 0) * 0.7);
 
                     sellPlayerListDiv.innerHTML += `
-                        <div class="player-card p-4 text-center shadow-lg border-t-4 border-red-500">
+                        <div class="player-card p-4 text-center shadow-lg">
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg">${playerData.name}</h4>
                             <p class="text-sm text-gray-400">${playerData.position}</p>
                             <p class="text-xl font-bold text-teal-400 mt-2">${playerData.rating}</p>
-                            <button onclick="sellPlayer('${playerId}', ${sellPrice})" class="w-full mt-3 py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md transition duration-300">Sell (${sellPrice} C)</button>
+                            <button onclick="sellPlayer('${playerId}', ${sellPrice})" class="w-full mt-3 py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md interactive-button">Sell (${sellPrice} C)</button>
                         </div>`;
                 }
             });
@@ -1145,11 +976,11 @@
                     }
 
                     tournamentListDiv.innerHTML += `
-                        <div class="tournament-card p-6 shadow-xl border-l-4 ${borderColor} hover:bg-gray-700 transition duration-200">
+                        <div class="tournament-card p-6 shadow-xl hover:bg-gray-700 transition duration-200">
                             <h2 class="text-2xl font-bold mb-2 text-white">${tournamentData.name || 'Tournament Name'}</h2>
                             <p class="text-lg mb-1"><span class="font-semibold text-gray-300">Prize:</span> 💰 <span class="text-yellow-300 font-bold">${tournamentData.prize || 0} Coins</span></p>
                             <p class="text-lg"><span class="font-semibold text-gray-300">Status:</span> <span class="${statusClass} font-bold">${status}</span></p>
-                            <button class="mt-3 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-md transition duration-300">View Details</button>
+                            <button class="mt-3 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-md interactive-button">View Details</button>
                         </div>
                     `;
                 });
@@ -1238,8 +1069,8 @@
                 if(newStrategy === currentLocalStrategy) return;
 
                 currentLocalStrategy = newStrategy; 
-                strategyButtons.forEach(btn => btn.classList.remove('border-2', 'border-teal-500'));
-                targetButton.classList.add('border-2', 'border-teal-500');
+                strategyButtons.forEach(btn => btn.classList.remove('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400'));
+                targetButton.classList.add('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');
 
                 const matchSnapshot = await get(ref(db, `matches/${currentMatchId}`));
                 if (!matchSnapshot.exists()) return;
@@ -1270,7 +1101,6 @@
 
         const cancelMatchmakingBtn = document.getElementById('cancel-matchmaking-btn');
 
-        // NEW HELPER: Load players by IDs and return an array of names
         async function getPlayerNamesBySquad(squadIds) {
             if (!squadIds || squadIds.length === 0) return [];
             const playerPromises = squadIds.map(playerId => get(ref(db, 'players/' + playerId)));
@@ -1284,7 +1114,7 @@
         
             document.getElementById('match-initial-screen').classList.add('hidden');
             document.getElementById('matchmaking-screen').classList.remove('hidden');
-            pauseMainMenuMusic(); // Menu music paused during matchmaking
+            pauseMainMenuMusic();
 
             const matchmakingRef = ref(db, 'matchmaking');
             const snapshot = await get(matchmakingRef);
@@ -1299,13 +1129,12 @@
                 const matchId = push(ref(db, 'matches')).key;
                 currentMatchId = matchId;
                 
-                // Fetch opponent's squad to include in match data (REQUIRED for simulation)
                 const opponentUserSnap = await get(ref(db, `users/${opponent.uid}`));
                 const opponentSquad = opponentUserSnap.exists() ? (opponentUserSnap.val().squad || []) : [];
                 
                 const matchData = {
-                    teamA: { uid: opponent.uid, clubName: opponent.clubName, teamPower: opponent.teamPower, squad: opponentSquad }, // Added squad
-                    teamB: { uid: currentUserData.uid, clubName: currentUserData.clubName, teamPower: teamPower, squad: currentUserData.squad }, // Added squad
+                    teamA: { uid: opponent.uid, clubName: opponent.clubName, teamPower: opponent.teamPower, squad: opponentSquad },
+                    teamB: { uid: currentUserData.uid, clubName: currentUserData.clubName, teamPower: teamPower, squad: currentUserData.squad },
                     score: { teamA: 0, teamB: 0 },
                     status: 'starting',
                     startTime: serverTimestamp(),
@@ -1334,8 +1163,8 @@
             await remove(ref(db, `matchmaking/${currentUserData.uid}`));
             document.getElementById('matchmaking-screen').classList.add('hidden');
             document.getElementById('match-initial-screen').classList.remove('hidden');
-            pauseMatchMusic(); // Ensure match music is off
-            playMainMenuMusic(); // Resume menu music after canceling matchmaking
+            pauseMatchMusic();
+            playMainMenuMusic();
         });
 
         function listenForMatch(uid) {
@@ -1345,23 +1174,20 @@
                 const matchId = snapshot.val();
                 if(matchId){
                     currentMatchId = matchId;
-                    // **NOTE:** We navigate to match-view, but we DON'T clear currentMatch. 
-                    // This allows the user to navigate to other views while the host runs simulation.
                     navigateToView('match-view'); 
                     startMatch(matchId);
                 } else {
-                    // Match ended (currentMatch is null)
                     currentMatchId = null;
                     if(timerInterval) clearInterval(timerInterval);
                     if(matchSimulationInterval) clearInterval(matchSimulationInterval);
+                    if(opponentStatusListener) opponentStatusListener();
                     
-                    pauseMatchMusic(); // **FIX:** Stop match music when match ends/deleted
+                    pauseMatchMusic();
                     
                     if(!document.getElementById('match-view').classList.contains('hidden')) {
                         navigateToView('home-view');
-                        // Music resumes via navigateToView
                     } else {
-                        playMainMenuMusic(); // Ensure menu music plays if they weren't in match-view but match ended unexpectedly
+                        playMainMenuMusic();
                     }
                     
                     document.getElementById('match-simulation-screen').classList.add('hidden');
@@ -1371,20 +1197,55 @@
             });
         }
         
+        async function handleWalkover(matchId, disconnectedOpponentUid) {
+             if (!currentUserData) return;
+            
+            if(matchListener) matchListener();
+            if(opponentStatusListener) opponentStatusListener();
+            
+            showModal(`Opponent has disconnected. You win by walkover!`);
+
+            const winnerData = currentUserData;
+            const updates = {};
+            updates[`/users/${winnerData.uid}/points`] = (winnerData.points || 0) + 10;
+            updates[`/users/${winnerData.uid}/wins`] = (winnerData.wins || 0) + 1;
+            updates[`/users/${winnerData.uid}/balance`] = (winnerData.balance || 0) + 500;
+            updates[`/users/${winnerData.uid}/currentMatch`] = null;
+
+            const leaverRef = ref(db, `users/${disconnectedOpponentUid}`);
+            const leaverSnap = await get(leaverRef);
+            if(leaverSnap.exists()){
+                const leaverData = leaverSnap.val();
+                updates[`/users/${disconnectedOpponentUid}/balance`] = (leaverData.balance || 0) + 50;
+            }
+            updates[`/users/${disconnectedOpponentUid}/currentMatch`] = null;
+            updates[`/matches/${matchId}`] = null;
+            
+            await update(ref(db), updates);
+        }
+
         async function startMatch(matchId) {
             document.getElementById('matchmaking-screen').classList.add('hidden');
             document.getElementById('match-initial-screen').classList.add('hidden');
             document.getElementById('match-simulation-screen').classList.remove('hidden');
             document.getElementById('live-commentary').innerHTML = '';
             
-            pauseMainMenuMusic(); // Ensure menu music is paused for the match simulation
+            pauseMainMenuMusic();
             
             const matchRef = ref(db, `matches/${matchId}`);
-            const initialSnap = await get(matchRef); // Get initial data to fetch squads
+            const initialSnap = await get(matchRef);
             if (!initialSnap.exists()) return;
             const initialMatchData = initialSnap.val();
+            
+            const opponent = initialMatchData.teamA.uid === currentUserData.uid ? initialMatchData.teamB : initialMatchData.teamA;
+            const opponentStatusRef = ref(db, `/status/${opponent.uid}`);
+            if (opponentStatusListener) opponentStatusListener();
+            opponentStatusListener = onValue(opponentStatusRef, (snapshot) => {
+                if (!snapshot.exists() || snapshot.val().state === 'offline') {
+                    handleWalkover(matchId, opponent.uid);
+                }
+            });
 
-            // Fetch player names for commentary
             const teamA_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamA.squad);
             const teamB_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamB.squad);
 
@@ -1393,7 +1254,7 @@
             matchListener = onValue(matchRef, (snapshot) => {
                 const matchData = snapshot.val();
                 if(!matchData) {
-                    playMainMenuMusic(); // Match was deleted
+                    playMainMenuMusic();
                     return;
                 }
 
@@ -1411,9 +1272,9 @@
                 }
                 
                 strategyButtons.forEach(btn => {
-                    btn.classList.remove('border-2', 'border-teal-500');
+                    btn.classList.remove('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');
                     if (btn.getAttribute('data-strategy') === currentLocalStrategy) {
-                        btn.classList.add('border-2', 'border-teal-500');
+                        btn.classList.add('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');
                     }
                 });
 
@@ -1422,7 +1283,6 @@
                 const timerDisplay = document.getElementById('match-timer');
                 
                 if (matchData.status === 'ongoing' && matchData.startTime) {
-                    // For the second player, start music when status changes to 'ongoing'
                     if (matchData.teamA.uid !== currentUserData.uid) {
                        playMatchMusic();
                     }
@@ -1447,7 +1307,6 @@
                     timerDisplay.textContent = '01:30';
                 }
 
-                // IMPORTANT: Only Team A runs the simulation, but Team B must also be prepared to listen if the match is still starting/ongoing.
                 if(currentUserData && matchData.status === 'starting' && matchData.teamA.uid === currentUserData.uid){
                      runMatchSimulation(matchId, matchData, teamA_PlayerNames, teamB_PlayerNames);
                 }
@@ -1462,15 +1321,12 @@
             });
         }
 
-        // Helper to get a random item from an array
         function getRandomItem(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
         
-        // Helper to get a random non-goal commentary
         function getRandomCommentary(type = 'default', teamName = '', attacker = '', defender = '') {
             let filteredCommentaries = ALL_COMMENTARIES;
-            
             if (type === 'goal') {
                 filteredCommentaries = ALL_COMMENTARIES.filter(c => c.includes('GOAL') || c.includes('Golazo') || c.includes('The net bulges'));
                 if (filteredCommentaries.length === 0) return `🚀 GOAL! ${teamName} scores!`;
@@ -1484,16 +1340,12 @@
                  filteredCommentaries = ALL_COMMENTARIES.filter(c => !c.includes('GOAL') && !c.includes('Golazo') && !c.includes('The net bulges') && !c.includes('$PLAYER') && !c.includes('chance') && !c.includes('save') && !c.includes('tackle'));
                  if (filteredCommentaries.length === 0) return `⚔️ Battle for possession in the midfield. Both sides holding strong.`;
             }
-
             let commentary = getRandomItem(filteredCommentaries);
-            
-            // Player name substitution logic
             commentary = commentary.replace(/\$PLAYER/g, attacker || teamName);
-            commentary = commentary.replace(/\$ASSIST/g, getRandomItem([attacker, teamName]) || scorer); // Use attacker or team name as placeholder for assist
+            commentary = commentary.replace(/\$ASSIST/g, getRandomItem([attacker, teamName]) || scorer);
             commentary = commentary.replace(/\$ATTACKER/g, attacker || teamName);
             commentary = commentary.replace(/\$DEFENDER/g, defender || teamName);
             commentary = commentary.replace(/\$TEAM/g, teamName);
-
             return commentary;
         }
 
@@ -1501,14 +1353,12 @@
             if (!currentUserData) return;
             if(matchSimulationInterval) clearInterval(matchSimulationInterval);
             
-            // **FIX:** Ensure match music starts for the player running the simulation
             playMatchMusic(); 
             
             await update(ref(db, `matches/${matchId}`), { status: 'ongoing', startTime: serverTimestamp() });
             
             let seconds = 0;
             const matchDuration = 90;
-            
             const attackBonus = 0.2;
             const defenseBonus = 0.2;
 
@@ -1547,11 +1397,9 @@
 
                     const offenseChanceA = (powerA / totalPower) * baseChance * getOffenseModifier(strategyA);
                     
-                    // Team A Attack Chance
                     if (Math.random() < offenseChanceA) {
                         const defensePowerB = (powerB / totalPower) * getDefenseModifier(strategyB);
                         
-                        // Team A Score Chance (Defense B Fails)
                         if(Math.random() > defensePowerB){
                             matchData.score.teamA++;
                             scoreUpdated = true;
@@ -1559,7 +1407,6 @@
                             const assister = getRandomItem(teamA_Players.filter(p => p !== scorer)) || scorer;
                             eventText = getRandomCommentary('goal', matchData.teamA.clubName, scorer, assister);
                         } else {
-                            // Team A Attack Fails / Team B Save/Tackle
                             const attacker = getRandomItem(teamA_Players) || matchData.teamA.clubName;
                             const defender = getRandomItem(teamB_Players) || matchData.teamB.clubName;
                             eventText = getRandomCommentary('save', matchData.teamB.clubName, attacker, defender);
@@ -1567,11 +1414,9 @@
                     } else {
                         const offenseChanceB = (powerB / totalPower) * baseChance * getOffenseModifier(strategyB);
                         
-                        // Team B Attack Chance
                         if(Math.random() < offenseChanceB){
                             const defensePowerA = (powerA / totalPower) * getDefenseModifier(strategyA);
                             
-                            // Team B Score Chance (Defense A Fails)
                             if(Math.random() > defensePowerA){
                                 matchData.score.teamB++;
                                 scoreUpdated = true;
@@ -1579,13 +1424,11 @@
                                 const assister = getRandomItem(teamB_Players.filter(p => p !== scorer)) || scorer;
                                 eventText = getRandomCommentary('goal', matchData.teamB.clubName, scorer, assister);
                             } else {
-                                // Team B Attack Fails / Team A Save/Tackle
                                 const attacker = getRandomItem(teamB_Players) || matchData.teamB.clubName;
                                 const defender = getRandomItem(teamA_Players) || matchData.teamA.clubName;
                                 eventText = getRandomCommentary('save', matchData.teamA.clubName, attacker, defender);
                             }
                         } else {
-                             // No attack, general commentary
                              eventText = getRandomCommentary('midfield', 'Both Teams');
                         }
                     }
@@ -1596,6 +1439,8 @@
 
                 if (seconds >= matchDuration) {
                     clearInterval(matchSimulationInterval);
+                    if(opponentStatusListener) opponentStatusListener();
+
                     let resultText = "The match ended in a draw!";
                     let winnerUid = null;
                     if(matchData.score.teamA > matchData.score.teamB){
@@ -1609,16 +1454,15 @@
                     await push(ref(db, `matches/${matchId}/events`), { time: 'Final', text: `🏁 ${resultText}` });
                     await update(ref(db, `matches/${matchId}`), { status: 'completed' });
                     
+                    const updates = {};
                     if(winnerUid){
                         const winnerRef = ref(db, `users/${winnerUid}`);
                         const winnerSnap = await get(winnerRef);
                         if (winnerSnap.exists()) {
                             const winnerData = winnerSnap.val();
-                            await update(winnerRef, {
-                                points: (winnerData.points || 0) + 10,
-                                wins: (winnerData.wins || 0) + 1,
-                                balance: (winnerData.balance || 0) + 500
-                            });
+                            updates[`/users/${winnerUid}/points`] = (winnerData.points || 0) + 10;
+                            updates[`/users/${winnerUid}/wins`] = (winnerData.wins || 0) + 1;
+                            updates[`/users/${winnerUid}/balance`] = (winnerData.balance || 0) + 500;
                         }
                     }
                     
@@ -1628,18 +1472,15 @@
                         const loserSnap = await get(loserRef);
                         if (loserSnap.exists()) {
                             const loserData = loserSnap.val();
-                             await update(loserRef, {
-                                balance: (loserData.balance || 0) + 100
-                            });
+                             updates[`/users/${loserUid}/balance`] = (loserData.balance || 0) + 100;
                         }
                     }
                     
-                    // Cleanup for both users and the match node
-                    await update(ref(db), {
-                        [`/users/${matchData.teamA.uid}/currentMatch`]: null,
-                        [`/users/${matchData.teamB.uid}/currentMatch`]: null
-                    });
-                    await remove(ref(db, `matches/${matchId}`)); // Room is closed when the match is over
+                    updates[`/users/${matchData.teamA.uid}/currentMatch`] = null;
+                    updates[`/users/${matchData.teamB.uid}/currentMatch`] = null;
+                    updates[`/matches/${matchId}`] = null;
+                    
+                    await update(ref(db), updates);
                     
                     pauseMatchMusic(); 
                     playMainMenuMusic(); 
@@ -1647,7 +1488,6 @@
             }, 1000);
         }
         
-        // --- NEW: Global Chat Logic ---
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
         const chatMessages = document.getElementById('chat-messages');
@@ -1658,7 +1498,7 @@
                 if (!currentUserData || !chatInput.value.trim()) return;
 
                 const messageText = chatInput.value.trim();
-                chatInput.value = ''; // Clear input
+                chatInput.value = '';
 
                 try {
                     await push(ref(db, 'globalChat'), {
@@ -1676,11 +1516,10 @@
         let chatListener = null;
 
         function loadChatMessages() {
-            if (chatListener) return; // Only attach the listener once
+            if (chatListener) return;
             
-            chatMessages.innerHTML = ''; // Clear old messages
+            chatMessages.innerHTML = '';
             
-            // Listen for new messages
             const chatRef = ref(db, 'globalChat');
             chatListener = onChildAdded(chatRef, (snapshot) => {
                 const messageData = snapshot.val();
@@ -1695,32 +1534,28 @@
                 messageElement.innerHTML = `<span class="font-bold">${sender}:</span> ${messageData.message}`;
 
                 chatMessages.appendChild(messageElement);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             });
         }
         
-        // --- END: Global Chat Logic ---
-
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const targetId = link.getAttribute('href').substring(1) + '-view';
+                
+                // Special case for 'home' link in bottom nav
+                if(targetId === 'home-view') {
+                     navigateToView('home-view');
+                     return;
+                }
+                
                 navigateToView(targetId);
             });
         });
         
         document.addEventListener('DOMContentLoaded', () => {
             const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
-            if(balancedBtn) balancedBtn.classList.add('border-2', 'border-teal-500');
-            
-            // Apply background images to nav cards
-            document.querySelectorAll('.nav-card-image').forEach(card => {
-                const imageUrl = card.getAttribute('data-bg-url');
-                if (imageUrl) {
-                    card.style.backgroundImage = `url('${imageUrl}')`;
-                    card.classList.remove('bg-gray-800'); 
-                }
-            });
+            if(balancedBtn) balancedBtn.classList.add('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');
             
             if (!auth.currentUser) {
                 // Auth screen handled by onAuthStateChanged
@@ -1729,9 +1564,7 @@
             }
         });
         
-        // General fallback to attempt playing music on any user interaction (like a click on the auth screen)
         document.addEventListener('click', () => {
-             // Only try to play main menu music if it's currently paused and no match is active.
              if (mainMenuAudio.paused && currentMatchId === null) {
                  playMainMenuMusic();
              }

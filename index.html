@@ -31,7 +31,7 @@
             filter: brightness(0.4); 
         }
 
-        .nav-card, .stat-card, .player-card, .tournament-card {
+        .nav-card, .stat-card, .player-card, .tournament-card, .mission-card, .reward-item {
             background: linear-gradient(135deg, rgba(14, 51, 26, 0.85), rgba(22, 79, 45, 0.9)); /* Greenish Gradient */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 255, 153, 0.4); /* Greenish Border */
@@ -40,7 +40,7 @@
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
         }
 
-        .nav-card:hover, .stat-card:hover, .player-card:hover, .tournament-card:hover {
+        .nav-card:hover, .stat-card:hover, .player-card:hover, .tournament-card:hover, .mission-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(50, 255, 150, 0.5); /* Enhanced Glow on Hover */
             border-color: #39ff14; /* Neon green accent on hover */
@@ -115,6 +115,56 @@
             border-radius: 4px;
             transition: width 0.5s ease-in-out;
         }
+        /* Season Pass Progress Bar */
+        .season-pass-progress-container {
+            background-color: #2c3a47;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444;
+            padding: 4px;
+        }
+        #season-pass-progress-fill {
+            height: 1rem;
+            background: linear-gradient(to right, #a855f7, #ec4899);
+            border-radius: 6px;
+            transition: width 0.5s ease-in-out;
+        }
+        .tab-button.active {
+            background-color: #00c5a4;
+            color: white;
+            border-bottom-color: #39ff14;
+        }
+
+        /* In-match emoji reaction */
+        #emoji-reaction-container {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            z-index: 50;
+        }
+        #emoji-panel {
+            background-color: rgba(13, 17, 23, 0.9);
+            border: 1px solid #39ff14;
+            border-radius: 10px;
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+        }
+        .emoji { cursor: pointer; font-size: 24px; transition: transform 0.1s; }
+        .emoji:hover { transform: scale(1.2); }
+        .reaction-display {
+             position: absolute;
+             bottom: 150px;
+             left: 50%;
+             transform: translateX(-50%);
+             font-size: 4rem;
+             animation: fade-up-out 2s forwards;
+             text-shadow: 0 0 10px #000;
+        }
+        @keyframes fade-up-out {
+            0% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100px); opacity: 0; }
+        }
 
     </style>
 </head>
@@ -166,6 +216,27 @@
                 <button id="modal-close-btn" class="btn-primary py-2 px-6 rounded">OK</button>
             </div>
         </div>
+        <!-- Payment Modal -->
+        <div id="payment-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md text-left border border-purple-500 relative">
+                <button id="payment-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-2xl font-bold text-purple-400 mb-4">Purchase Premium Season Pass (99 BDT)</h2>
+                <div class="space-y-4 text-gray-300">
+                    <p>1. Choose a payment method: <span class="font-bold text-white">bKash, Nagad, or Rocket</span>.</p>
+                    <p>2. Use the "Send Money" option to send 99 BDT to the following number:</p>
+                    <div class="bg-gray-800 p-3 rounded-lg text-center">
+                        <p class="text-xl font-mono tracking-widest text-green-400">01767882562</p>
+                    </div>
+                    <p>3. After sending the money, copy the Transaction ID (TnxID) from the confirmation message.</p>
+                    <p>4. Enter the Transaction ID below and submit for verification.</p>
+                </div>
+                <form id="payment-form" class="mt-6 space-y-4">
+                    <input id="transaction-id-input" type="text" placeholder="Enter Transaction ID (TnxID)" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <button type="submit" class="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg interactive-button">Submit Transaction</button>
+                </form>
+            </div>
+        </div>
+
         <div id="auth-screen" class="w-full h-full flex items-center justify-center bg-gray-900 hidden">
             <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-xl shadow-2xl border border-green-500">
                 <div>
@@ -218,7 +289,7 @@
                     </div>
                     <div class="flex items-center space-x-2">
                          <i class="fas fa-gem text-blue-400"></i>
-                         <span class="font-bold text-white">100</span>
+                         <span id="user-gems" class="font-bold text-white">100</span>
                     </div>
                 </div>
                  <div class="flex items-center space-x-4">
@@ -227,6 +298,7 @@
             </header>
 
             <aside class="left-sidebar fixed top-16 left-0 w-24 h-[calc(100%-4rem-4rem)] flex flex-col items-center py-4 space-y-4 z-30">
+                <a href="#season-pass" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="Season Pass"><i class="fas fa-ticket-alt text-2xl"></i><span class="text-xs mt-1 font-semibold">Season Pass</span></a>
                 <a href="#events" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="Events"><i class="fas fa-star text-2xl"></i><span class="text-xs mt-1 font-semibold">Events</span></a>
                 <a href="#esports" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="ESPORTS"><i class="fas fa-gamepad text-2xl"></i><span class="text-xs mt-1 font-semibold">ESPORTS</span></a>
                 <a href="#leaderboard" class="nav-link flex flex-col items-center text-gray-300 w-full py-2" title="Leaderboard"><i class="fas fa-trophy text-2xl"></i><span class="text-xs mt-1 font-semibold">Ranking</span></a>
@@ -267,7 +339,7 @@
                     <h1 class="text-3xl font-bold mb-8 text-green-400">My Squad (5-player team)</h1>
                     <div id="squad-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
                 </div>
-                <div id="match-view" class="view hidden p-6">
+                <div id="match-view" class="view hidden p-6 relative">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                      <h1 class="text-3xl font-bold mb-8 text-green-400">PvP Match</h1>
                     <div id="match-initial-screen">
@@ -281,6 +353,7 @@
                         <button id="cancel-matchmaking-btn" class="mt-8 py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg interactive-button">Cancel</button>
                     </div>
                     <div id="match-simulation-screen" class="hidden">
+                         <div id="reaction-display-area" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"></div>
                         <div class="flex justify-between items-center bg-gray-900 bg-opacity-80 p-6 rounded-xl mb-6 shadow-2xl border-b-4 border-green-500">
                             <div class="text-center w-1/3"><p id="teamA-name" class="font-bold text-xl md:text-2xl truncate text-green-400">Team A</p><p id="teamA-score" class="text-5xl font-extrabold text-white">0</p></div>
                             <div class="text-center"><p id="match-timer" class="text-3xl font-mono text-yellow-400 bg-gray-700 px-4 py-2 rounded">01:30</p></div>
@@ -292,6 +365,17 @@
                             <button data-strategy="Defense" class="strategy-btn flex-1 py-3 px-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Defense 🛡️</button>
                         </div>
                         <div id="live-commentary" class="bg-gray-900 bg-opacity-80 p-5 rounded-xl h-96 overflow-y-auto border border-gray-700 shadow-inner text-gray-300"></div>
+                         <!-- Emoji Reaction System -->
+                        <div id="emoji-reaction-container">
+                             <div id="emoji-panel" class="hidden mb-2">
+                                <span class="emoji" data-emoji="👍">👍</span>
+                                <span class="emoji" data-emoji="😂">😂</span>
+                                <span class="emoji" data-emoji="😡">😡</span>
+                                <span class="emoji" data-emoji="⚽">⚽</span>
+                                <span class="emoji" data-emoji="🔥">🔥</span>
+                            </div>
+                            <button id="emoji-toggle-btn" class="w-14 h-14 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center text-3xl interactive-button">😀</button>
+                        </div>
                     </div>
                 </div>
                 <div id="events-view" class="view hidden p-6">
@@ -299,6 +383,57 @@
                     <h1 class="text-3xl font-bold mb-8 text-green-400">Club Events</h1>
                     <div id="events-list" class="space-y-6"></div>
                 </div>
+                <!-- Season Pass View -->
+                <div id="season-pass-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-purple-400">Season Pass</h1>
+                        <button id="buy-premium-pass-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg interactive-button shadow-lg disabled:bg-gray-500 disabled:cursor-not-allowed">
+                            Premium Pass (99 BDT)
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mb-8">
+                        <div class="flex justify-between items-end mb-2">
+                            <div class="text-lg">Level: <span id="sp-current-level" class="font-bold text-xl text-purple-300">1</span></div>
+                            <div class="text-sm text-gray-400"><span id="sp-current-xp">0</span> / <span id="sp-needed-xp">100</span> XP</div>
+                        </div>
+                        <div class="season-pass-progress-container">
+                            <div id="season-pass-progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <p class="text-right text-sm mt-1 text-gray-500">Season ends in: <span id="season-end-timer">60d 0h 0m</span></p>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="flex border-b-2 border-gray-700 mb-6">
+                        <button id="missions-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent active">Missions</button>
+                        <button id="rewards-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">Rewards</button>
+                    </div>
+
+                    <!-- Missions Content -->
+                    <div id="missions-content">
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-semibold mb-4 text-green-400 border-b-2 border-gray-700 pb-2">Daily Missions</h2>
+                            <div id="daily-missions-list" class="space-y-4"></div>
+                        </div>
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-semibold mb-4 text-green-400 border-b-2 border-gray-700 pb-2">Weekly Missions</h2>
+                            <div id="weekly-missions-list" class="space-y-4"></div>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-semibold mb-4 text-green-400 border-b-2 border-gray-700 pb-2">Seasonal Missions</h2>
+                            <div id="seasonal-missions-list" class="space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Rewards Content -->
+                    <div id="rewards-content" class="hidden">
+                        <p class="text-center text-gray-400">View and claim your rewards as you level up!</p>
+                        <div id="rewards-track-list" class="mt-6 space-y-4"></div>
+                    </div>
+                </div>
+
                 <div id="leaderboard-view" class="view hidden p-6">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-green-400">World Leaderboard</h1>
@@ -345,7 +480,7 @@
                         <p class="text-2xl text-gray-200">This game was created by</p>
                         <h2 class="text-5xl font-bold my-4 text-green-300 tracking-wider">SWAMPOD & MITHUN</h2>
                         <div class="border-t border-gray-600 my-8"></div>
-                        <p class="mt-4 text-lg text-gray-400">Version: <span class="font-bold text-yellow-400">0.2</span></p>
+                        <p class="mt-4 text-lg text-gray-400">Version: <span class="font-bold text-yellow-400">0.3</span></p>
                     </div>
                 </div>
             </main>
@@ -354,15 +489,14 @@
                  <a href="#home" class="nav-link back-to-home flex flex-col items-center text-gray-300 p-2" title="Home"><i class="fas fa-home text-2xl"></i><span class="text-xs mt-1 font-semibold">Home</span></a>
                  <a href="#squad" class="nav-link flex flex-col items-center text-gray-300 p-2" title="My Squad"><i class="fas fa-users text-2xl"></i><span class="text-xs mt-1 font-semibold">Club</span></a>
                  <a href="#transfers" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Transfers"><i class="fas fa-exchange-alt text-2xl"></i><span class="text-xs mt-1 font-semibold">Transfers</span></a>
-                <a href="#store" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Store"><i class="fas fa-store text-2xl"></i><span class="text-xs mt-1 font-semibold">Store</span></a>
+                 <a href="#store" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Store"><i class="fas fa-store text-2xl"></i><span class="text-xs mt-1 font-semibold">Store</span></a>
+                 <a href="#season-pass" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Season Pass"><i class="fas fa-ticket-alt text-2xl"></i><span class="text-xs mt-1 font-semibold">Season Pass</span></a>
             </footer>
 
         </div>
     </div>
     
     <script type="module">
-        // ALL JAVASCRIPT CODE IS PRESERVED AND ENHANCED WITH NEW FEATURES
-        
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getDatabase, ref, set, get, onValue, update, serverTimestamp, remove, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -398,6 +532,7 @@
         let matchSimulationInterval = null;
         let currentMatchId = null; 
         let opponentStatusListener = null;
+        let reactionListener = null;
         
         let currentLocalStrategy = 'Balanced';
         let isLocalPlayerTeamA = false;
@@ -418,6 +553,11 @@
         
         const promoBannerModal = document.getElementById('promo-banner-modal');
         const promoCloseBtn = document.getElementById('promo-close-btn');
+
+        const paymentModal = document.getElementById('payment-modal');
+        const buyPremiumPassBtn = document.getElementById('buy-premium-pass-btn');
+        const paymentCloseBtn = document.getElementById('payment-close-btn');
+        const paymentForm = document.getElementById('payment-form');
         
         const strategyButtons = document.querySelectorAll('#in-match-strategy-control .strategy-btn');
 
@@ -478,6 +618,9 @@
             
             if (viewId === 'chat-view') {
                 loadChatMessages();
+            }
+             if (viewId === 'season-pass-view') {
+                loadSeasonPassData();
             }
         }
         
@@ -631,15 +774,12 @@
                 const startingSquad = shuffledPlayers.slice(0, 5);
 
                 await set(ref(db, 'users/' + user.uid), {
-                    email: email, clubName: clubName, balance: 1000, points: 0, wins: 0, 
+                    email: email, clubName: clubName, balance: 1000, gems: 100, points: 0, wins: 0, 
                     squad: startingSquad, avatarUrl: `https://placehold.co/96x96/0d1117/00bcd4?text=${clubName.charAt(0)}`, 
                     claimedMaradonaEvent: false,
-                    isBanned: false, // Default isBanned status
-                    // New Leveling System Fields
-                    level: 1,
-                    xp: 0,
-                    matchesPlayedThisLevel: 0,
-                    matchesNeededForLevelUp: BASE_MATCHES_FOR_LEVEL_UP
+                    isBanned: false, 
+                    level: 1, xp: 0, matchesPlayedThisLevel: 0, matchesNeededForLevelUp: BASE_MATCHES_FOR_LEVEL_UP,
+                    seasonPass: { level: 1, xp: 0, premium: false }
                 });
                 
                 await set(ref(db, 'players/' + MARADONA_PLAYER_ID), {
@@ -671,17 +811,14 @@
                     currentUserData = snapshot.val();
                     currentUserData.uid = uid;
 
-                    // Ban Check
                     if (currentUserData.isBanned) {
                         gameContent.classList.add('hidden');
                         bannedScreen.classList.remove('hidden');
                         pauseMainMenuMusic();
                         pauseMatchMusic();
-                        return; // Stop loading the rest of the game UI
+                        return; 
                     } else {
                         bannedScreen.classList.add('hidden');
-                        
-                        // Only navigate to home view on initial load
                         if (gameContent.classList.contains('hidden')) {
                             gameContent.classList.remove('hidden');
                             gameContent.classList.add('flex');
@@ -691,9 +828,9 @@
                     
                     document.getElementById('user-club-name').textContent = currentUserData.clubName;
                     document.getElementById('user-balance').textContent = currentUserData.balance;
+                    document.getElementById('user-gems').textContent = currentUserData.gems || 0;
                     document.getElementById('user-avatar').src = currentUserData.avatarUrl || `https://placehold.co/96x96/0d1117/00bcd4?text=${currentUserData.clubName.charAt(0)}`;
                     
-                    // Update Level and XP Bar
                     document.getElementById('user-level').textContent = currentUserData.level || 1;
                     const matchesPlayed = currentUserData.matchesPlayedThisLevel || 0;
                     const matchesNeeded = currentUserData.matchesNeededForLevelUp || BASE_MATCHES_FOR_LEVEL_UP;
@@ -1054,6 +1191,7 @@
                     if(timerInterval) clearInterval(timerInterval);
                     if(matchSimulationInterval) clearInterval(matchSimulationInterval);
                     if(opponentStatusListener) opponentStatusListener();
+                    if(reactionListener) reactionListener();
                     pauseMatchMusic();
                     if(!document.getElementById('match-view').classList.contains('hidden')) { navigateToView('home-view'); } 
                     else { playMainMenuMusic(); }
@@ -1070,29 +1208,26 @@
             if(opponentStatusListener) { opponentStatusListener(); opponentStatusListener = null; }
             if(timerInterval) clearInterval(timerInterval);
             if(matchSimulationInterval) clearInterval(matchSimulationInterval);
+            if(reactionListener) reactionListener();
             
-            // This function ensures that the current user (who is still in the game) is declared the winner.
             showModal(`Opponent Disconnected! You win the match by walkover. Rewards have been added.`);
             
             const updates = {};
             const winnerData = currentUserData; 
             
-            // Apply WIN rewards to the current user
             updates[`/users/${winnerData.uid}/points`] = (winnerData.points || 0) + 10;
             updates[`/users/${winnerData.uid}/wins`] = (winnerData.wins || 0) + 1;
             updates[`/users/${winnerData.uid}/balance`] = (winnerData.balance || 0) + 500;
             await updatePlayerStatsAfterMatch(winnerData.uid, "win");
 
-            // Apply LOSS penalties/rewards to the disconnected opponent
             const leaverRef = ref(db, `users/${disconnectedOpponentUid}`);
             const leaverSnap = await get(leaverRef);
             if(leaverSnap.exists()){
                 const leaverData = leaverSnap.val();
-                updates[`/users/${disconnectedOpponentUid}/balance`] = (leaverData.balance || 0) + 50; // Consolation prize
+                updates[`/users/${disconnectedOpponentUid}/balance`] = (leaverData.balance || 0) + 50;
                 await updatePlayerStatsAfterMatch(disconnectedOpponentUid, "loss");
             }
 
-            // Clean up match from both users' profiles and the main matches node
             updates[`/users/${winnerData.uid}/currentMatch`] = null;
             updates[`/users/${disconnectedOpponentUid}/currentMatch`] = null;
             updates[`/matches/${matchId}`] = null;
@@ -1116,7 +1251,6 @@
             const opponentStatusRef = ref(db, `/status/${opponent.uid}`);
             if (opponentStatusListener) opponentStatusListener();
             opponentStatusListener = onValue(opponentStatusRef, (snapshot) => {
-                // If opponent data disappears or state is offline, trigger walkover
                 if (!snapshot.exists() || snapshot.val().state === 'offline') {
                     handleWalkover(matchId, opponent.uid);
                 }
@@ -1173,6 +1307,15 @@
                 commentaryBox.innerHTML += `<p class="mb-2 text-sm">${event.time}: ${event.text}</p>`;
                 commentaryBox.scrollTop = commentaryBox.scrollHeight;
             });
+            
+            const reactionRef = ref(db, `matches/${matchId}/reactions`);
+            if(reactionListener) reactionListener();
+            reactionListener = onChildAdded(reactionRef, (snapshot) => {
+                const { emoji, senderId } = snapshot.val();
+                if(senderId !== currentUserData.uid) {
+                    displayReaction(emoji);
+                }
+            });
         }
 
         function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -1195,7 +1338,6 @@
             const userData = snapshot.val();
             const updates = {};
 
-            // Calculate XP
             let xpGained = 0;
             if (result === 'win') xpGained = XP_PER_WIN;
             else if (result === 'draw') xpGained = XP_PER_DRAW;
@@ -1203,7 +1345,6 @@
             
             updates.xp = (userData.xp || 0) + xpGained;
 
-            // Handle Leveling Up
             let currentMatchesPlayed = (userData.matchesPlayedThisLevel || 0) + 1;
             let currentMatchesNeeded = userData.matchesNeededForLevelUp || BASE_MATCHES_FOR_LEVEL_UP;
             let currentLevel = userData.level || 1;
@@ -1273,6 +1414,7 @@
                 if (seconds >= matchDuration) {
                     clearInterval(matchSimulationInterval);
                     if(opponentStatusListener) opponentStatusListener();
+                    if(reactionListener) reactionListener();
 
                     let resultText = "The match ended in a draw!", winnerUid = null, loserUid = null;
                     if(matchData.score.teamA > matchData.score.teamB){
@@ -1295,7 +1437,6 @@
                         await updatePlayerStatsAfterMatch(matchData.teamB.uid, "draw");
                     }
                     
-                    // Standard updates for points and balance
                     if(winnerUid) {
                          const winnerSnap = await get(ref(db, `users/${winnerUid}`));
                          if(winnerSnap.exists()) { const d = winnerSnap.val(); updates[`/users/${winnerUid}/points`] = (d.points||0)+10; updates[`/users/${winnerUid}/wins`]=(d.wins||0)+1; updates[`/users/${winnerUid}/balance`]=(d.balance||0)+500; }
@@ -1348,6 +1489,177 @@
             });
         }
         
+        // --- SEASON PASS LOGIC ---
+        const missionsTab = document.getElementById('missions-tab');
+        const rewardsTab = document.getElementById('rewards-tab');
+        const missionsContent = document.getElementById('missions-content');
+        const rewardsContent = document.getElementById('rewards-content');
+
+        missionsTab.addEventListener('click', () => {
+            missionsTab.classList.add('active');
+            rewardsTab.classList.remove('active');
+            missionsContent.classList.remove('hidden');
+            rewardsContent.classList.add('hidden');
+        });
+
+        rewardsTab.addEventListener('click', () => {
+            rewardsTab.classList.add('active');
+            missionsTab.classList.remove('active');
+            rewardsContent.classList.remove('hidden');
+            missionsContent.classList.add('hidden');
+        });
+
+        async function loadSeasonPassData() {
+            if (!currentUserData) return;
+
+            const sp = currentUserData.seasonPass || { level: 1, xp: 0, premium: false };
+            const seasonConfigSnap = await get(ref(db, 'seasonPass/config'));
+            if (!seasonConfigSnap.exists()) return;
+            const config = seasonConfigSnap.val();
+            
+            // Update UI
+            document.getElementById('sp-current-level').textContent = sp.level;
+            document.getElementById('sp-current-xp').textContent = sp.xp;
+            document.getElementById('sp-needed-xp').textContent = config.xpPerLevel || 100;
+            const progressPercentage = (sp.xp / (config.xpPerLevel || 100)) * 100;
+            document.getElementById('season-pass-progress-fill').style.width = `${progressPercentage}%`;
+            
+            if (sp.premium) {
+                buyPremiumPassBtn.textContent = 'Premium Activated';
+                buyPremiumPassBtn.disabled = true;
+            } else {
+                buyPremiumPassBtn.textContent = 'Premium Pass (99 BDT)';
+                buyPremiumPassBtn.disabled = false;
+            }
+
+            // Load Missions
+            loadMissions(config.missions);
+            // Load Rewards
+            loadRewards(config.rewards, sp);
+        }
+
+        function loadMissions(missions) {
+            const dailyList = document.getElementById('daily-missions-list');
+            const weeklyList = document.getElementById('weekly-missions-list');
+            const seasonalList = document.getElementById('seasonal-missions-list');
+            dailyList.innerHTML = weeklyList.innerHTML = seasonalList.innerHTML = ''; // Clear lists
+
+            for(const missionId in missions) {
+                const mission = missions[missionId];
+                const missionHtml = `<div class="mission-card p-4 flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold text-white">${mission.description}</p>
+                        <p class="text-sm text-gray-400">Reward: ${mission.xpReward} XP</p>
+                    </div>
+                    <button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Claim</button>
+                </div>`;
+
+                if (mission.type === 'daily') dailyList.innerHTML += missionHtml;
+                else if (mission.type === 'weekly') weeklyList.innerHTML += missionHtml;
+                else if (mission.type === 'seasonal') seasonalList.innerHTML += missionHtml;
+            }
+             if(!dailyList.innerHTML) dailyList.innerHTML = `<p class="text-gray-500 text-center">No daily missions available.</p>`;
+             if(!weeklyList.innerHTML) weeklyList.innerHTML = `<p class="text-gray-500 text-center">No weekly missions available.</p>`;
+             if(!seasonalList.innerHTML) seasonalList.innerHTML = `<p class="text-gray-500 text-center">No seasonal missions available.</p>`;
+        }
+        
+        function loadRewards(rewards, userSP) {
+            const rewardsList = document.getElementById('rewards-track-list');
+            rewardsList.innerHTML = '';
+            
+            for(const level in rewards) {
+                const levelRewards = rewards[level];
+                
+                const freeRewardHtml = levelRewards.free ? `<div class="reward-item p-3 w-1/2 text-center ${userSP.level >= level ? 'border-green-400' : 'border-gray-600 opacity-60'}">
+                    <p class="font-bold">${levelRewards.free.name}</p><p class="text-sm text-gray-300">Free</p>
+                    </div>` : `<div class="w-1/2 p-3 text-center text-gray-600">--</div>`;
+                
+                const premiumRewardHtml = levelRewards.premium ? `<div class="reward-item p-3 w-1/2 text-center ${userSP.premium ? (userSP.level >= level ? 'border-purple-400' : 'border-gray-600 opacity-60') : 'border-gray-600 opacity-40'}">
+                    <p class="font-bold text-purple-300">${levelRewards.premium.name}</p><p class="text-sm text-purple-400">Premium</p>
+                    </div>` : `<div class="w-1/2 p-3 text-center text-gray-600">--</div>`;
+
+                rewardsList.innerHTML += `
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 flex items-center justify-center bg-gray-800 rounded-full font-bold text-xl ${userSP.level >= level ? 'text-purple-400 border-2 border-purple-400' : 'text-gray-500'}">
+                           ${level}
+                        </div>
+                        <div class="flex-grow flex gap-2">
+                           ${freeRewardHtml}
+                           ${premiumRewardHtml}
+                        </div>
+                    </div>`;
+            }
+        }
+
+        buyPremiumPassBtn.addEventListener('click', () => {
+            paymentModal.classList.remove('hidden');
+        });
+        paymentCloseBtn.addEventListener('click', () => {
+            paymentModal.classList.add('hidden');
+        });
+        paymentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserData) return showModal("User data not loaded.");
+            
+            const tnxIdInput = document.getElementById('transaction-id-input');
+            const tnxId = tnxIdInput.value.trim();
+            if (!tnxId) return showModal("Please enter a valid Transaction ID.");
+
+            const transactionData = {
+                transactionId: tnxId,
+                userId: currentUserData.uid,
+                clubName: currentUserData.clubName,
+                amount: 99,
+                timestamp: serverTimestamp(),
+                status: 'pending_verification' // Status for manual check
+            };
+            
+            try {
+                await push(ref(db, 'premiumPassTransactions'), transactionData);
+                tnxIdInput.value = '';
+                paymentModal.classList.add('hidden');
+                showModal('Transaction submitted! Your premium pass will be activated after manual verification. Thank you!');
+            } catch (error) {
+                showModal("Failed to submit transaction: " + error.message);
+            }
+        });
+        
+        // --- EMOJI REACTION LOGIC ---
+        const emojiToggleBtn = document.getElementById('emoji-toggle-btn');
+        const emojiPanel = document.getElementById('emoji-panel');
+        const emojis = document.querySelectorAll('.emoji');
+        const reactionDisplayArea = document.getElementById('reaction-display-area');
+
+        emojiToggleBtn.addEventListener('click', () => {
+            emojiPanel.classList.toggle('hidden');
+        });
+
+        emojis.forEach(emoji => {
+            emoji.addEventListener('click', async () => {
+                if (!currentMatchId || !currentUserData) return;
+                const emojiToSend = emoji.getAttribute('data-emoji');
+                
+                displayReaction(emojiToSend); // Show locally immediately
+                emojiPanel.classList.add('hidden');
+                
+                // Send to opponent
+                const reactionRef = ref(db, `matches/${currentMatchId}/reactions`);
+                await push(reactionRef, { emoji: emojiToSend, senderId: currentUserData.uid });
+            });
+        });
+
+        function displayReaction(emoji) {
+            const reactionEl = document.createElement('div');
+            reactionEl.className = 'reaction-display';
+            reactionEl.textContent = emoji;
+            reactionDisplayArea.appendChild(reactionEl);
+            
+            // Clean up the element after the animation
+            setTimeout(() => {
+                reactionEl.remove();
+            }, 2000);
+        }
+
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1370,3 +1682,4 @@
     </script>
 </body>
 </html>
+

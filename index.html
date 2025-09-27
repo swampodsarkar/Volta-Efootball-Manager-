@@ -680,9 +680,13 @@
                         return; // Stop loading the rest of the game UI
                     } else {
                         bannedScreen.classList.add('hidden');
-                        gameContent.classList.remove('hidden');
-                        gameContent.classList.add('flex');
-                        navigateToView('home-view');
+                        
+                        // Only navigate to home view on initial load
+                        if (gameContent.classList.contains('hidden')) {
+                            gameContent.classList.remove('hidden');
+                            gameContent.classList.add('flex');
+                            navigateToView('home-view');
+                        }
                     }
                     
                     document.getElementById('user-club-name').textContent = currentUserData.clubName;

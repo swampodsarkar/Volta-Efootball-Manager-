@@ -154,6 +154,12 @@
                 <p id="maintenance-message" class="text-lg text-gray-300">The game is on maintenance, will back shortly.</p>
             </div>
         </div>
+        <div id="banned-screen" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="text-center p-8 bg-gray-800 rounded-lg shadow-xl border border-red-500">
+                <h2 class="text-3xl font-bold text-red-400 mb-4">🚫 You are Banned</h2>
+                <p class="text-lg text-gray-300">Please contact support for assistance: <a href="mailto:voltaefootball@gmail.com" class="text-green-400 hover:underline">voltaefootball@gmail.com</a></p>
+            </div>
+        </div>
         <div id="custom-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
             <div class="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-sm text-center border border-green-500">
                 <p id="modal-message" class="text-lg mb-4"></p>
@@ -403,6 +409,7 @@
         const authScreen = document.getElementById('auth-screen');
         const gameContent = document.getElementById('game-content');
         const maintenanceModeDiv = document.getElementById('maintenance-mode');
+        const bannedScreen = document.getElementById('banned-screen');
         const modal = document.getElementById('custom-modal');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -490,6 +497,7 @@
                 authScreen.classList.add('hidden');
                 gameContent.classList.add('hidden');
                 fullScreenLoader.classList.add('hidden');
+                bannedScreen.classList.add('hidden');
                 pauseMainMenuMusic();
                 pauseMatchMusic();
 
@@ -564,16 +572,14 @@
             if (user) {
                 setupPresence(user);
                 authScreen.classList.add('hidden');
-                gameContent.classList.remove('hidden');
-                gameContent.classList.add('flex');
-                navigateToView('home-view');
+                // Game content visibility will be handled by loadUserData after the ban check
                 loadUserData(user.uid);
                 listenForMatch(user.uid);
                 loadAndShowPromoBanner(); 
             } else {
                 authScreen.classList.remove('hidden');
                 gameContent.classList.add('hidden');
-                gameContent.classList.remove('flex');
+                bannedScreen.classList.add('hidden');
                 currentUserData = null;
                 if(timerInterval) clearInterval(timerInterval);
                 if(matchSimulationInterval) clearInterval(matchSimulationInterval);
@@ -628,6 +634,7 @@
                     email: email, clubName: clubName, balance: 1000, points: 0, wins: 0, 
                     squad: startingSquad, avatarUrl: `https://placehold.co/96x96/0d1117/00bcd4?text=${clubName.charAt(0)}`, 
                     claimedMaradonaEvent: false,
+                    isBanned: false, // Default isBanned status
                     // New Leveling System Fields
                     level: 1,
                     xp: 0,
@@ -649,9 +656,7 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             authError.textContent = '';
-            signInWithEmailAndPassword(auth, email, password).then(() => {
-                playMainMenuMusic(); 
-            }).catch(error => authError.textContent = "Login failed: " + error.message);
+            signInWithEmailAndPassword(auth, email, password).catch(error => authError.textContent = "Login failed: " + error.message);
         });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
@@ -664,7 +669,22 @@
             onValue(userRef, async (snapshot) => {
                 if (snapshot.exists()) {
                     currentUserData = snapshot.val();
-                    currentUserData.uid = uid; 
+                    currentUserData.uid = uid;
+
+                    // Ban Check
+                    if (currentUserData.isBanned) {
+                        gameContent.classList.add('hidden');
+                        bannedScreen.classList.remove('hidden');
+                        pauseMainMenuMusic();
+                        pauseMatchMusic();
+                        return; // Stop loading the rest of the game UI
+                    } else {
+                        bannedScreen.classList.add('hidden');
+                        gameContent.classList.remove('hidden');
+                        gameContent.classList.add('flex');
+                        navigateToView('home-view');
+                    }
+                    
                     document.getElementById('user-club-name').textContent = currentUserData.clubName;
                     document.getElementById('user-balance').textContent = currentUserData.balance;
                     document.getElementById('user-avatar').src = currentUserData.avatarUrl || `https://placehold.co/96x96/0d1117/00bcd4?text=${currentUserData.clubName.charAt(0)}`;

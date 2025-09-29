@@ -821,6 +821,7 @@
                     </div>
                 </div>
                  <div class="flex items-center space-x-4">
+                     <button id="header-settings-btn" class="text-gray-300 hover:text-green-400 text-xl"><i class="fas fa-cog"></i></button>
                      <button id="logout-btn" class="text-gray-300 hover:text-red-500 text-xl"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </header>
@@ -921,9 +922,17 @@
                     <div id="match-simulation-screen" class="hidden">
                          <div id="reaction-display-area" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"></div>
                         <div class="flex justify-between items-center bg-gray-900 bg-opacity-80 p-6 rounded-xl mb-6 shadow-2xl border-b-4 border-green-500">
-                            <div class="text-center w-1/3"><p id="teamA-name" class="font-bold text-xl md:text-2xl truncate text-green-400">Team A</p><p id="teamA-score" class="text-5xl font-extrabold text-white">0</p></div>
+                            <div class="flex flex-col items-center w-1/3">
+                                <img id="teamA-avatar" src="https://placehold.co/60x60/161b22/FFFFFF?text=A" alt="Team A Logo" class="w-12 h-12 rounded-full border-2 border-green-500 object-cover mb-2">
+                                <p id="teamA-name" class="font-bold text-xl md:text-2xl truncate text-green-400">Team A</p>
+                                <p id="teamA-score" class="text-5xl font-extrabold text-white">0</p>
+                            </div>
                             <div class="text-center"><p id="match-timer" class="text-3xl font-mono text-yellow-400 bg-gray-700 px-4 py-2 rounded">01:30</p></div>
-                            <div class="text-center w-1/3"><p id="teamB-name" class="font-bold text-xl md:text-2xl truncate text-green-400">Team B</p><p id="teamB-score" class="text-5xl font-extrabold text-white">0</p></div>
+                            <div class="flex flex-col items-center w-1/3">
+                                <img id="teamB-avatar" src="https://placehold.co/60x60/161b22/FFFFFF?text=B" alt="Team B Logo" class="w-12 h-12 rounded-full border-2 border-green-500 object-cover mb-2">
+                                <p id="teamB-name" class="font-bold text-xl md:text-2xl truncate text-green-400">Team B</p>
+                                <p id="teamB-score" class="text-5xl font-extrabold text-white">0</p>
+                            </div>
                         </div>
                         <div id="in-match-strategy-control" class="flex justify-center space-x-4 mb-6">
                             <button data-strategy="Attack" class="strategy-btn flex-1 py-3 px-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg interactive-button">Attack ⚽</button>
@@ -2486,13 +2495,34 @@
 
             if(matchListener) matchListener(); 
             
-            matchListener = onValue(matchRef, (snapshot) => {
+            matchListener = onValue(matchRef, async (snapshot) => {
                 const matchData = snapshot.val();
                 if(!matchData) { playMainMenuMusic(); return; }
                 document.getElementById('teamA-name').textContent = matchData.teamA.clubName;
                 document.getElementById('teamB-name').textContent = matchData.teamB.clubName;
                 document.getElementById('teamA-score').textContent = matchData.score.teamA;
                 document.getElementById('teamB-score').textContent = matchData.score.teamB;
+                
+                // Load team avatars
+                if (matchData.teamA.uid !== 'ai_opponent') {
+                    const teamAUserSnap = await get(ref(db, `users/${matchData.teamA.uid}`));
+                    if (teamAUserSnap.exists()) {
+                        const teamAData = teamAUserSnap.val();
+                        document.getElementById('teamA-avatar').src = teamAData.avatarUrl || `https://placehold.co/60x60/161b22/FFFFFF?text=${teamAData.clubName.charAt(0)}`;
+                    }
+                } else {
+                    document.getElementById('teamA-avatar').src = 'https://placehold.co/60x60/161b22/FFFFFF?text=AI';
+                }
+                
+                if (matchData.teamB.uid !== 'ai_opponent') {
+                    const teamBUserSnap = await get(ref(db, `users/${matchData.teamB.uid}`));
+                    if (teamBUserSnap.exists()) {
+                        const teamBData = teamBUserSnap.val();
+                        document.getElementById('teamB-avatar').src = teamBData.avatarUrl || `https://placehold.co/60x60/161b22/FFFFFF?text=${teamBData.clubName.charAt(0)}`;
+                    }
+                } else {
+                    document.getElementById('teamB-avatar').src = 'https://placehold.co/60x60/161b22/FFFFFF?text=AI';
+                }
                 
                 isLocalPlayerTeamA = currentUserData.uid === matchData.teamA.uid;
                 currentLocalStrategy = isLocalPlayerTeamA ? matchData.teamAStrategy : matchData.teamBStrategy;
@@ -3573,6 +3603,12 @@
         const settingsCloseBtn2 = document.getElementById('settings-close-btn-2');
         
         settingsBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openSettingsModal();
+        });
+        
+        // Add event listener for the settings button in the header
+        document.getElementById('header-settings-btn').addEventListener('click', () => {
             if (!currentUserData) return;
             openSettingsModal();
         });
@@ -4808,13 +4844,15 @@
              if (mainMenuAudio.paused && currentMatchId === null) { playMainMenuMusic(); }
         }, { once: true }); 
 
-    </script>
-</body>
-</html>        }, { once: true }); 
-
-    </script>
-</body>
-</html></html>        }, { once: true }); 
+        document.addEventListener('DOMContentLoaded', () => {
+            const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
+            if(balancedBtn) balancedBtn.classList.add('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');
+            if (!auth.currentUser) {} else { navigateToView('home-view'); }
+        });
+        
+        document.addEventListener('click', () => {
+             if (mainMenuAudio.paused && currentMatchId === null) { playMainMenuMusic(); }
+        }, { once: true }); 
 
     </script>
 </body>

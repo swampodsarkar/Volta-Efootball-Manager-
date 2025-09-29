@@ -165,6 +165,15 @@
             0% { transform: translate(-50%, 0); opacity: 1; }
             100% { transform: translate(-50%, -100px); opacity: 0; }
         }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
 
         /* Player attribute bars */
         .attribute-bar {
@@ -934,6 +943,23 @@
                                 <p id="teamB-score" class="text-5xl font-extrabold text-white">0</p>
                             </div>
                         </div>
+                        
+                        <!-- In-Match Chat -->
+                        <div id="in-match-chat" class="bg-gray-900 bg-opacity-80 rounded-xl mb-6 border border-gray-700 shadow-inner hidden">
+                            <div class="flex justify-between items-center p-3 border-b border-gray-700">
+                                <h3 class="text-lg font-bold text-green-400">Match Chat</h3>
+                                <button id="toggle-chat-btn" class="text-gray-400 hover:text-white">
+                                    <i class="fas fa-chevron-up"></i>
+                                </button>
+                            </div>
+                            <div id="in-match-chat-messages" class="h-32 overflow-y-auto p-3 text-sm"></div>
+                            <div class="p-3 border-t border-gray-700">
+                                <form id="in-match-chat-form" class="flex space-x-2">
+                                    <input type="text" id="in-match-chat-input" placeholder="Type a message..." class="flex-grow px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm" maxlength="100">
+                                    <button type="submit" class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Send</button>
+                                </form>
+                            </div>
+                        </div>
                         <div id="in-match-strategy-control" class="flex justify-center space-x-4 mb-6">
                             <button data-strategy="Attack" class="strategy-btn flex-1 py-3 px-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg interactive-button">Attack ⚽</button>
                             <button data-strategy="Balanced" class="strategy-btn flex-1 py-3 px-2 btn-primary rounded-lg">Balanced ⚖️</button>
@@ -951,6 +977,24 @@
                                 <span class="emoji" data-emoji="🔥">🔥</span>
                             </div>
                             <button id="emoji-toggle-btn" class="w-14 h-14 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center text-3xl interactive-button">😀</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Victory Screen -->
+                    <div id="victory-screen" class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
+                        <div class="text-center">
+                            <h1 class="text-6xl md:text-8xl font-extrabold text-green-400 mb-6 animate-bounce">VICTORY!</h1>
+                            <p class="text-2xl text-white mb-8">Congratulations on your win!</p>
+                            <button id="back-to-main-menu-btn" class="py-3 px-8 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-xl interactive-button">Back to Main Menu</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Defeat Screen -->
+                    <div id="defeat-screen" class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
+                        <div class="text-center">
+                            <h1 class="text-6xl md:text-8xl font-extrabold text-red-500 mb-6 animate-pulse">DEFEAT!</h1>
+                            <p class="text-2xl text-white mb-8">Better luck next time!</p>
+                            <button id="back-to-main-menu-defeat-btn" class="py-3 px-8 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xl interactive-button">Back to Main Menu</button>
                         </div>
                     </div>
                 </div>
@@ -2547,7 +2591,18 @@
                         if (remaining <= 0) { clearInterval(timerInterval); timerDisplay.textContent = '00:00'; } 
                         else { timerDisplay.textContent = `${Math.floor(remaining / 60).toString().padStart(2, '0')}:${(remaining % 60).toString().padStart(2, '0')}`; }
                     }, 1000);
-                } else if (matchData.status === 'completed') { timerDisplay.textContent = '00:00 (FT)'; } 
+                } else if (matchData.status === 'completed') { 
+                    timerDisplay.textContent = '00:00 (FT)'; 
+                    // Hide victory/defeat screens if match is completed but user didn't win/lose
+                    const victoryScreen = document.getElementById('victory-screen');
+                    if (victoryScreen && !victoryScreen.classList.contains('hidden')) {
+                        victoryScreen.classList.add('hidden');
+                    }
+                    const defeatScreen = document.getElementById('defeat-screen');
+                    if (defeatScreen && !defeatScreen.classList.contains('hidden')) {
+                        defeatScreen.classList.add('hidden');
+                    }
+                } 
                 else { timerDisplay.textContent = '01:30'; }
 
                 if(currentUserData && matchData.status === 'starting' && (matchData.teamA.uid === currentUserData.uid || matchData.isSinglePlayer)){
@@ -2576,6 +2631,9 @@
                     displayReaction(emoji);
                 }
             });
+            
+            // Set up in-match chat
+            setupInMatchChat(matchId);
         }
 
         function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -2635,6 +2693,40 @@
             // Track season pass missions if this is the current user
             if (uid === currentUserData?.uid) {
                 trackMatchMissions(result);
+            }
+        }
+        
+        // Show victory screen with animation
+        function showVictoryScreen() {
+            const victoryScreen = document.getElementById('victory-screen');
+            if (victoryScreen) {
+                victoryScreen.classList.remove('hidden');
+                
+                // Add back to main menu button functionality
+                const backToMainMenuBtn = document.getElementById('back-to-main-menu-btn');
+                if (backToMainMenuBtn) {
+                    backToMainMenuBtn.addEventListener('click', () => {
+                        victoryScreen.classList.add('hidden');
+                        navigateToView('home-view');
+                    });
+                }
+            }
+        }
+        
+        // Show defeat screen with animation
+        function showDefeatScreen() {
+            const defeatScreen = document.getElementById('defeat-screen');
+            if (defeatScreen) {
+                defeatScreen.classList.remove('hidden');
+                
+                // Add back to main menu button functionality
+                const backToMainMenuDefeatBtn = document.getElementById('back-to-main-menu-defeat-btn');
+                if (backToMainMenuDefeatBtn) {
+                    backToMainMenuDefeatBtn.addEventListener('click', () => {
+                        defeatScreen.classList.add('hidden');
+                        navigateToView('home-view');
+                    });
+                }
             }
         }
 
@@ -2706,6 +2798,13 @@
                     } else if (matchData.score.teamB > matchData.score.teamA){
                         winnerUid = matchData.teamB.uid; loserUid = matchData.teamA.uid;
                         resultText = `${matchData.teamB.clubName} wins the match!`;
+                    }
+                    
+                    // Show victory/defeat screen based on match result
+                    if (winnerUid === currentUserData.uid) {
+                        showVictoryScreen();
+                    } else if (loserUid === currentUserData.uid) {
+                        showDefeatScreen();
                     }
 
                     await push(ref(db, `matches/${matchId}/events`), { time: 'Final', text: `🏁 ${resultText}` });
@@ -3092,6 +3191,77 @@
             setTimeout(() => {
                 reactionEl.remove();
             }, 2000);
+        }
+        
+        // Set up in-match chat
+        function setupInMatchChat(matchId) {
+            // Show the chat panel
+            document.getElementById('in-match-chat').classList.remove('hidden');
+            
+            // Set up chat form submission
+            const chatForm = document.getElementById('in-match-chat-form');
+            const chatInput = document.getElementById('in-match-chat-input');
+            const chatMessages = document.getElementById('in-match-chat-messages');
+            
+            // Clear previous chat messages
+            chatMessages.innerHTML = '';
+            
+            if (chatForm) {
+                chatForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!currentUserData || !chatInput.value.trim()) return;
+                    
+                    const messageText = chatInput.value.trim();
+                    chatInput.value = '';
+                    
+                    try {
+                        // Send message to match chat
+                        await push(ref(db, `matches/${matchId}/chat`), { 
+                            uid: currentUserData.uid, 
+                            clubName: currentUserData.clubName, 
+                            message: messageText, 
+                            timestamp: serverTimestamp() 
+                        });
+                    } catch (error) {
+                        console.error("Failed to send message: " + error.message);
+                    }
+                });
+            }
+            
+            // Listen for new chat messages
+            const chatRef = ref(db, `matches/${matchId}/chat`);
+            onChildAdded(chatRef, (snapshot) => {
+                const msgData = snapshot.val();
+                if (!msgData) return;
+                
+                const isMe = msgData.uid === currentUserData.uid;
+                const alignClass = isMe ? 'text-green-400' : 'text-blue-400';
+                const sender = isMe ? 'You' : msgData.clubName;
+                
+                const msgEl = document.createElement('div');
+                msgEl.className = `mb-2 text-sm ${alignClass}`;
+                msgEl.innerHTML = `<span class="font-bold">${sender}:</span> ${msgData.message}`;
+                chatMessages.appendChild(msgEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+            
+            // Set up chat toggle button
+            const toggleChatBtn = document.getElementById('toggle-chat-btn');
+            const chatMessagesContainer = document.getElementById('in-match-chat-messages');
+            const chatFormContainer = document.getElementById('in-match-chat-form').closest('div');
+            
+            toggleChatBtn.addEventListener('click', () => {
+                const icon = toggleChatBtn.querySelector('i');
+                if (chatMessagesContainer.classList.contains('hidden')) {
+                    chatMessagesContainer.classList.remove('hidden');
+                    chatFormContainer.classList.remove('hidden');
+                    icon.className = 'fas fa-chevron-up';
+                } else {
+                    chatMessagesContainer.classList.add('hidden');
+                    chatFormContainer.classList.add('hidden');
+                    icon.className = 'fas fa-chevron-down';
+                }
+            });
         }
 
         // --- NEW FEATURES IMPLEMENTATION ---

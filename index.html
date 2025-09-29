@@ -31,7 +31,7 @@
             filter: brightness(0.4); 
         }
 
-        .nav-card, .stat-card, .player-card, .tournament-card, .mission-card, .reward-item {
+        .nav-card, .stat-card, .player-card, .tournament-card, .mission-card, .reward-item, .pack-card {
             background: linear-gradient(135deg, rgba(14, 51, 26, 0.85), rgba(22, 79, 45, 0.9)); /* Greenish Gradient */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 255, 153, 0.4); /* Greenish Border */
@@ -40,7 +40,7 @@
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
         }
 
-        .nav-card:hover, .stat-card:hover, .player-card:hover, .tournament-card:hover, .mission-card:hover {
+        .nav-card:hover, .stat-card:hover, .player-card:hover, .tournament-card:hover, .mission-card:hover, .pack-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(50, 255, 150, 0.5); /* Enhanced Glow on Hover */
             border-color: #39ff14; /* Neon green accent on hover */
@@ -166,6 +166,60 @@
             100% { transform: translate(-50%, -100px); opacity: 0; }
         }
 
+        /* Player attribute bars */
+        .attribute-bar {
+            height: 8px;
+            background-color: #2c3a47;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .attribute-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease-in-out;
+        }
+        .pace-fill { background: linear-gradient(to right, #39ff14, #2cffa1); }
+        .shooting-fill { background: linear-gradient(to right, #ff6b6b, #ff8e8e); }
+        .passing-fill { background: linear-gradient(to right, #4dabf7, #74c0fc); }
+        .dribbling-fill { background: linear-gradient(to right, #ffd43b, #ffe066); }
+        .defending-fill { background: linear-gradient(to right, #9775fa, #b197fc); }
+        .physical-fill { background: linear-gradient(to right, #ff922b, #ffa94d); }
+
+        /* Pack opening animation */
+        @keyframes pack-shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .pack-shake {
+            animation: pack-shake 0.5s;
+        }
+        @keyframes card-reveal {
+            0% { transform: scale(0.5) rotateY(0deg); opacity: 0; }
+            50% { transform: scale(1.1) rotateY(180deg); opacity: 1; }
+            100% { transform: scale(1) rotateY(360deg); opacity: 1; }
+        }
+        .card-reveal {
+            animation: card-reveal 1s forwards;
+        }
+
+        /* Formation selector */
+        .formation-option {
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .formation-option:hover, .formation-option.selected {
+            border-color: #39ff14;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        /* Player card rarity colors */
+        .bronze { border-color: #cd7f32; box-shadow: 0 0 10px rgba(205, 127, 50, 0.5); }
+        .silver { border-color: #c0c0c0; box-shadow: 0 0 10px rgba(192, 192, 192, 0.5); }
+        .gold { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        .special { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.7); }
+
     </style>
 </head>
 <body class="overflow-hidden">
@@ -177,6 +231,18 @@
     </audio>
     <audio id="match-audio" loop>
         <source src="asset/match.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="goal-sound">
+        <source src="asset/goal.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="whistle-sound">
+        <source src="asset/whistle.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="button-sound">
+        <source src="asset/button.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="pack-open-sound">
+        <source src="asset/pack.mp3" type="audio/mpeg">
     </audio>
 
     <div id="game-container-wrapper" class="w-full h-screen">
@@ -237,6 +303,97 @@
             </div>
         </div>
 
+        <!-- Pack Opening Modal -->
+        <div id="pack-opening-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-2xl text-center border-4 border-yellow-500 relative">
+                <button id="pack-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-yellow-400 mb-6">Player Pack Opening</h2>
+                <div id="pack-opening-container" class="flex flex-wrap justify-center gap-4">
+                    <!-- Pack cards will be dynamically inserted here -->
+                </div>
+                <button id="pack-open-again-btn" class="mt-6 py-3 px-6 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg interactive-button hidden">Open Another Pack</button>
+                <button id="pack-done-btn" class="mt-6 py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Done</button>
+            </div>
+        </div>
+
+        <!-- Training Modal -->
+        <div id="training-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-2xl text-left border-4 border-blue-500 relative">
+                <button id="training-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-blue-400 mb-6">Player Training</h2>
+                <div class="flex items-center mb-4">
+                    <span class="text-lg font-bold text-gray-300 mr-4">Training Points:</span>
+                    <div class="flex items-center bg-gray-800 px-4 py-2 rounded-lg">
+                        <i class="fas fa-dumbbell text-yellow-400 mr-2"></i>
+                        <span id="training-points" class="font-bold text-white">0</span>
+                    </div>
+                </div>
+                <div id="training-player-list" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Player training cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Formation Modal -->
+        <div id="formation-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-4xl text-center border-4 border-green-500 relative">
+                <button id="formation-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-green-400 mb-6">Team Formation & Tactics</h2>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-300 mb-4">Select Formation</h3>
+                    <div class="flex justify-center gap-4 flex-wrap">
+                        <div class="formation-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-formation="4-4-2">
+                            <div class="text-lg font-bold text-white mb-2">4-4-2</div>
+                            <div class="text-sm text-gray-400">Balanced</div>
+                        </div>
+                        <div class="formation-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-formation="4-3-3">
+                            <div class="text-lg font-bold text-white mb-2">4-3-3</div>
+                            <div class="text-sm text-gray-400">Attacking</div>
+                        </div>
+                        <div class="formation-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-formation="3-5-2">
+                            <div class="text-lg font-bold text-white mb-2">3-5-2</div>
+                            <div class="text-sm text-gray-400">Midfield Control</div>
+                        </div>
+                        <div class="formation-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-formation="5-3-2">
+                            <div class="text-lg font-bold text-white mb-2">5-3-2</div>
+                            <div class="text-sm text-gray-400">Defensive</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-300 mb-4">Team Chemistry</h3>
+                    <div class="flex items-center justify-center">
+                        <div class="w-full max-w-md bg-gray-800 rounded-full h-4">
+                            <div id="chemistry-bar" class="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-4 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <span id="chemistry-value" class="ml-4 text-xl font-bold text-white">0%</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-4">
+                    <button id="formation-save-btn" class="py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Save Formation</button>
+                    <button id="formation-cancel-btn" class="py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Login Modal -->
+        <div id="daily-login-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-lg text-center border-4 border-yellow-500 relative">
+                <button id="daily-login-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-yellow-400 mb-6">Daily Login Reward</h2>
+                <div class="text-xl text-gray-300 mb-4">Day <span id="login-day">1</span> of 7</div>
+                <div id="daily-reward" class="bg-gray-800 p-6 rounded-lg mb-6">
+                    <div id="daily-reward-content" class="text-2xl font-bold text-yellow-400">
+                        <!-- Reward content will be dynamically inserted here -->
+                    </div>
+                </div>
+                <button id="daily-login-claim-btn" class="py-3 px-6 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg interactive-button">Claim Reward</button>
+            </div>
+        </div>
+
         <div id="auth-screen" class="w-full h-full flex items-center justify-center bg-gray-900 hidden">
             <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-xl shadow-2xl border border-green-500">
                 <div>
@@ -291,6 +448,10 @@
                          <i class="fas fa-gem text-blue-400"></i>
                          <span id="user-gems" class="font-bold text-white">100</span>
                     </div>
+                    <div class="flex items-center space-x-2">
+                         <i class="fas fa-dumbbell text-yellow-400"></i>
+                         <span id="user-training-points" class="font-bold text-white">0</span>
+                    </div>
                 </div>
                  <div class="flex items-center space-x-4">
                      <button id="logout-btn" class="text-gray-300 hover:text-red-500 text-xl"><i class="fas fa-sign-out-alt"></i></button>
@@ -336,16 +497,48 @@
 
                 <div id="squad-view" class="view hidden p-6">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
-                    <h1 class="text-3xl font-bold mb-8 text-green-400">My Squad (5-player team)</h1>
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-green-400">My Squad (5-player team)</h1>
+                        <div class="flex space-x-4">
+                            <button id="training-btn" class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">
+                                <i class="fas fa-dumbbell mr-2"></i>Training
+                            </button>
+                            <button id="formation-btn" class="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg interactive-button">
+                                <i class="fas fa-chess-board mr-2"></i>Formation
+                            </button>
+                        </div>
+                    </div>
                     <div id="squad-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
                 </div>
                 <div id="match-view" class="view hidden p-6 relative">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                      <h1 class="text-3xl font-bold mb-8 text-green-400">PvP Match</h1>
                     <div id="match-initial-screen">
-                        <button id="find-match-btn" class="w-full max-w-lg mx-auto py-5 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-2xl transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed interactive-button" disabled>
-                            Find Match
-                        </button>
+                        <div class="flex flex-col md:flex-row gap-6 mb-6">
+                            <button id="find-match-btn" class="flex-1 py-5 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-2xl transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed interactive-button" disabled>
+                                Find PvP Match
+                            </button>
+                            <button id="single-player-btn" class="flex-1 py-5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-2xl transition duration-300 interactive-button">
+                                Single Player
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="player-card p-4 text-center">
+                                <h3 class="text-xl font-bold text-green-400 mb-2">League</h3>
+                                <p class="text-gray-300 mb-4">Play in league matches</p>
+                                <button class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Join League</button>
+                            </div>
+                            <div class="player-card p-4 text-center">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-2">Tournament</h3>
+                                <p class="text-gray-300 mb-4">Knockout competitions</p>
+                                <button class="w-full py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg interactive-button">Enter Tournament</button>
+                            </div>
+                            <div class="player-card p-4 text-center">
+                                <h3 class="text-xl font-bold text-blue-400 mb-2">Friendly</h3>
+                                <p class="text-gray-300 mb-4">Practice matches</p>
+                                <button class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Friendly Match</button>
+                            </div>
+                        </div>
                     </div>
                      <div id="matchmaking-screen" class="hidden text-center">
                         <p class="text-2xl mb-4 text-yellow-400">Searching for opponent...</p>
@@ -447,7 +640,12 @@
                 <div id="store-view" class="view hidden p-6">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-green-400">Item Store</h1>
+                    <div class="flex border-b-2 border-gray-700 mb-6">
+                        <button id="players-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent active">Players</button>
+                        <button id="packs-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">Player Packs</button>
+                    </div>
                     <div id="store-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+                    <div id="store-packs" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 </div>
                 <div id="transfers-view" class="view hidden p-6">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
@@ -480,7 +678,7 @@
                         <p class="text-2xl text-gray-200">This game was created by</p>
                         <h2 class="text-5xl font-bold my-4 text-green-300 tracking-wider">SWAMPOD & MITHUN</h2>
                         <div class="border-t border-gray-600 my-8"></div>
-                        <p class="mt-4 text-lg text-gray-400">Version: <span class="font-bold text-yellow-400">0.3</span></p>
+                        <p class="mt-4 text-lg text-gray-400">Version: <span class="font-bold text-yellow-400">1.0</span></p>
                     </div>
                 </div>
             </main>
@@ -566,6 +764,39 @@
         
         const mainMenuAudio = document.getElementById('main-menu-audio');
         const matchAudio = document.getElementById('match-audio'); 
+        const goalSound = document.getElementById('goal-sound');
+        const whistleSound = document.getElementById('whistle-sound');
+        const buttonSound = document.getElementById('button-sound');
+        const packOpenSound = document.getElementById('pack-open-sound');
+
+        // New feature elements
+        const trainingBtn = document.getElementById('training-btn');
+        const formationBtn = document.getElementById('formation-btn');
+        const singlePlayerBtn = document.getElementById('single-player-btn');
+        const playersTab = document.getElementById('players-tab');
+        const packsTab = document.getElementById('packs-tab');
+        const storeItems = document.getElementById('store-items');
+        const storePacks = document.getElementById('store-packs');
+
+        // Modal elements
+        const trainingModal = document.getElementById('training-modal');
+        const trainingCloseBtn = document.getElementById('training-close-btn');
+        const formationModal = document.getElementById('formation-modal');
+        const formationCloseBtn = document.getElementById('formation-close-btn');
+        const formationSaveBtn = document.getElementById('formation-save-btn');
+        const formationCancelBtn = document.getElementById('formation-cancel-btn');
+        const packOpeningModal = document.getElementById('pack-opening-modal');
+        const packCloseBtn = document.getElementById('pack-close-btn');
+        const packOpenAgainBtn = document.getElementById('pack-open-again-btn');
+        const packDoneBtn = document.getElementById('pack-done-btn');
+        const dailyLoginModal = document.getElementById('daily-login-modal');
+        const dailyLoginCloseBtn = document.getElementById('daily-login-close-btn');
+        const dailyLoginClaimBtn = document.getElementById('daily-login-claim-btn');
+
+        function playSound(sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio play failed:", e));
+        }
 
         function showModal(message) {
             modalMessage.textContent = message;
@@ -719,6 +950,7 @@
                 loadUserData(user.uid);
                 listenForMatch(user.uid);
                 loadAndShowPromoBanner(); 
+                checkDailyLogin(user.uid);
             } else {
                 authScreen.classList.remove('hidden');
                 gameContent.classList.add('hidden');
@@ -779,11 +1011,17 @@
                     claimedMaradonaEvent: false,
                     isBanned: false, 
                     level: 1, xp: 0, matchesPlayedThisLevel: 0, matchesNeededForLevelUp: BASE_MATCHES_FOR_LEVEL_UP,
-                    seasonPass: { level: 1, xp: 0, premium: false }
+                    seasonPass: { level: 1, xp: 0, premium: false },
+                    trainingPoints: 0,
+                    formation: "4-4-2",
+                    lastLoginDate: new Date().toDateString(),
+                    dailyLoginStreak: 1
                 });
                 
                 await set(ref(db, 'players/' + MARADONA_PLAYER_ID), {
-                    name: "Maradona Prime", position: "CAM", rating: 99, value: 50000, imageUrl: "https://placehold.co/96x96/FFD700/000?text=M+P"
+                    name: "Maradona Prime", position: "CAM", rating: 99, value: 50000, imageUrl: "https://placehold.co/96x96/FFD700/000?text=M+P",
+                    attributes: { pace: 95, shooting: 98, passing: 97, dribbling: 99, defending: 65, physical: 85 },
+                    rarity: "special"
                 }, { merge: true });
                 
                 playMainMenuMusic();
@@ -829,6 +1067,7 @@
                     document.getElementById('user-club-name').textContent = currentUserData.clubName;
                     document.getElementById('user-balance').textContent = currentUserData.balance;
                     document.getElementById('user-gems').textContent = currentUserData.gems || 0;
+                    document.getElementById('user-training-points').textContent = currentUserData.trainingPoints || 0;
                     document.getElementById('user-avatar').src = currentUserData.avatarUrl || `https://placehold.co/96x96/0d1117/00bcd4?text=${currentUserData.clubName.charAt(0)}`;
                     
                     document.getElementById('user-level').textContent = currentUserData.level || 1;
@@ -847,6 +1086,7 @@
                     }
 
                     loadStoreItems();
+                    loadStorePacks();
                     loadTransferMarket();
                     loadLeaderboard();
                     loadTournaments();
@@ -868,12 +1108,33 @@
                 if (playerSnap.exists()) {
                     const playerData = playerSnap.val();
                     totalRating += playerData.rating;
+                    
+                    // Calculate player's overall rating based on attributes
+                    const attributes = playerData.attributes || { pace: 50, shooting: 50, passing: 50, dribbling: 50, defending: 50, physical: 50 };
+                    const calculatedRating = Math.round(
+                        (attributes.pace + attributes.shooting + attributes.passing + 
+                         attributes.dribbling + attributes.defending + attributes.physical) / 6
+                    );
+                    
+                    const rarity = playerData.rarity || "bronze";
+                    const rarityClass = rarity === "bronze" ? "bronze" : 
+                                       rarity === "silver" ? "silver" : 
+                                       rarity === "gold" ? "gold" : "special";
+                    
                     squadListDiv.innerHTML += `
-                        <div class="player-card p-4 text-center shadow-lg">
+                        <div class="player-card p-4 text-center shadow-lg ${rarityClass}">
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg text-white">${playerData.name}</h4>
                             <p class="text-sm text-gray-400">${playerData.position}</p>
-                            <p class="text-2xl font-black text-green-400 mt-2">${playerData.rating}</p>
+                            <p class="text-2xl font-black text-green-400 mt-2">${calculatedRating}</p>
+                            <div class="mt-2 text-xs text-gray-500">
+                                <div class="flex justify-between"><span>Pace:</span><span>${attributes.pace}</span></div>
+                                <div class="attribute-bar"><div class="attribute-fill pace-fill" style="width: ${attributes.pace}%"></div></div>
+                                <div class="flex justify-between"><span>Shooting:</span><span>${attributes.shooting}</span></div>
+                                <div class="attribute-bar"><div class="attribute-fill shooting-fill" style="width: ${attributes.shooting}%"></div></div>
+                                <div class="flex justify-between"><span>Passing:</span><span>${attributes.passing}</span></div>
+                                <div class="attribute-bar"><div class="attribute-fill passing-fill" style="width: ${attributes.passing}%"></div></div>
+                            </div>
                         </div>`;
                 }
             });
@@ -988,13 +1249,50 @@
                     const buttonHtml = isOwned 
                         ? `<button class="w-full mt-3 py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Owned</button>`
                         : `<button onclick="buyPlayer('${playerId}', ${playerData.value})" class="w-full mt-3 py-2 px-4 btn-primary rounded-md">Buy (${playerData.value} C)</button>`;
+                    
+                    const rarity = playerData.rarity || "bronze";
+                    const rarityClass = rarity === "bronze" ? "bronze" : 
+                                       rarity === "silver" ? "silver" : 
+                                       rarity === "gold" ? "gold" : "special";
+                    
                     storeItemsDiv.innerHTML += `
-                        <div class="player-card p-4 text-center shadow-lg">
+                        <div class="player-card p-4 text-center shadow-lg ${rarityClass}">
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg">${playerData.name}</h4><p class="text-sm text-gray-400">${playerData.position}</p><p class="text-xl font-bold text-green-400 mt-2">${playerData.rating}</p>${buttonHtml}
                         </div>`;
                 }
             } else { storeItemsDiv.innerHTML = '<p class="text-center p-4 text-gray-400">No players found in the store.</p>'; }
+        }
+
+        async function loadStorePacks() {
+            const storePacksDiv = document.getElementById('store-packs');
+            storePacksDiv.innerHTML = '';
+            
+            // Define player packs
+            const packs = [
+                { id: 'bronze_pack', name: 'Bronze Pack', price: 1000, coinsPrice: 1000, gemsPrice: 0, description: 'Contains 3 bronze players', rarity: 'bronze' },
+                { id: 'silver_pack', name: 'Silver Pack', price: 2500, coinsPrice: 2500, gemsPrice: 50, description: 'Contains 3 silver players', rarity: 'silver' },
+                { id: 'gold_pack', name: 'Gold Pack', price: 5000, coinsPrice: 5000, gemsPrice: 100, description: 'Contains 3 gold players', rarity: 'gold' },
+                { id: 'premium_pack', name: 'Premium Pack', price: 10000, coinsPrice: 10000, gemsPrice: 200, description: 'Contains 5 players with chance for special', rarity: 'special' }
+            ];
+            
+            packs.forEach(pack => {
+                const priceHtml = pack.gemsPrice > 0 
+                    ? `<div class="flex justify-center space-x-2">
+                         <span class="text-yellow-400"><i class="fas fa-coins"></i> ${pack.coinsPrice}</span>
+                         <span class="text-blue-400"><i class="fas fa-gem"></i> ${pack.gemsPrice}</span>
+                       </div>`
+                    : `<div class="text-yellow-400"><i class="fas fa-coins"></i> ${pack.coinsPrice}</div>`;
+                
+                storePacksDiv.innerHTML += `
+                    <div class="pack-card p-4 text-center shadow-lg">
+                        <div class="text-4xl mb-4">🎁</div>
+                        <h4 class="font-bold text-lg text-white">${pack.name}</h4>
+                        <p class="text-sm text-gray-400 mb-3">${pack.description}</p>
+                        ${priceHtml}
+                        <button onclick="buyPack('${pack.id}', ${pack.coinsPrice}, ${pack.gemsPrice})" class="w-full mt-3 py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-md interactive-button">Buy Pack</button>
+                    </div>`;
+            });
         }
 
         async function loadTransferMarket() {
@@ -1077,6 +1375,96 @@
             try { await update(ref(db, 'users/' + currentUserData.uid), { balance: newBalance, squad: newSquad }); showModal("Player sold successfully!"); } 
             catch (error) { showModal("Failed to sell player: " + error.message); }
         };
+
+        window.buyPack = async (packId, coinsPrice, gemsPrice) => {
+            if (!currentUserData) return showModal("User data not loaded.");
+            
+            // Check if user has enough currency
+            if (coinsPrice > 0 && currentUserData.balance < coinsPrice) {
+                return showModal("You don't have enough coins to buy this pack.");
+            }
+            if (gemsPrice > 0 && currentUserData.gems < gemsPrice) {
+                return showModal("You don't have enough gems to buy this pack.");
+            }
+            
+            // Deduct currency
+            const updates = {};
+            if (coinsPrice > 0) updates.balance = currentUserData.balance - coinsPrice;
+            if (gemsPrice > 0) updates.gems = currentUserData.gems - gemsPrice;
+            
+            try {
+                await update(ref(db, 'users/' + currentUserData.uid), updates);
+                openPack(packId);
+            } catch (error) {
+                showModal("Failed to purchase pack: " + error.message);
+            }
+        };
+
+        async function openPack(packId) {
+            const playersRef = ref(db, 'players');
+            const snapshot = await get(playersRef);
+            if (!snapshot.exists()) return;
+            
+            const allPlayers = snapshot.val();
+            const playerIds = Object.keys(allPlayers);
+            
+            // Filter players by rarity based on pack type
+            let filteredPlayers = [];
+            if (packId === 'bronze_pack') {
+                filteredPlayers = playerIds.filter(id => allPlayers[id].rarity === 'bronze' || !allPlayers[id].rarity);
+            } else if (packId === 'silver_pack') {
+                filteredPlayers = playerIds.filter(id => allPlayers[id].rarity === 'silver' || allPlayers[id].rarity === 'bronze');
+            } else if (packId === 'gold_pack') {
+                filteredPlayers = playerIds.filter(id => allPlayers[id].rarity === 'gold' || allPlayers[id].rarity === 'silver');
+            } else if (packId === 'premium_pack') {
+                filteredPlayers = playerIds; // All players
+            }
+            
+            // Select random players
+            const selectedPlayers = [];
+            const numPlayers = packId === 'premium_pack' ? 5 : 3;
+            
+            for (let i = 0; i < numPlayers; i++) {
+                if (filteredPlayers.length === 0) break;
+                const randomIndex = Math.floor(Math.random() * filteredPlayers.length);
+                const playerId = filteredPlayers[randomIndex];
+                selectedPlayers.push({ id: playerId, ...allPlayers[playerId] });
+                filteredPlayers.splice(randomIndex, 1);
+            }
+            
+            // Show pack opening modal
+            const packContainer = document.getElementById('pack-opening-container');
+            packContainer.innerHTML = '';
+            
+            selectedPlayers.forEach(player => {
+                const rarity = player.rarity || "bronze";
+                const rarityClass = rarity === "bronze" ? "bronze" : 
+                                   rarity === "silver" ? "silver" : 
+                                   rarity === "gold" ? "gold" : "special";
+                
+                packContainer.innerHTML += `
+                    <div class="pack-card p-4 text-center shadow-lg ${rarityClass} pack-shake">
+                        <img src="${player.imageUrl}" alt="${player.name}" class="w-32 h-32 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600 card-reveal">
+                        <h4 class="font-bold text-lg text-white">${player.name}</h4>
+                        <p class="text-sm text-gray-400">${player.position}</p>
+                        <p class="text-xl font-bold text-green-400 mt-2">${player.rating}</p>
+                        <p class="text-xs text-gray-500 mt-1">${rarity.toUpperCase()}</p>
+                    </div>`;
+            });
+            
+            playSound(packOpenSound);
+            packOpeningModal.classList.remove('hidden');
+            
+            // Add players to user's squad
+            const newSquad = [...(currentUserData.squad || [])];
+            selectedPlayers.forEach(player => {
+                if (!newSquad.includes(player.id)) {
+                    newSquad.push(player.id);
+                }
+            });
+            
+            await update(ref(db, 'users/' + currentUserData.uid), { squad: newSquad });
+        }
 
         document.getElementById('edit-club-name').addEventListener('click', () => {
             if (!currentUserData) return;
@@ -1168,6 +1556,32 @@
             }
         });
 
+        singlePlayerBtn.addEventListener('click', async () => {
+            if (!currentUserData || !currentUserData.uid) return showModal("Your data is still loading. Please wait a moment.");
+            if (!currentUserData.squad || currentUserData.squad.length < 5) return showModal("You must have at least 5 players in your squad to play a match.");
+            
+            // Create a single player match against AI
+            const matchId = push(ref(db, 'matches')).key;
+            currentMatchId = matchId;
+            
+            // Generate AI opponent with similar team power
+            const aiTeamPower = Math.max(teamPower - 5 + Math.floor(Math.random() * 10), 10);
+            const aiClubName = "AI Team " + Math.floor(Math.random() * 1000);
+            
+            const matchData = {
+                teamA: { uid: "ai_opponent", clubName: aiClubName, teamPower: aiTeamPower, squad: [] },
+                teamB: { uid: currentUserData.uid, clubName: currentUserData.clubName, teamPower: teamPower, squad: currentUserData.squad },
+                score: { teamA: 0, teamB: 0 }, status: 'starting', startTime: serverTimestamp(), events: {},
+                teamAStrategy: 'Balanced', teamBStrategy: 'Balanced',
+                isSinglePlayer: true
+            };
+            
+            const updates = {};
+            updates[`/matches/${matchId}`] = matchData;
+            updates[`/users/${currentUserData.uid}/currentMatch`] = matchId;
+            await update(ref(db), updates);
+        });
+
         cancelMatchmakingBtn.addEventListener('click', async () => {
             if (!currentUserData || !currentUserData.uid) return;
             await remove(ref(db, `matchmaking/${currentUserData.uid}`));
@@ -1247,14 +1661,17 @@
             if (!initialSnap.exists()) return;
             const initialMatchData = initialSnap.val();
             
-            const opponent = initialMatchData.teamA.uid === currentUserData.uid ? initialMatchData.teamB : initialMatchData.teamA;
-            const opponentStatusRef = ref(db, `/status/${opponent.uid}`);
-            if (opponentStatusListener) opponentStatusListener();
-            opponentStatusListener = onValue(opponentStatusRef, (snapshot) => {
-                if (!snapshot.exists() || snapshot.val().state === 'offline') {
-                    handleWalkover(matchId, opponent.uid);
-                }
-            });
+            // Only set up opponent status listener if it's not a single player match
+            if (!initialMatchData.isSinglePlayer) {
+                const opponent = initialMatchData.teamA.uid === currentUserData.uid ? initialMatchData.teamB : initialMatchData.teamA;
+                const opponentStatusRef = ref(db, `/status/${opponent.uid}`);
+                if (opponentStatusListener) opponentStatusListener();
+                opponentStatusListener = onValue(opponentStatusRef, (snapshot) => {
+                    if (!snapshot.exists() || snapshot.val().state === 'offline') {
+                        handleWalkover(matchId, opponent.uid);
+                    }
+                });
+            }
 
             const teamA_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamA.squad);
             const teamB_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamB.squad);
@@ -1306,6 +1723,11 @@
                 const commentaryBox = document.getElementById('live-commentary');
                 commentaryBox.innerHTML += `<p class="mb-2 text-sm">${event.time}: ${event.text}</p>`;
                 commentaryBox.scrollTop = commentaryBox.scrollHeight;
+                
+                // Play goal sound if it's a goal event
+                if (event.text.includes('GOAL') || event.text.includes('Golazo') || event.text.includes('scores')) {
+                    playSound(goalSound);
+                }
             });
             
             const reactionRef = ref(db, `matches/${matchId}/reactions`);
@@ -1361,6 +1783,14 @@
             } else {
                 updates.matchesPlayedThisLevel = currentMatchesPlayed;
             }
+
+            // Award training points based on match result
+            let trainingPointsGained = 0;
+            if (result === 'win') trainingPointsGained = 5;
+            else if (result === 'draw') trainingPointsGained = 3;
+            else if (result === 'loss') trainingPointsGained = 1;
+            
+            updates.trainingPoints = (userData.trainingPoints || 0) + trainingPointsGained;
 
             await update(userRef, updates);
         }
@@ -1660,6 +2090,338 @@
             }, 2000);
         }
 
+        // --- NEW FEATURES IMPLEMENTATION ---
+
+        // Training System
+        trainingBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openTrainingModal();
+        });
+
+        trainingCloseBtn.addEventListener('click', () => {
+            trainingModal.classList.add('hidden');
+        });
+
+        async function openTrainingModal() {
+            if (!currentUserData || !currentUserData.squad) return;
+            
+            const trainingPoints = currentUserData.trainingPoints || 0;
+            document.getElementById('training-points').textContent = trainingPoints;
+            
+            const playerList = document.getElementById('training-player-list');
+            playerList.innerHTML = '';
+            
+            const playerPromises = currentUserData.squad.map(playerId => get(ref(db, 'players/' + playerId)));
+            const playerSnapshots = await Promise.all(playerPromises);
+            
+            playerSnapshots.forEach((playerSnap, index) => {
+                if (playerSnap.exists()) {
+                    const playerData = playerSnap.val();
+                    const playerId = currentUserData.squad[index];
+                    const attributes = playerData.attributes || { pace: 50, shooting: 50, passing: 50, dribbling: 50, defending: 50, physical: 50 };
+                    
+                    playerList.innerHTML += `
+                        <div class="player-card p-4 flex flex-col md:flex-row justify-between items-center">
+                            <div class="flex items-center mb-4 md:mb-0">
+                                <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-16 h-16 object-cover rounded-full mr-4 border-2 border-gray-600">
+                                <div>
+                                    <h4 class="font-bold text-lg text-white">${playerData.name}</h4>
+                                    <p class="text-sm text-gray-400">${playerData.position}</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 w-full md:w-auto">
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-400">Pace</div>
+                                    <div class="attribute-bar"><div class="attribute-fill pace-fill" style="width: ${attributes.pace}%"></div></div>
+                                    <button class="train-btn mt-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded disabled:bg-gray-600 disabled:cursor-not-allowed" data-player="${playerId}" data-attribute="pace" ${trainingPoints < 1 ? 'disabled' : ''}>+</button>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-400">Shooting</div>
+                                    <div class="attribute-bar"><div class="attribute-fill shooting-fill" style="width: ${attributes.shooting}%"></div></div>
+                                    <button class="train-btn mt-1 px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded disabled:bg-gray-600 disabled:cursor-not-allowed" data-player="${playerId}" data-attribute="shooting" ${trainingPoints < 1 ? 'disabled' : ''}>+</button>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-400">Passing</div>
+                                    <div class="attribute-bar"><div class="attribute-fill passing-fill" style="width: ${attributes.passing}%"></div></div>
+                                    <button class="train-btn mt-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded disabled:bg-gray-600 disabled:cursor-not-allowed" data-player="${playerId}" data-attribute="passing" ${trainingPoints < 1 ? 'disabled' : ''}>+</button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            });
+            
+            // Add event listeners to training buttons
+            document.querySelectorAll('.train-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const playerId = e.target.getAttribute('data-player');
+                    const attribute = e.target.getAttribute('data-attribute');
+                    await trainPlayer(playerId, attribute);
+                });
+            });
+            
+            trainingModal.classList.remove('hidden');
+        }
+
+        async function trainPlayer(playerId, attribute) {
+            if (!currentUserData) return;
+            
+            const trainingPoints = currentUserData.trainingPoints || 0;
+            if (trainingPoints < 1) {
+                showModal("You don't have enough training points!");
+                return;
+            }
+            
+            // Get player data
+            const playerRef = ref(db, 'players/' + playerId);
+            const playerSnap = await get(playerRef);
+            if (!playerSnap.exists()) return;
+            
+            const playerData = playerSnap.val();
+            const attributes = playerData.attributes || { pace: 50, shooting: 50, passing: 50, dribbling: 50, defending: 50, physical: 50 };
+            
+            // Increase attribute (max 99)
+            if (attributes[attribute] < 99) {
+                attributes[attribute] += 1;
+                
+                // Update player and user data
+                await update(playerRef, { attributes: attributes });
+                await update(ref(db, 'users/' + currentUserData.uid), { 
+                    trainingPoints: trainingPoints - 1 
+                });
+                
+                showModal(`${playerData.name}'s ${attribute} increased to ${attributes[attribute]}!`);
+                openTrainingModal(); // Refresh the modal
+            } else {
+                showModal(`${playerData.name}'s ${attribute} is already at maximum!`);
+            }
+        }
+
+        // Formation System
+        formationBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openFormationModal();
+        });
+
+        formationCloseBtn.addEventListener('click', () => {
+            formationModal.classList.add('hidden');
+        });
+
+        formationCancelBtn.addEventListener('click', () => {
+            formationModal.classList.add('hidden');
+        });
+
+        formationSaveBtn.addEventListener('click', async () => {
+            const selectedFormation = document.querySelector('.formation-option.selected');
+            if (!selectedFormation) {
+                showModal("Please select a formation!");
+                return;
+            }
+            
+            const formation = selectedFormation.getAttribute('data-formation');
+            await update(ref(db, 'users/' + currentUserData.uid), { formation: formation });
+            showModal(`Formation changed to ${formation}!`);
+            formationModal.classList.add('hidden');
+        });
+
+        function openFormationModal() {
+            // Set current formation as selected
+            const currentFormation = currentUserData.formation || "4-4-2";
+            document.querySelectorAll('.formation-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.getAttribute('data-formation') === currentFormation) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            // Calculate team chemistry
+            calculateTeamChemistry();
+            
+            formationModal.classList.remove('hidden');
+        }
+
+        // Add event listeners to formation options
+        document.querySelectorAll('.formation-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.formation-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                calculateTeamChemistry();
+            });
+        });
+
+        async function calculateTeamChemistry() {
+            if (!currentUserData || !currentUserData.squad) return;
+            
+            let chemistry = 0;
+            const playerPromises = currentUserData.squad.map(playerId => get(ref(db, 'players/' + playerId)));
+            const playerSnapshots = await Promise.all(playerPromises);
+            
+            // Simple chemistry calculation based on player positions matching formation requirements
+            // In a real game, this would be more complex
+            playerSnapshots.forEach(playerSnap => {
+                if (playerSnap.exists()) {
+                    const playerData = playerSnap.val();
+                    // Add some chemistry for each player (this is a simplified version)
+                    chemistry += 15;
+                }
+            });
+            
+            // Cap at 100%
+            chemistry = Math.min(chemistry, 100);
+            
+            document.getElementById('chemistry-bar').style.width = `${chemistry}%`;
+            document.getElementById('chemistry-value').textContent = `${chemistry}%`;
+        }
+
+        // Store Tabs
+        playersTab.addEventListener('click', () => {
+            playersTab.classList.add('active');
+            packsTab.classList.remove('active');
+            storeItems.classList.remove('hidden');
+            storePacks.classList.add('hidden');
+        });
+
+        packsTab.addEventListener('click', () => {
+            packsTab.classList.add('active');
+            playersTab.classList.remove('active');
+            storePacks.classList.remove('hidden');
+            storeItems.classList.add('hidden');
+        });
+
+        // Pack Opening Modal Controls
+        packCloseBtn.addEventListener('click', () => {
+            packOpeningModal.classList.add('hidden');
+        });
+
+        packOpenAgainBtn.addEventListener('click', () => {
+            packOpeningModal.classList.add('hidden');
+            navigateToView('store-view');
+        });
+
+        packDoneBtn.addEventListener('click', () => {
+            packOpeningModal.classList.add('hidden');
+        });
+
+        // Daily Login System
+        dailyLoginCloseBtn.addEventListener('click', () => {
+            dailyLoginModal.classList.add('hidden');
+        });
+
+        dailyLoginClaimBtn.addEventListener('click', async () => {
+            await claimDailyLoginReward();
+            dailyLoginModal.classList.add('hidden');
+        });
+
+        async function checkDailyLogin(uid) {
+            const userRef = ref(db, 'users/' + uid);
+            const userSnap = await get(userRef);
+            if (!userSnap.exists()) return;
+            
+            const userData = userSnap.val();
+            const today = new Date().toDateString();
+            const lastLogin = userData.lastLoginDate;
+            let streak = userData.dailyLoginStreak || 1;
+            
+            // Check if user already logged in today
+            if (lastLogin === today) return;
+            
+            // Check if streak continues (logged in yesterday)
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toDateString();
+            
+            if (lastLogin === yesterdayStr) {
+                streak += 1;
+            } else {
+                streak = 1; // Reset streak
+            }
+            
+            // Cap streak at 7 days
+            if (streak > 7) streak = 7;
+            
+            // Show daily login modal
+            showDailyLoginModal(streak);
+            
+            // Update user data
+            await update(userRef, {
+                lastLoginDate: today,
+                dailyLoginStreak: streak
+            });
+        }
+
+        function showDailyLoginModal(day) {
+            document.getElementById('login-day').textContent = day;
+            
+            const rewards = [
+                { day: 1, reward: "500 Coins" },
+                { day: 2, reward: "10 Gems" },
+                { day: 3, reward: "Bronze Pack" },
+                { day: 4, reward: "1000 Coins" },
+                { day: 5, reward: "20 Gems" },
+                { day: 6, reward: "Silver Pack" },
+                { day: 7, reward: "Gold Pack" }
+            ];
+            
+            const todayReward = rewards[day - 1];
+            document.getElementById('daily-reward-content').textContent = todayReward.reward;
+            
+            dailyLoginModal.classList.remove('hidden');
+        }
+
+        async function claimDailyLoginReward() {
+            if (!currentUserData) return;
+            
+            const day = currentUserData.dailyLoginStreak || 1;
+            const updates = {};
+            
+            switch(day) {
+                case 1:
+                    updates.balance = (currentUserData.balance || 0) + 500;
+                    break;
+                case 2:
+                    updates.gems = (currentUserData.gems || 0) + 10;
+                    break;
+                case 3:
+                    // Add bronze pack logic
+                    break;
+                case 4:
+                    updates.balance = (currentUserData.balance || 0) + 1000;
+                    break;
+                case 5:
+                    updates.gems = (currentUserData.gems || 0) + 20;
+                    break;
+                case 6:
+                    // Add silver pack logic
+                    break;
+                case 7:
+                    // Add gold pack logic
+                    break;
+            }
+            
+            await update(ref(db, 'users/' + currentUserData.uid), updates);
+            showModal(`Daily login reward claimed: ${getRewardDescription(day)}`);
+        }
+
+        function getRewardDescription(day) {
+            const rewards = [
+                "500 Coins",
+                "10 Gems",
+                "Bronze Pack",
+                "1000 Coins",
+                "20 Gems",
+                "Silver Pack",
+                "Gold Pack"
+            ];
+            
+            return rewards[day - 1] || "Unknown Reward";
+        }
+
+        // Add sound effects to buttons
+        document.querySelectorAll('.interactive-button').forEach(button => {
+            button.addEventListener('click', () => {
+                playSound(buttonSound);
+            });
+        });
+
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1682,4 +2444,3 @@
     </script>
 </body>
 </html>
-

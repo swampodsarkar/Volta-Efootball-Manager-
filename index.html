@@ -220,6 +220,86 @@
         .gold { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         .special { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.7); }
 
+        /* Stamina bar */
+        .stamina-bar {
+            height: 6px;
+            background-color: #2c3a47;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+        .stamina-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ff6b6b, #ffd43b);
+            border-radius: 3px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Injury indicator */
+        .injury-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* Kit designer styles */
+        .kit-preview {
+            width: 100px;
+            height: 120px;
+            position: relative;
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .kit-jersey {
+            width: 100%;
+            height: 80px;
+            background-color: #1e40af;
+            position: relative;
+        }
+        .kit-shorts {
+            width: 100%;
+            height: 40px;
+            background-color: #1e40af;
+            position: absolute;
+            bottom: 0;
+        }
+        .kit-stripe {
+            position: absolute;
+            background-color: white;
+        }
+        .kit-stripe.horizontal {
+            width: 100%;
+            height: 10px;
+        }
+        .kit-stripe.vertical {
+            width: 10px;
+            height: 100%;
+        }
+
+        /* Alliance styles */
+        .alliance-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
     </style>
 </head>
 <body class="overflow-hidden">
@@ -394,6 +474,274 @@
             </div>
         </div>
 
+        <!-- Advanced Tactics Modal -->
+        <div id="advanced-tactics-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-2xl text-center border-4 border-blue-500 relative">
+                <button id="advanced-tactics-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-blue-400 mb-6">Advanced Tactics</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="tactic-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-tactic="High Press">
+                        <div class="text-lg font-bold text-white mb-2">High Press</div>
+                        <div class="text-sm text-gray-400">Aggressive pressing to win the ball quickly</div>
+                    </div>
+                    <div class="tactic-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-tactic="Counter Attack">
+                        <div class="text-lg font-bold text-white mb-2">Counter Attack</div>
+                        <div class="text-sm text-gray-400">Defend deep and attack quickly on transitions</div>
+                    </div>
+                    <div class="tactic-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-tactic="Possession Play">
+                        <div class="text-lg font-bold text-white mb-2">Possession Play</div>
+                        <div class="text-sm text-gray-400">Keep possession and control the game tempo</div>
+                    </div>
+                    <div class="tactic-option p-4 bg-gray-800 rounded-lg cursor-pointer" data-tactic="Wing Play">
+                        <div class="text-lg font-bold text-white mb-2">Wing Play</div>
+                        <div class="text-sm text-gray-400">Focus attacks through the wings with crosses</div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-4">
+                    <button id="advanced-tactics-save-btn" class="py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Save Tactics</button>
+                    <button id="advanced-tactics-cancel-btn" class="py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Club Facilities Modal -->
+        <div id="facilities-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-4xl text-center border-4 border-green-500 relative">
+                <button id="facilities-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-green-400 mb-6">Club Facilities</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="facility-card p-4 bg-gray-800 rounded-lg">
+                        <h3 class="text-xl font-bold text-white mb-2">Stadium</h3>
+                        <p class="text-sm text-gray-400 mb-4">Level: <span id="stadium-level" class="font-bold text-yellow-400">1</span></p>
+                        <p class="text-sm text-gray-300 mb-4">Increases match revenue and home advantage</p>
+                        <button class="upgrade-facility-btn w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button" data-facility="stadium">Upgrade (5000 Coins)</button>
+                    </div>
+                    <div class="facility-card p-4 bg-gray-800 rounded-lg">
+                        <h3 class="text-xl font-bold text-white mb-2">Training Ground</h3>
+                        <p class="text-sm text-gray-400 mb-4">Level: <span id="training-ground-level" class="font-bold text-yellow-400">1</span></p>
+                        <p class="text-sm text-gray-300 mb-4">Improves player training efficiency</p>
+                        <button class="upgrade-facility-btn w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button" data-facility="trainingGround">Upgrade (3000 Coins)</button>
+                    </div>
+                    <div class="facility-card p-4 bg-gray-800 rounded-lg">
+                        <h3 class="text-xl font-bold text-white mb-2">Youth Academy</h3>
+                        <p class="text-sm text-gray-400 mb-4">Level: <span id="youth-academy-level" class="font-bold text-yellow-400">1</span></p>
+                        <p class="text-sm text-gray-300 mb-4">Produces young talents periodically</p>
+                        <button class="upgrade-facility-btn w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button" data-facility="youthAcademy">Upgrade (8000 Coins)</button>
+                    </div>
+                </div>
+                
+                <button id="facilities-close-btn-2" class="py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
+            </div>
+        </div>
+
+        <!-- Sponsorship Modal -->
+        <div id="sponsorship-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-2xl text-center border-4 border-yellow-500 relative">
+                <button id="sponsorship-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-yellow-400 mb-6">Sponsorship Deals</h2>
+                
+                <div id="sponsorship-list" class="space-y-4 mb-6">
+                    <!-- Sponsorship deals will be dynamically inserted here -->
+                </div>
+                
+                <button id="sponsorship-close-btn-2" class="py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
+            </div>
+        </div>
+
+        <!-- Kit Designer Modal -->
+        <div id="kit-designer-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-4xl text-center border-4 border-purple-500 relative">
+                <button id="kit-designer-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-purple-400 mb-6">Kit Designer</h2>
+                
+                <div class="flex flex-col md:flex-row gap-8 mb-6">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-white mb-4">Kit Preview</h3>
+                        <div class="kit-preview mx-auto">
+                            <div id="kit-jersey" class="kit-jersey"></div>
+                            <div id="kit-shorts" class="kit-shorts"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-white mb-4">Customization</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-left text-gray-300 mb-2">Jersey Color</label>
+                                <input type="color" id="jersey-color" value="#1e40af" class="w-full h-10 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-left text-gray-300 mb-2">Shorts Color</label>
+                                <input type="color" id="shorts-color" value="#1e40af" class="w-full h-10 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-left text-gray-300 mb-2">Kit Style</label>
+                                <select id="kit-style" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                    <option value="plain">Plain</option>
+                                    <option value="stripes">Stripes</option>
+                                    <option value="hoops">Hoops</option>
+                                    <option value="sash">Sash</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-4">
+                    <button id="kit-save-btn" class="py-3 px-6 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg interactive-button">Save Kit</button>
+                    <button id="kit-cancel-btn" class="py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Settings Modal -->
+        <div id="settings-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-2xl text-center border-4 border-green-500 relative">
+                <button id="settings-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-green-400 mb-6">Game Settings</h2>
+                
+                <div class="space-y-6 text-left">
+                    <!-- Server Info -->
+                    <div class="player-card p-4">
+                        <h3 class="text-xl font-bold text-white mb-3">Server Information</h3>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-300">Current Server:</span>
+                            <span id="current-server" class="font-bold text-green-400">-</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Simulated Ping:</span>
+                            <span id="simulated-ping" class="font-bold text-yellow-400">- ms</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-2">Note: Server cannot be changed after signup</p>
+                    </div>
+                    
+                    <!-- Graphics Settings -->
+                    <div class="player-card p-4">
+                        <h3 class="text-xl font-bold text-white mb-3">Graphics Quality</h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button id="graphics-low" class="py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Low</button>
+                            <button id="graphics-medium" class="py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Medium</button>
+                            <button id="graphics-high" class="py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">High</button>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <span class="text-gray-300">Current Setting: </span>
+                            <span id="current-graphics" class="font-bold text-green-400">Medium</span>
+                        </div>
+                    </div>
+                    
+                    <!-- FPS Limit -->
+                    <div class="player-card p-4">
+                        <h3 class="text-xl font-bold text-white mb-3">FPS Limit</h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button id="fps-30" class="py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">30 FPS</button>
+                            <button id="fps-60" class="py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">60 FPS</button>
+                            <button id="fps-unlimited" class="py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Unlimited</button>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <span class="text-gray-300">Current Setting: </span>
+                            <span id="current-fps" class="font-bold text-green-400">60 FPS</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Audio Volume -->
+                    <div class="player-card p-4">
+                        <h3 class="text-xl font-bold text-white mb-3">Audio Volume</h3>
+                        <input type="range" id="audio-volume" min="0" max="100" value="100" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between mt-2">
+                            <span class="text-gray-300">0%</span>
+                            <span id="volume-value" class="font-bold text-green-400">100%</span>
+                            <span class="text-gray-300">100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="settings-close-btn-2" class="mt-6 py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
+            </div>
+        </div>
+
+        <!-- Friends & Alliances Modal -->
+        <div id="friends-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-4xl text-center border-4 border-blue-500 relative">
+                <button id="friends-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-blue-400 mb-6">Friends & Alliances</h2>
+                
+                <div class="flex border-b-2 border-gray-700 mb-6">
+                    <button id="friends-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent active">Friends</button>
+                    <button id="alliances-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">Alliances</button>
+                </div>
+                
+                <div id="friends-content">
+                    <div class="mb-4">
+                        <input type="text" id="friend-search" placeholder="Search for friends by club name..." class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white mb-4">
+                        <button id="search-friend-btn" class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Search</button>
+                    </div>
+                    <div id="friends-list" class="space-y-4 max-h-64 overflow-y-auto">
+                        <!-- Friends list will be dynamically inserted here -->
+                    </div>
+                </div>
+                
+                <div id="alliances-content" class="hidden">
+                    <div class="mb-4">
+                        <input type="text" id="alliance-search" placeholder="Search for alliances..." class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white mb-4">
+                        <button id="search-alliance-btn" class="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg interactive-button">Search</button>
+                    </div>
+                    <div id="alliances-list" class="space-y-4 max-h-64 overflow-y-auto">
+                        <!-- Alliances list will be dynamically inserted here -->
+                    </div>
+                    <button id="create-alliance-btn" class="w-full mt-4 py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Create New Alliance</button>
+                </div>
+                
+                <button id="friends-close-btn-2" class="mt-6 py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
+            </div>
+        </div>
+
+        <!-- Live Transfer Market Modal -->
+        <div id="live-transfer-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+            <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-6xl text-center border-4 border-yellow-500 relative">
+                <button id="live-transfer-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold text-yellow-400 mb-6">Live Transfer Market</h2>
+                
+                <div class="flex border-b-2 border-gray-700 mb-6">
+                    <button id="buy-players-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent active">Buy Players</button>
+                    <button id="sell-players-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">Sell Players</button>
+                </div>
+                
+                <div id="buy-players-content">
+                    <div class="mb-4 flex gap-4">
+                        <input type="text" id="player-search" placeholder="Search players..." class="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                        <select id="player-position-filter" class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            <option value="">All Positions</option>
+                            <option value="GK">Goalkeeper</option>
+                            <option value="DEF">Defender</option>
+                            <option value="MID">Midfielder</option>
+                            <option value="ATT">Attacker</option>
+                        </select>
+                        <select id="player-rarity-filter" class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            <option value="">All Rarities</option>
+                            <option value="bronze">Bronze</option>
+                            <option value="silver">Silver</option>
+                            <option value="gold">Gold</option>
+                            <option value="special">Special</option>
+                        </select>
+                    </div>
+                    <div id="live-transfer-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                        <!-- Live transfer market players will be dynamically inserted here -->
+                    </div>
+                </div>
+                
+                <div id="sell-players-content" class="hidden">
+                    <div id="sell-player-list-live" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                        <!-- Players to sell will be dynamically inserted here -->
+                    </div>
+                </div>
+                
+                <button id="live-transfer-close-btn-2" class="mt-6 py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
+            </div>
+        </div>
+
         <div id="auth-screen" class="w-full h-full flex items-center justify-center bg-gray-900 hidden">
             <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-xl shadow-2xl border border-green-500">
                 <div>
@@ -409,6 +757,15 @@
                     <input id="signup-email" type="email" placeholder="Email" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                     <input id="signup-password" type="password" placeholder="Password" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                     <input id="signup-club-name" type="text" placeholder="Club Name" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <div>
+                        <label class="block text-gray-300 mb-2">Select Server</label>
+                        <select id="signup-server" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="bangladesh">Bangladesh (0-100ms)</option>
+                            <option value="singapore">Singapore (100-150ms)</option>
+                            <option value="usa">USA (200-300ms)</option>
+                            <option value="brazil">Brazil (200-300ms)</option>
+                        </select>
+                    </div>
                     <button type="submit" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Sign Up</button>
                 </form>
                 <p id="auth-toggle" class="text-center text-sm text-green-400 hover:underline cursor-pointer">
@@ -451,6 +808,16 @@
                     <div class="flex items-center space-x-2">
                          <i class="fas fa-dumbbell text-yellow-400"></i>
                          <span id="user-training-points" class="font-bold text-white">0</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4 bg-gray-900 px-4 py-1 rounded-full">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-server text-green-400"></i>
+                        <span id="user-server" class="font-bold text-white">BD</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-signal text-blue-400"></i>
+                        <span id="user-ping" class="font-bold text-white">0ms</span>
                     </div>
                 </div>
                  <div class="flex items-center space-x-4">
@@ -506,6 +873,9 @@
                             <button id="formation-btn" class="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg interactive-button">
                                 <i class="fas fa-chess-board mr-2"></i>Formation
                             </button>
+                            <button id="advanced-tactics-btn" class="py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg interactive-button">
+                                <i class="fas fa-cogs mr-2"></i>Advanced Tactics
+                            </button>
                         </div>
                     </div>
                     <div id="squad-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
@@ -521,6 +891,9 @@
                             <button id="single-player-btn" class="flex-1 py-5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-2xl transition duration-300 interactive-button">
                                 Single Player
                             </button>
+                            <button id="friendly-match-btn" class="flex-1 py-5 px-6 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-xl text-2xl transition duration-300 interactive-button">
+                                Friendly Match
+                            </button>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="player-card p-4 text-center">
@@ -534,9 +907,9 @@
                                 <button class="w-full py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg interactive-button">Enter Tournament</button>
                             </div>
                             <div class="player-card p-4 text-center">
-                                <h3 class="text-xl font-bold text-blue-400 mb-2">Friendly</h3>
-                                <p class="text-gray-300 mb-4">Practice matches</p>
-                                <button class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Friendly Match</button>
+                                <h3 class="text-xl font-bold text-blue-400 mb-2">Private League</h3>
+                                <p class="text-gray-300 mb-4">Create or join private leagues</p>
+                                <button class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Private League</button>
                             </div>
                         </div>
                     </div>
@@ -556,6 +929,7 @@
                             <button data-strategy="Attack" class="strategy-btn flex-1 py-3 px-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg interactive-button">Attack ⚽</button>
                             <button data-strategy="Balanced" class="strategy-btn flex-1 py-3 px-2 btn-primary rounded-lg">Balanced ⚖️</button>
                             <button data-strategy="Defense" class="strategy-btn flex-1 py-3 px-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Defense 🛡️</button>
+                            <button id="substitution-btn" class="py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg interactive-button">Substitutions</button>
                         </div>
                         <div id="live-commentary" class="bg-gray-900 bg-opacity-80 p-5 rounded-xl h-96 overflow-y-auto border border-gray-700 shadow-inner text-gray-300"></div>
                          <!-- Emoji Reaction System -->
@@ -643,13 +1017,20 @@
                     <div class="flex border-b-2 border-gray-700 mb-6">
                         <button id="players-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent active">Players</button>
                         <button id="packs-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">Player Packs</button>
+                        <button id="items-tab" class="tab-button flex-1 py-2 px-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">Special Items</button>
                     </div>
                     <div id="store-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
                     <div id="store-packs" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    <div id="store-special-items" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 </div>
                 <div id="transfers-view" class="view hidden p-6">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-green-400">Transfer Market</h1>
+                    <div class="mb-6">
+                        <button id="open-live-market-btn" class="py-3 px-6 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg interactive-button mb-6">
+                            <i class="fas fa-globe-americas mr-2"></i>Live Player-to-Player Transfer Market
+                        </button>
+                    </div>
                     <div class="mb-10"><h2 class="text-2xl font-semibold mb-4 border-b-2 border-gray-700 pb-2 text-green-400">Buy Players</h2><div id="transfer-market-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div></div>
                     <div><h2 class="text-2xl font-semibold mb-4 border-b-2 border-gray-700 pb-2 text-green-400">Sell Your Players</h2><div id="sell-player-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div></div>
                 </div>
@@ -681,6 +1062,101 @@
                         <p class="mt-4 text-lg text-gray-400">Version: <span class="font-bold text-yellow-400">1.0</span></p>
                     </div>
                 </div>
+                <!-- New Views for Enhanced Features -->
+                <div id="club-management-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
+                    <h1 class="text-3xl font-bold mb-8 text-green-400">Club Management</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="facilities-btn">
+                            <div class="text-4xl mb-4 text-blue-400"><i class="fas fa-building"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Club Facilities</h3>
+                            <p class="text-gray-400">Upgrade your stadium, training ground, and youth academy</p>
+                        </div>
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="sponsorship-btn">
+                            <div class="text-4xl mb-4 text-yellow-400"><i class="fas fa-handshake"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Sponsorship</h3>
+                            <p class="text-gray-400">Sign sponsorship deals for additional income</p>
+                        </div>
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="kit-designer-btn">
+                            <div class="text-4xl mb-4 text-purple-400"><i class="fas fa-tshirt"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Kit Designer</h3>
+                            <p class="text-gray-400">Design custom kits for your club</p>
+                        </div>
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="settings-btn">
+                            <div class="text-4xl mb-4 text-green-400"><i class="fas fa-cog"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Game Settings</h3>
+                            <p class="text-gray-400">Adjust graphics, FPS, audio and view server info</p>
+                        </div>
+                    </div>
+                    
+                    <div class="player-card p-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">Club Finances</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <p class="text-gray-400">Weekly Income</p>
+                                <p class="text-2xl font-bold text-yellow-400" id="weekly-income">0 Coins</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-gray-400">Weekly Expenses</p>
+                                <p class="text-2xl font-bold text-red-400" id="weekly-expenses">0 Coins</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-gray-400">Net Profit</p>
+                                <p class="text-2xl font-bold text-green-400" id="net-profit">0 Coins</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="social-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
+                    <h1 class="text-3xl font-bold mb-8 text-green-400">Social Features</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="friends-btn">
+                            <div class="text-4xl mb-4 text-blue-400"><i class="fas fa-user-friends"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Friends & Alliances</h3>
+                            <p class="text-gray-400">Connect with friends and join alliances</p>
+                        </div>
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="private-leagues-btn">
+                            <div class="text-4xl mb-4 text-purple-400"><i class="fas fa-trophy"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Private Leagues</h3>
+                            <p class="text-gray-400">Create or join private leagues with friends</p>
+                        </div>
+                    </div>
+                    
+                    <div class="player-card p-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">Recent Friend Activity</h2>
+                        <div id="friend-activity-list" class="space-y-4">
+                            <!-- Friend activity will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="live-transfer-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
+                    <h1 class="text-3xl font-bold mb-8 text-green-400">Live Transfer Market</h1>
+                    
+                    <div class="player-card p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-white">Active Auctions</h2>
+                            <button id="refresh-auctions-btn" class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">
+                                <i class="fas fa-sync-alt mr-2"></i>Refresh
+                            </button>
+                        </div>
+                        <div id="auction-list" class="space-y-4 max-h-96 overflow-y-auto">
+                            <!-- Active auctions will be dynamically inserted here -->
+                        </div>
+                    </div>
+                    
+                    <div class="player-card p-6">
+                        <h2 class="text-xl font-bold text-white mb-4">Your Active Listings</h2>
+                        <div id="my-listings" class="space-y-4">
+                            <!-- User's active listings will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </div>
             </main>
 
             <footer class="bottom-nav fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around z-40">
@@ -689,6 +1165,8 @@
                  <a href="#transfers" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Transfers"><i class="fas fa-exchange-alt text-2xl"></i><span class="text-xs mt-1 font-semibold">Transfers</span></a>
                  <a href="#store" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Store"><i class="fas fa-store text-2xl"></i><span class="text-xs mt-1 font-semibold">Store</span></a>
                  <a href="#season-pass" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Season Pass"><i class="fas fa-ticket-alt text-2xl"></i><span class="text-xs mt-1 font-semibold">Season Pass</span></a>
+                 <a href="#club-management" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Club Management"><i class="fas fa-cog text-2xl"></i><span class="text-xs mt-1 font-semibold">Management</span></a>
+                 <a href="#social" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Social"><i class="fas fa-users text-2xl"></i><span class="text-xs mt-1 font-semibold">Social</span></a>
             </footer>
 
         </div>
@@ -700,14 +1178,14 @@
         import { getDatabase, ref, set, get, onValue, update, serverTimestamp, remove, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAVs3SuUH0P9hGu57v0A9kZ5dwBulMD80Y",
-            authDomain: "voltefootball.firebaseapp.com",
-            databaseURL: "https://voltefootball-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "voltefootball",
-            storageBucket: "voltefootball.firebasestorage.app",
-            messagingSenderId: "549298882625",
-            appId: "1:549298882625:web:1aaecf96ebbb64c5c7dec0",
-            measurementId: "G-0F5B1D98Y3"
+         apiKey: "AIzaSyCc9VfxfKPxG8TKUq7kovp1kKQDyEQosHY",
+  authDomain: "efootball-manager-a2739.firebaseapp.com",
+  databaseURL: "https://efootball-manager-a2739-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "efootball-manager-a2739",
+  storageBucket: "efootball-manager-a2739.firebasestorage.app",
+  messagingSenderId: "990435760435",
+  appId: "1:990435760435:web:dfd38cfb17d22d88170646",
+  measurementId: "G-0QD82FGFRG"
         };
         const IMGBB_API_KEY = "fe3e06e5bbecab856c63cf7e6a50a251";
         const MARADONA_PLAYER_ID = "MARADONA_PRIME"; 
@@ -772,11 +1250,15 @@
         // New feature elements
         const trainingBtn = document.getElementById('training-btn');
         const formationBtn = document.getElementById('formation-btn');
+        const advancedTacticsBtn = document.getElementById('advanced-tactics-btn');
         const singlePlayerBtn = document.getElementById('single-player-btn');
+        const friendlyMatchBtn = document.getElementById('friendly-match-btn');
         const playersTab = document.getElementById('players-tab');
         const packsTab = document.getElementById('packs-tab');
+        const itemsTab = document.getElementById('items-tab');
         const storeItems = document.getElementById('store-items');
         const storePacks = document.getElementById('store-packs');
+        const storeSpecialItems = document.getElementById('store-special-items');
 
         // Modal elements
         const trainingModal = document.getElementById('training-modal');
@@ -785,6 +1267,26 @@
         const formationCloseBtn = document.getElementById('formation-close-btn');
         const formationSaveBtn = document.getElementById('formation-save-btn');
         const formationCancelBtn = document.getElementById('formation-cancel-btn');
+        const advancedTacticsModal = document.getElementById('advanced-tactics-modal');
+        const advancedTacticsCloseBtn = document.getElementById('advanced-tactics-close-btn');
+        const advancedTacticsSaveBtn = document.getElementById('advanced-tactics-save-btn');
+        const advancedTacticsCancelBtn = document.getElementById('advanced-tactics-cancel-btn');
+        const facilitiesModal = document.getElementById('facilities-modal');
+        const facilitiesCloseBtn = document.getElementById('facilities-close-btn');
+        const facilitiesCloseBtn2 = document.getElementById('facilities-close-btn-2');
+        const sponsorshipModal = document.getElementById('sponsorship-modal');
+        const sponsorshipCloseBtn = document.getElementById('sponsorship-close-btn');
+        const sponsorshipCloseBtn2 = document.getElementById('sponsorship-close-btn-2');
+        const kitDesignerModal = document.getElementById('kit-designer-modal');
+        const kitDesignerCloseBtn = document.getElementById('kit-designer-close-btn');
+        const kitSaveBtn = document.getElementById('kit-save-btn');
+        const kitCancelBtn = document.getElementById('kit-cancel-btn');
+        const friendsModal = document.getElementById('friends-modal');
+        const friendsCloseBtn = document.getElementById('friends-close-btn');
+        const friendsCloseBtn2 = document.getElementById('friends-close-btn-2');
+        const liveTransferModal = document.getElementById('live-transfer-modal');
+        const liveTransferCloseBtn = document.getElementById('live-transfer-close-btn');
+        const liveTransferCloseBtn2 = document.getElementById('live-transfer-close-btn-2');
         const packOpeningModal = document.getElementById('pack-opening-modal');
         const packCloseBtn = document.getElementById('pack-close-btn');
         const packOpenAgainBtn = document.getElementById('pack-open-again-btn');
@@ -792,6 +1294,14 @@
         const dailyLoginModal = document.getElementById('daily-login-modal');
         const dailyLoginCloseBtn = document.getElementById('daily-login-close-btn');
         const dailyLoginClaimBtn = document.getElementById('daily-login-claim-btn');
+
+        // New feature buttons
+        const facilitiesBtn = document.getElementById('facilities-btn');
+        const sponsorshipBtn = document.getElementById('sponsorship-btn');
+        const kitDesignerBtn = document.getElementById('kit-designer-btn');
+        const friendsBtn = document.getElementById('friends-btn');
+        const privateLeaguesBtn = document.getElementById('private-leagues-btn');
+        const substitutionBtn = document.getElementById('substitution-btn');
 
         function playSound(sound) {
             sound.currentTime = 0;
@@ -991,6 +1501,7 @@
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const clubName = document.getElementById('signup-club-name').value;
+            const selectedServer = document.getElementById('signup-server').value;
             authError.textContent = '';
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -1014,8 +1525,27 @@
                     seasonPass: { level: 1, xp: 0, premium: false },
                     trainingPoints: 0,
                     formation: "4-4-2",
+                    advancedTactics: "Balanced",
                     lastLoginDate: new Date().toDateString(),
-                    dailyLoginStreak: 1
+                    dailyLoginStreak: 1,
+                    clubFacilities: {
+                        stadium: { level: 1 },
+                        trainingGround: { level: 1 },
+                        youthAcademy: { level: 1 }
+                    },
+                    sponsorshipDeals: {},
+                    kitDesign: {
+                        jerseyColor: "#1e40af",
+                        shortsColor: "#1e40af",
+                        style: "plain"
+                    },
+                    friends: [],
+                    alliances: [],
+                    activeListings: [],
+                    server: selectedServer,
+                    graphics: 'medium',
+                    fpsLimit: 60,
+                    audioVolume: 100
                 });
                 
                 await set(ref(db, 'players/' + MARADONA_PLAYER_ID), {
@@ -1039,6 +1569,11 @@
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             sessionStorage.removeItem('adShown');
+            // Clear ping update interval
+            if (window.pingUpdateInterval) {
+                clearInterval(window.pingUpdateInterval);
+                window.pingUpdateInterval = null;
+            }
             signOut(auth);
         });
         
@@ -1075,6 +1610,29 @@
                     const matchesNeeded = currentUserData.matchesNeededForLevelUp || BASE_MATCHES_FOR_LEVEL_UP;
                     const xpPercentage = (matchesPlayed / matchesNeeded) * 100;
                     document.getElementById('xp-bar-fill').style.width = `${xpPercentage}%`;
+                    
+                    // Display server information
+                    const server = currentUserData.server || 'bangladesh';
+                    const serverNames = {
+                        'bangladesh': 'BD',
+                        'singapore': 'SG',
+                        'usa': 'US',
+                        'brazil': 'BR'
+                    };
+                    document.getElementById('user-server').textContent = serverNames[server] || 'BD';
+                    
+                    // Simulate ping based on server
+                    let ping = 0;
+                    if (server === 'bangladesh') {
+                        ping = Math.floor(Math.random() * 101); // 0-100ms
+                    } else if (server === 'singapore') {
+                        ping = Math.floor(Math.random() * 51) + 100; // 100-150ms
+                    } else if (server === 'usa') {
+                        ping = Math.floor(Math.random() * 101) + 200; // 200-300ms
+                    } else if (server === 'brazil') {
+                        ping = Math.floor(Math.random() * 101) + 200; // 200-300ms
+                    }
+                    document.getElementById('user-ping').textContent = `${ping}ms`;
 
                     if (currentUserData.squad && currentUserData.squad.length > 0) {
                         await loadSquad(currentUserData.squad);
@@ -1087,12 +1645,35 @@
 
                     loadStoreItems();
                     loadStorePacks();
+                    loadStoreSpecialItems();
                     loadTransferMarket();
                     loadLeaderboard();
                     loadTournaments();
                     loadEvents();
+                    loadClubFinances();
                     
                     findMatchBtn.disabled = false;
+                    
+                    // Set up periodic ping update
+                    if (window.pingUpdateInterval) {
+                        clearInterval(window.pingUpdateInterval);
+                    }
+                    window.pingUpdateInterval = setInterval(() => {
+                        if (currentUserData) {
+                            const server = currentUserData.server || 'bangladesh';
+                            let ping = 0;
+                            if (server === 'bangladesh') {
+                                ping = Math.floor(Math.random() * 101); // 0-100ms
+                            } else if (server === 'singapore') {
+                                ping = Math.floor(Math.random() * 51) + 100; // 100-150ms
+                            } else if (server === 'usa') {
+                                ping = Math.floor(Math.random() * 101) + 200; // 200-300ms
+                            } else if (server === 'brazil') {
+                                ping = Math.floor(Math.random() * 101) + 200; // 200-300ms
+                            }
+                            document.getElementById('user-ping').textContent = `${ping}ms`;
+                        }
+                    }, 5000); // Update every 5 seconds
                 }
             });
         }
@@ -1121,8 +1702,13 @@
                                        rarity === "silver" ? "silver" : 
                                        rarity === "gold" ? "gold" : "special";
                     
+                    // Check for player injuries and stamina
+                    const isInjured = playerData.injury && playerData.injury > 0;
+                    const stamina = playerData.stamina || 100;
+                    
                     squadListDiv.innerHTML += `
-                        <div class="player-card p-4 text-center shadow-lg ${rarityClass}">
+                        <div class="player-card p-4 text-center shadow-lg ${rarityClass} relative">
+                            ${isInjured ? '<div class="injury-indicator" title="Injured"><i class="fas fa-first-aid"></i></div>' : ''}
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg text-white">${playerData.name}</h4>
                             <p class="text-sm text-gray-400">${playerData.position}</p>
@@ -1134,6 +1720,10 @@
                                 <div class="attribute-bar"><div class="attribute-fill shooting-fill" style="width: ${attributes.shooting}%"></div></div>
                                 <div class="flex justify-between"><span>Passing:</span><span>${attributes.passing}</span></div>
                                 <div class="attribute-bar"><div class="attribute-fill passing-fill" style="width: ${attributes.passing}%"></div></div>
+                            </div>
+                            <div class="mt-2">
+                                <div class="flex justify-between text-xs"><span>Stamina:</span><span>${stamina}%</span></div>
+                                <div class="stamina-bar"><div class="stamina-fill" style="width: ${stamina}%"></div></div>
                             </div>
                         </div>`;
                 }
@@ -1295,6 +1885,37 @@
             });
         }
 
+        async function loadStoreSpecialItems() {
+            const storeSpecialItemsDiv = document.getElementById('store-special-items');
+            storeSpecialItemsDiv.innerHTML = '';
+            
+            // Define special items
+            const specialItems = [
+                { id: 'fitness_card', name: 'Fitness Card', price: 500, coinsPrice: 500, gemsPrice: 10, description: 'Restores player stamina to 100%', type: 'fitness' },
+                { id: 'healing_card', name: 'Healing Card', price: 1000, coinsPrice: 1000, gemsPrice: 20, description: 'Instantly heals injured players', type: 'healing' },
+                { id: 'training_boost', name: 'Training Boost', price: 1500, coinsPrice: 1500, gemsPrice: 30, description: 'Doubles training effectiveness for 24 hours', type: 'boost' },
+                { id: 'totw_pack', name: 'Team of the Week', price: 7500, coinsPrice: 7500, gemsPrice: 150, description: 'Special pack with Team of the Week players', type: 'special_pack' }
+            ];
+            
+            specialItems.forEach(item => {
+                const priceHtml = item.gemsPrice > 0 
+                    ? `<div class="flex justify-center space-x-2">
+                         <span class="text-yellow-400"><i class="fas fa-coins"></i> ${item.coinsPrice}</span>
+                         <span class="text-blue-400"><i class="fas fa-gem"></i> ${item.gemsPrice}</span>
+                       </div>`
+                    : `<div class="text-yellow-400"><i class="fas fa-coins"></i> ${item.coinsPrice}</div>`;
+                
+                storeSpecialItemsDiv.innerHTML += `
+                    <div class="pack-card p-4 text-center shadow-lg">
+                        <div class="text-4xl mb-4">${item.type === 'fitness' ? '💪' : item.type === 'healing' ? '🏥' : item.type === 'boost' ? '⚡' : '🌟'}</div>
+                        <h4 class="font-bold text-lg text-white">${item.name}</h4>
+                        <p class="text-sm text-gray-400 mb-3">${item.description}</p>
+                        ${priceHtml}
+                        <button onclick="buySpecialItem('${item.id}', ${item.coinsPrice}, ${item.gemsPrice})" class="w-full mt-3 py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-md interactive-button">Buy Item</button>
+                    </div>`;
+            });
+        }
+
         async function loadTransferMarket() {
             const transferMarketListDiv = document.getElementById('transfer-market-list');
             transferMarketListDiv.innerHTML = ''; 
@@ -1400,6 +2021,39 @@
             }
         };
 
+        window.buySpecialItem = async (itemId, coinsPrice, gemsPrice) => {
+            if (!currentUserData) return showModal("User data not loaded.");
+            
+            // Check if user has enough currency
+            if (coinsPrice > 0 && currentUserData.balance < coinsPrice) {
+                return showModal("You don't have enough coins to buy this item.");
+            }
+            if (gemsPrice > 0 && currentUserData.gems < gemsPrice) {
+                return showModal("You don't have enough gems to buy this item.");
+            }
+            
+            // Deduct currency
+            const updates = {};
+            if (coinsPrice > 0) updates.balance = currentUserData.balance - coinsPrice;
+            if (gemsPrice > 0) updates.gems = currentUserData.gems - gemsPrice;
+            
+            // Add item to user's inventory
+            const inventory = currentUserData.inventory || {};
+            if (!inventory[itemId]) {
+                inventory[itemId] = 1;
+            } else {
+                inventory[itemId] += 1;
+            }
+            updates.inventory = inventory;
+            
+            try {
+                await update(ref(db, 'users/' + currentUserData.uid), updates);
+                showModal("Item purchased successfully!");
+            } catch (error) {
+                showModal("Failed to purchase item: " + error.message);
+            }
+        };
+
         async function openPack(packId) {
             const playersRef = ref(db, 'players');
             const snapshot = await get(playersRef);
@@ -1464,6 +2118,9 @@
             });
             
             await update(ref(db, 'users/' + currentUserData.uid), { squad: newSquad });
+            
+            // Track pack opening missions
+            trackPurchaseMissions();
         }
 
         document.getElementById('edit-club-name').addEventListener('click', () => {
@@ -1582,6 +2239,156 @@
             await update(ref(db), updates);
         });
 
+        friendlyMatchBtn.addEventListener('click', async () => {
+            if (!currentUserData || !currentUserData.uid) return showModal("Your data is still loading. Please wait a moment.");
+            if (!currentUserData.squad || currentUserData.squad.length < 5) return showModal("You must have at least 5 players in your squad to play a match.");
+            
+            // Open friendly match modal
+            openFriendlyMatchModal();
+        });
+        
+        // Add event listener for private leagues button
+        privateLeaguesBtn.addEventListener('click', async () => {
+            if (!currentUserData || !currentUserData.uid) return showModal("Your data is still loading. Please wait a moment.");
+            if (!currentUserData.squad || currentUserData.squad.length < 5) return showModal("You must have at least 5 players in your squad to play a match.");
+            
+            // Open private leagues modal
+            openPrivateLeaguesModal();
+        });
+        
+        // Add function to open friendly match modal
+        function openFriendlyMatchModal() {
+            // Create a modal for friendly matches
+            const modalHtml = `
+                <div id="friendly-match-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md text-left border-4 border-yellow-500 relative">
+                        <button id="friendly-match-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-yellow-400 mb-4">Friendly Match</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">Invite Friend</label>
+                                <input type="text" id="friend-name" placeholder="Enter friend's club name" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div class="flex space-x-3 pt-4">
+                                <button id="cancel-friendly-match-btn" class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                                <button id="send-invite-btn" class="flex-1 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Send Invite</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add the modal to the document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listeners
+            document.getElementById('friendly-match-close-btn').addEventListener('click', closeFriendlyMatchModal);
+            document.getElementById('cancel-friendly-match-btn').addEventListener('click', closeFriendlyMatchModal);
+            document.getElementById('send-invite-btn').addEventListener('click', sendFriendlyMatchInvite);
+        }
+        
+        // Add function to close friendly match modal
+        function closeFriendlyMatchModal() {
+            const modal = document.getElementById('friendly-match-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Add function to send friendly match invite
+        async function sendFriendlyMatchInvite() {
+            if (!currentUserData) return;
+            
+            const friendName = document.getElementById('friend-name').value.trim();
+            
+            if (!friendName) {
+                showModal("Please enter a friend's club name.");
+                return;
+            }
+            
+            // In a real implementation, you would search for the friend and send an invite
+            // For now, we'll just show a message
+            closeFriendlyMatchModal();
+            showModal(`Friendly match invite sent to ${friendName}!`);
+        }
+        
+        // Add function to open private leagues modal
+        function openPrivateLeaguesModal() {
+            // Create a modal for private leagues
+            const modalHtml = `
+                <div id="private-leagues-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md text-left border-4 border-blue-500 relative">
+                        <button id="private-leagues-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-blue-400 mb-4">Private Leagues</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">League Name</label>
+                                <input type="text" id="league-name" placeholder="Enter league name" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">League Code (for joining)</label>
+                                <input type="text" id="league-code" placeholder="Enter league code" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div class="flex space-x-3 pt-4">
+                                <button id="cancel-private-leagues-btn" class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                                <button id="create-league-btn" class="flex-1 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Create League</button>
+                                <button id="join-league-btn" class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">Join League</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add the modal to the document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listeners
+            document.getElementById('private-leagues-close-btn').addEventListener('click', closePrivateLeaguesModal);
+            document.getElementById('cancel-private-leagues-btn').addEventListener('click', closePrivateLeaguesModal);
+            document.getElementById('create-league-btn').addEventListener('click', createPrivateLeague);
+            document.getElementById('join-league-btn').addEventListener('click', joinPrivateLeague);
+        }
+        
+        // Add function to close private leagues modal
+        function closePrivateLeaguesModal() {
+            const modal = document.getElementById('private-leagues-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Add function to create private league
+        async function createPrivateLeague() {
+            if (!currentUserData) return;
+            
+            const leagueName = document.getElementById('league-name').value.trim();
+            
+            if (!leagueName) {
+                showModal("Please enter a league name.");
+                return;
+            }
+            
+            // In a real implementation, you would create the league in Firebase
+            // For now, we'll just show a message
+            closePrivateLeaguesModal();
+            showModal(`Private league "${leagueName}" created successfully!`);
+        }
+        
+        // Add function to join private league
+        async function joinPrivateLeague() {
+            if (!currentUserData) return;
+            
+            const leagueCode = document.getElementById('league-code').value.trim();
+            
+            if (!leagueCode) {
+                showModal("Please enter a league code.");
+                return;
+            }
+            
+            // In a real implementation, you would join the league in Firebase
+            // For now, we'll just show a message
+            closePrivateLeaguesModal();
+            showModal(`Joined private league with code ${leagueCode}!`);
+        }
+
         cancelMatchmakingBtn.addEventListener('click', async () => {
             if (!currentUserData || !currentUserData.uid) return;
             await remove(ref(db, `matchmaking/${currentUserData.uid}`));
@@ -1673,7 +2480,8 @@
                 });
             }
 
-            const teamA_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamA.squad);
+            // For single player matches, teamA (AI) may have an empty squad
+            const teamA_PlayerNames = initialMatchData.isSinglePlayer ? [initialMatchData.teamA.clubName] : await getPlayerNamesBySquad(initialMatchData.teamA.squad);
             const teamB_PlayerNames = await getPlayerNamesBySquad(initialMatchData.teamB.squad);
 
             if(matchListener) matchListener(); 
@@ -1712,7 +2520,7 @@
                 } else if (matchData.status === 'completed') { timerDisplay.textContent = '00:00 (FT)'; } 
                 else { timerDisplay.textContent = '01:30'; }
 
-                if(currentUserData && matchData.status === 'starting' && matchData.teamA.uid === currentUserData.uid){
+                if(currentUserData && matchData.status === 'starting' && (matchData.teamA.uid === currentUserData.uid || matchData.isSinglePlayer)){
                      runMatchSimulation(matchId, matchData, teamA_PlayerNames, teamB_PlayerNames);
                 }
             });
@@ -1793,6 +2601,11 @@
             updates.trainingPoints = (userData.trainingPoints || 0) + trainingPointsGained;
 
             await update(userRef, updates);
+            
+            // Track season pass missions if this is the current user
+            if (uid === currentUserData?.uid) {
+                trackMatchMissions(result);
+            }
         }
 
         async function runMatchSimulation(matchId, initialMatchData, teamA_Players, teamB_Players){
@@ -1823,18 +2636,28 @@
                         const defB = (pB / totalP) * getDefenseModifier(sB);
                         if(Math.random() > defB){
                             matchData.score.teamA++; scoreUpdated = true;
-                            const scorer = getRandomItem(teamA_Players) || matchData.teamA.clubName;
-                            eventText = getRandomCommentary('goal', matchData.teamA.clubName, scorer, getRandomItem(teamA_Players.filter(p => p !== scorer)));
-                        } else { eventText = getRandomCommentary('save', matchData.teamB.clubName, getRandomItem(teamA_Players), getRandomItem(teamB_Players)); }
+                            const scorer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players) : matchData.teamA.clubName;
+                            const otherPlayer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players.filter(p => p !== scorer)) : matchData.teamA.clubName;
+                            eventText = getRandomCommentary('goal', matchData.teamA.clubName, scorer, otherPlayer);
+                        } else { 
+                            const teamAPlayer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players) : matchData.teamA.clubName;
+                            const teamBPlayer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players) : matchData.teamB.clubName;
+                            eventText = getRandomCommentary('save', matchData.teamB.clubName, teamAPlayer, teamBPlayer); 
+                        }
                     } else {
                         const offB = (pB / totalP) * baseC * getOffenseModifier(sB);
                         if(Math.random() < offB){
                             const defA = (pA / totalP) * getDefenseModifier(sA);
                             if(Math.random() > defA){
                                 matchData.score.teamB++; scoreUpdated = true;
-                                const scorer = getRandomItem(teamB_Players) || matchData.teamB.clubName;
-                                eventText = getRandomCommentary('goal', matchData.teamB.clubName, scorer, getRandomItem(teamB_Players.filter(p => p !== scorer)));
-                            } else { eventText = getRandomCommentary('save', matchData.teamA.clubName, getRandomItem(teamB_Players), getRandomItem(teamA_Players)); }
+                                const scorer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players) : matchData.teamB.clubName;
+                                const otherPlayer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players.filter(p => p !== scorer)) : matchData.teamB.clubName;
+                                eventText = getRandomCommentary('goal', matchData.teamB.clubName, scorer, otherPlayer);
+                            } else { 
+                                const teamBPlayer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players) : matchData.teamB.clubName;
+                                const teamAPlayer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players) : matchData.teamA.clubName;
+                                eventText = getRandomCommentary('save', matchData.teamA.clubName, teamBPlayer, teamAPlayer); 
+                            }
                         } else { eventText = getRandomCommentary('midfield'); }
                     }
                     await push(ref(db, `matches/${matchId}/events`), { time: `${seconds}'`, text: eventText });
@@ -1859,12 +2682,27 @@
                     await update(ref(db, `matches/${matchId}`), { status: 'completed' });
                     
                     const updates = {};
-                    if(winnerUid && loserUid){
-                        await updatePlayerStatsAfterMatch(winnerUid, "win");
-                        await updatePlayerStatsAfterMatch(loserUid, "loss");
-                    } else { // Draw
-                        await updatePlayerStatsAfterMatch(matchData.teamA.uid, "draw");
-                        await updatePlayerStatsAfterMatch(matchData.teamB.uid, "draw");
+                    // For single player matches, only update the real user's stats
+                    if (matchData.isSinglePlayer) {
+                        if (winnerUid === matchData.teamB.uid) {
+                            // User won
+                            await updatePlayerStatsAfterMatch(matchData.teamB.uid, "win");
+                        } else if (loserUid === matchData.teamB.uid) {
+                            // User lost
+                            await updatePlayerStatsAfterMatch(matchData.teamB.uid, "loss");
+                        } else {
+                            // Draw
+                            await updatePlayerStatsAfterMatch(matchData.teamB.uid, "draw");
+                        }
+                    } else {
+                        // For PvP matches, update both players' stats
+                        if(winnerUid && loserUid){
+                            await updatePlayerStatsAfterMatch(winnerUid, "win");
+                            await updatePlayerStatsAfterMatch(loserUid, "loss");
+                        } else { // Draw
+                            await updatePlayerStatsAfterMatch(matchData.teamA.uid, "draw");
+                            await updatePlayerStatsAfterMatch(matchData.teamB.uid, "draw");
+                        }
                     }
                     
                     if(winnerUid) {
@@ -1974,14 +2812,35 @@
             const seasonalList = document.getElementById('seasonal-missions-list');
             dailyList.innerHTML = weeklyList.innerHTML = seasonalList.innerHTML = ''; // Clear lists
 
+            // Get user's mission progress
+            const userMissions = currentUserData.missions || {};
+
             for(const missionId in missions) {
                 const mission = missions[missionId];
+                const userMission = userMissions[missionId] || { progress: 0, completed: false };
+                
+                // Check if mission is completed
+                const isCompleted = userMission.completed;
+                const canClaim = !isCompleted && userMission.progress >= mission.target;
+                
+                let buttonHtml;
+                if (isCompleted) {
+                    buttonHtml = `<button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Completed</button>`;
+                } else if (canClaim) {
+                    buttonHtml = `<button class="claim-mission-btn py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md interactive-button" data-mission="${missionId}">Claim</button>`;
+                } else {
+                    buttonHtml = `<button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Claim</button>`;
+                }
+                
+                const progressText = isCompleted ? 'Completed' : `${userMission.progress} / ${mission.target}`;
+                
                 const missionHtml = `<div class="mission-card p-4 flex justify-between items-center">
                     <div>
                         <p class="font-semibold text-white">${mission.description}</p>
+                        <p class="text-sm text-gray-400">Progress: ${progressText}</p>
                         <p class="text-sm text-gray-400">Reward: ${mission.xpReward} XP</p>
                     </div>
-                    <button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Claim</button>
+                    ${buttonHtml}
                 </div>`;
 
                 if (mission.type === 'daily') dailyList.innerHTML += missionHtml;
@@ -1991,6 +2850,121 @@
              if(!dailyList.innerHTML) dailyList.innerHTML = `<p class="text-gray-500 text-center">No daily missions available.</p>`;
              if(!weeklyList.innerHTML) weeklyList.innerHTML = `<p class="text-gray-500 text-center">No weekly missions available.</p>`;
              if(!seasonalList.innerHTML) seasonalList.innerHTML = `<p class="text-gray-500 text-center">No seasonal missions available.</p>`;
+             
+             // Add event listeners to claim buttons
+             document.querySelectorAll('.claim-mission-btn').forEach(button => {
+                 button.addEventListener('click', async (e) => {
+                     const missionId = e.target.getAttribute('data-mission');
+                     await claimMissionReward(missionId);
+                 });
+             });
+        }
+        
+        // Add function to claim mission rewards
+        async function claimMissionReward(missionId) {
+            if (!currentUserData) return;
+            
+            try {
+                // Get mission config
+                const seasonConfigSnap = await get(ref(db, 'seasonPass/config'));
+                if (!seasonConfigSnap.exists()) {
+                    showModal("Failed to load mission data.");
+                    return;
+                }
+                
+                const config = seasonConfigSnap.val();
+                const mission = config.missions[missionId];
+                
+                if (!mission) {
+                    showModal("Mission not found.");
+                    return;
+                }
+                
+                // Get user's current mission progress
+                const userMissions = currentUserData.missions || {};
+                const userMission = userMissions[missionId] || { progress: 0, completed: false };
+                
+                // Check if mission can be claimed
+                if (userMission.completed) {
+                    showModal("Mission already completed.");
+                    return;
+                }
+                
+                if (userMission.progress < mission.target) {
+                    showModal(`Mission not completed yet. Progress: ${userMission.progress}/${mission.target}`);
+                    return;
+                }
+                
+                // Mark mission as completed and award rewards
+                userMissions[missionId] = { progress: userMission.progress, completed: true };
+                
+                // Update season pass XP
+                const sp = currentUserData.seasonPass || { level: 1, xp: 0, premium: false };
+                sp.xp += mission.xpReward;
+                
+                // Update user data
+                await update(ref(db, 'users/' + currentUserData.uid), {
+                    missions: userMissions,
+                    seasonPass: sp
+                });
+                
+                showModal(`Mission completed! You earned ${mission.xpReward} XP.`);
+                loadSeasonPassData(); // Refresh the display
+            } catch (error) {
+                console.error("Error claiming mission reward:", error);
+                showModal("Failed to claim mission reward: " + error.message);
+            }
+        }
+        
+        // Add function to track mission progress
+        async function trackMissionProgress(missionId, increment = 1) {
+            if (!currentUserData) return;
+            
+            try {
+                // Get user's current mission progress
+                const userMissions = currentUserData.missions || {};
+                const userMission = userMissions[missionId] || { progress: 0, completed: false };
+                
+                // Skip if already completed
+                if (userMission.completed) return;
+                
+                // Increment progress
+                userMission.progress += increment;
+                
+                // Update in database
+                const updates = {};
+                updates[`missions/${missionId}`] = userMission;
+                await update(ref(db, 'users/' + currentUserData.uid), updates);
+                
+                // Update in memory
+                if (!currentUserData.missions) currentUserData.missions = {};
+                currentUserData.missions[missionId] = userMission;
+            } catch (error) {
+                console.error("Error tracking mission progress:", error);
+            }
+        }
+        
+        // Add function to track match-related missions
+        function trackMatchMissions(result) {
+            if (!currentUserData) return;
+            
+            // Track PvP match missions
+            trackMissionProgress('weekly_win_5', result === 'win' ? 1 : 0);
+            trackMissionProgress('weekly_play_10', 1);
+            
+            // Track seasonal missions based on result
+            if (result === 'win') {
+                trackMissionProgress('seasonal_win_20', 1);
+            }
+        }
+        
+        // Add function to track purchase missions
+        function trackPurchaseMissions() {
+            if (!currentUserData) return;
+            
+            // Track purchase-related missions
+            trackMissionProgress('daily_spend_1000', 1); // This would need to be called with actual amount
+            trackMissionProgress('weekly_open_5_packs', 1);
         }
         
         function loadRewards(rewards, userSP) {
@@ -2272,19 +3246,735 @@
             document.getElementById('chemistry-value').textContent = `${chemistry}%`;
         }
 
+        // Advanced Tactics System
+        advancedTacticsBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openAdvancedTacticsModal();
+        });
+
+        advancedTacticsCloseBtn.addEventListener('click', () => {
+            advancedTacticsModal.classList.add('hidden');
+        });
+
+        advancedTacticsCancelBtn.addEventListener('click', () => {
+            advancedTacticsModal.classList.add('hidden');
+        });
+
+        advancedTacticsSaveBtn.addEventListener('click', async () => {
+            const selectedTactic = document.querySelector('.tactic-option.selected');
+            if (!selectedTactic) {
+                showModal("Please select a tactic!");
+                return;
+            }
+            
+            const tactic = selectedTactic.getAttribute('data-tactic');
+            await update(ref(db, 'users/' + currentUserData.uid), { advancedTactics: tactic });
+            showModal(`Advanced tactics changed to ${tactic}!`);
+            advancedTacticsModal.classList.add('hidden');
+        });
+
+        function openAdvancedTacticsModal() {
+            // Set current tactic as selected
+            const currentTactic = currentUserData.advancedTactics || "Balanced";
+            document.querySelectorAll('.tactic-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.getAttribute('data-tactic') === currentTactic) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            advancedTacticsModal.classList.remove('hidden');
+        }
+
+        // Add event listeners to tactic options
+        document.querySelectorAll('.tactic-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.tactic-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        // Club Facilities System
+        facilitiesBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openFacilitiesModal();
+        });
+
+        facilitiesCloseBtn.addEventListener('click', () => {
+            facilitiesModal.classList.add('hidden');
+        });
+
+        facilitiesCloseBtn2.addEventListener('click', () => {
+            facilitiesModal.classList.add('hidden');
+        });
+
+        function openFacilitiesModal() {
+            const facilities = currentUserData.clubFacilities || {
+                stadium: { level: 1 },
+                trainingGround: { level: 1 },
+                youthAcademy: { level: 1 }
+            };
+            
+            document.getElementById('stadium-level').textContent = facilities.stadium.level;
+            document.getElementById('training-ground-level').textContent = facilities.trainingGround.level;
+            document.getElementById('youth-academy-level').textContent = facilities.youthAcademy.level;
+            
+            // Add event listeners to upgrade buttons
+            document.querySelectorAll('.upgrade-facility-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const facility = e.target.getAttribute('data-facility');
+                    await upgradeFacility(facility);
+                });
+            });
+            
+            facilitiesModal.classList.remove('hidden');
+        }
+
+        async function upgradeFacility(facility) {
+            if (!currentUserData) return;
+            
+            const facilities = currentUserData.clubFacilities || {
+                stadium: { level: 1 },
+                trainingGround: { level: 1 },
+                youthAcademy: { level: 1 }
+            };
+            
+            const currentLevel = facilities[facility].level;
+            const upgradeCost = getFacilityUpgradeCost(facility, currentLevel);
+            
+            if (currentUserData.balance < upgradeCost) {
+                showModal(`You don't have enough coins to upgrade this facility. Required: ${upgradeCost} coins.`);
+                return;
+            }
+            
+            // Update facility level and deduct coins
+            facilities[facility].level = currentLevel + 1;
+            const newBalance = currentUserData.balance - upgradeCost;
+            
+            await update(ref(db, 'users/' + currentUserData.uid), {
+                clubFacilities: facilities,
+                balance: newBalance
+            });
+            
+            showModal(`${facility} upgraded to level ${currentLevel + 1}!`);
+            openFacilitiesModal(); // Refresh the modal
+        }
+
+        function getFacilityUpgradeCost(facility, currentLevel) {
+            const baseCosts = {
+                stadium: 5000,
+                trainingGround: 3000,
+                youthAcademy: 8000
+            };
+            
+            return baseCosts[facility] * currentLevel;
+        }
+
+        // Sponsorship System
+        sponsorshipBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openSponsorshipModal();
+        });
+
+        sponsorshipCloseBtn.addEventListener('click', () => {
+            sponsorshipModal.classList.add('hidden');
+        });
+
+        sponsorshipCloseBtn2.addEventListener('click', () => {
+            sponsorshipModal.classList.add('hidden');
+        });
+
+        async function openSponsorshipModal() {
+            const sponsorshipList = document.getElementById('sponsorship-list');
+            sponsorshipList.innerHTML = '';
+            
+            // Define sponsorship deals
+            const sponsorshipDeals = [
+                { id: 'local_sponsor', name: 'Local Sponsor', income: 500, duration: 7, requirement: 'Club Level 2' },
+                { id: 'regional_sponsor', name: 'Regional Sponsor', income: 1000, duration: 7, requirement: 'Club Level 5' },
+                { id: 'national_sponsor', name: 'National Sponsor', income: 2000, duration: 7, requirement: 'Club Level 10' },
+                { id: 'international_sponsor', name: 'International Sponsor', income: 5000, duration: 7, requirement: 'Club Level 20' }
+            ];
+            
+            const userSponsorships = currentUserData.sponsorshipDeals || {};
+            const userLevel = currentUserData.level || 1;
+            
+            sponsorshipDeals.forEach(deal => {
+                const isActive = userSponsorships[deal.id] && userSponsorships[deal.id].active;
+                const canSign = userLevel >= parseInt(deal.requirement.split(' ')[2]);
+                
+                let buttonHtml;
+                if (isActive) {
+                    buttonHtml = `<button class="py-2 px-4 bg-gray-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Active</button>`;
+                } else if (canSign) {
+                    buttonHtml = `<button class="sign-sponsor-btn py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md interactive-button" data-deal='${JSON.stringify(deal)}'>Sign Deal</button>`;
+                } else {
+                    buttonHtml = `<button class="py-2 px-4 bg-yellow-600 text-white font-bold rounded-md cursor-not-allowed" disabled>Requirement: ${deal.requirement}</button>`;
+                }
+                
+                sponsorshipList.innerHTML += `
+                    <div class="player-card p-4 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${deal.name}</h3>
+                            <p class="text-gray-300">Weekly Income: ${deal.income} coins</p>
+                            <p class="text-gray-400 text-sm">Duration: ${deal.duration} days</p>
+                        </div>
+                        ${buttonHtml}
+                    </div>`;
+            });
+            
+            // Add event listeners to sign buttons
+            document.querySelectorAll('.sign-sponsor-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const deal = JSON.parse(e.target.getAttribute('data-deal'));
+                    await signSponsorshipDeal(deal);
+                });
+            });
+            
+            sponsorshipModal.classList.remove('hidden');
+        }
+
+        async function signSponsorshipDeal(deal) {
+            if (!currentUserData) return;
+            
+            const sponsorshipDeals = currentUserData.sponsorshipDeals || {};
+            
+            // Check if already has an active deal
+            if (sponsorshipDeals[deal.id] && sponsorshipDeals[deal.id].active) {
+                showModal("You already have an active sponsorship deal with this sponsor!");
+                return;
+            }
+            
+            // Add the sponsorship deal
+            sponsorshipDeals[deal.id] = {
+                active: true,
+                signedDate: new Date().toISOString(),
+                endDate: new Date(Date.now() + deal.duration * 24 * 60 * 60 * 1000).toISOString(),
+                income: deal.income
+            };
+            
+            await update(ref(db, 'users/' + currentUserData.uid), {
+                sponsorshipDeals: sponsorshipDeals
+            });
+            
+            showModal(`Successfully signed sponsorship deal with ${deal.name}! You will receive ${deal.income} coins weekly.`);
+            openSponsorshipModal(); // Refresh the modal
+        }
+
+        // Kit Designer System
+        kitDesignerBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openKitDesignerModal();
+        });
+
+        kitDesignerCloseBtn.addEventListener('click', () => {
+            kitDesignerModal.classList.add('hidden');
+        });
+
+        kitCancelBtn.addEventListener('click', () => {
+            kitDesignerModal.classList.add('hidden');
+        });
+
+        kitSaveBtn.addEventListener('click', async () => {
+            const jerseyColor = document.getElementById('jersey-color').value;
+            const shortsColor = document.getElementById('shorts-color').value;
+            const kitStyle = document.getElementById('kit-style').value;
+            
+            await update(ref(db, 'users/' + currentUserData.uid), {
+                kitDesign: {
+                    jerseyColor: jerseyColor,
+                    shortsColor: shortsColor,
+                    style: kitStyle
+                }
+            });
+            
+            showModal("Kit design saved successfully!");
+            kitDesignerModal.classList.add('hidden');
+        });
+
+        function openKitDesignerModal() {
+            const kitDesign = currentUserData.kitDesign || {
+                jerseyColor: "#1e40af",
+                shortsColor: "#1e40af",
+                style: "plain"
+            };
+            
+            // Set current values
+            document.getElementById('jersey-color').value = kitDesign.jerseyColor;
+            document.getElementById('shorts-color').value = kitDesign.shortsColor;
+            document.getElementById('kit-style').value = kitDesign.style;
+            
+            // Update kit preview
+            updateKitPreview(kitDesign.jerseyColor, kitDesign.shortsColor, kitDesign.style);
+            
+            // Add event listeners for real-time preview
+            document.getElementById('jersey-color').addEventListener('input', (e) => {
+                updateKitPreview(e.target.value, document.getElementById('shorts-color').value, document.getElementById('kit-style').value);
+            });
+            
+            document.getElementById('shorts-color').addEventListener('input', (e) => {
+                updateKitPreview(document.getElementById('jersey-color').value, e.target.value, document.getElementById('kit-style').value);
+            });
+            
+            document.getElementById('kit-style').addEventListener('change', (e) => {
+                updateKitPreview(document.getElementById('jersey-color').value, document.getElementById('shorts-color').value, e.target.value);
+            });
+            
+            kitDesignerModal.classList.remove('hidden');
+        }
+
+        function updateKitPreview(jerseyColor, shortsColor, style) {
+            const kitJersey = document.getElementById('kit-jersey');
+            const kitShorts = document.getElementById('kit-shorts');
+            
+            // Reset styles
+            kitJersey.style.backgroundColor = jerseyColor;
+            kitShorts.style.backgroundColor = shortsColor;
+            
+            // Clear existing stripes
+            const existingStripes = kitJersey.querySelectorAll('.kit-stripe');
+            existingStripes.forEach(stripe => stripe.remove());
+            
+            // Add stripes based on style
+            if (style === 'stripes') {
+                for (let i = 0; i < 5; i++) {
+                    const stripe = document.createElement('div');
+                    stripe.className = 'kit-stripe vertical';
+                    stripe.style.left = `${20 + i * 15}%`;
+                    stripe.style.backgroundColor = '#ffffff';
+                    kitJersey.appendChild(stripe);
+                }
+            } else if (style === 'hoops') {
+                for (let i = 0; i < 3; i++) {
+                    const stripe = document.createElement('div');
+                    stripe.className = 'kit-stripe horizontal';
+                    stripe.style.top = `${20 + i * 20}%`;
+                    stripe.style.backgroundColor = '#ffffff';
+                    kitJersey.appendChild(stripe);
+                }
+            } else if (style === 'sash') {
+                const stripe = document.createElement('div');
+                stripe.className = 'kit-stripe';
+                stripe.style.width = '100%';
+                stripe.style.height = '20px';
+                stripe.style.backgroundColor = '#ffffff';
+                stripe.style.transform = 'rotate(-45deg)';
+                stripe.style.position = 'absolute';
+                stripe.style.top = '40%';
+                stripe.style.left = '-20%';
+                kitJersey.appendChild(stripe);
+            }
+        }
+
+        // Game Settings System
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsCloseBtn = document.getElementById('settings-close-btn');
+        const settingsCloseBtn2 = document.getElementById('settings-close-btn-2');
+        
+        settingsBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openSettingsModal();
+        });
+
+        settingsCloseBtn.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+
+        settingsCloseBtn2.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+
+        function openSettingsModal() {
+            // Display server information
+            const server = currentUserData.server || 'bangladesh';
+            const serverNames = {
+                'bangladesh': 'Bangladesh',
+                'singapore': 'Singapore',
+                'usa': 'USA',
+                'brazil': 'Brazil'
+            };
+            
+            document.getElementById('current-server').textContent = serverNames[server] || 'Bangladesh';
+            
+            // Simulate ping based on server
+            let ping = 0;
+            if (server === 'bangladesh') {
+                ping = Math.floor(Math.random() * 101); // 0-100ms
+            } else if (server === 'singapore') {
+                ping = Math.floor(Math.random() * 51) + 100; // 100-150ms
+            } else if (server === 'usa') {
+                ping = Math.floor(Math.random() * 101) + 200; // 200-300ms
+            } else if (server === 'brazil') {
+                ping = Math.floor(Math.random() * 101) + 200; // 200-300ms
+            }
+            
+            document.getElementById('simulated-ping').textContent = `${ping} ms`;
+            
+            // Display graphics settings
+            const graphics = currentUserData.graphics || 'medium';
+            document.getElementById('current-graphics').textContent = graphics.charAt(0).toUpperCase() + graphics.slice(1);
+            
+            // Highlight current graphics setting
+            document.getElementById('graphics-low').classList.remove('bg-green-600', 'border-green-500');
+            document.getElementById('graphics-medium').classList.remove('bg-green-600', 'border-green-500');
+            document.getElementById('graphics-high').classList.remove('bg-green-600', 'border-green-500');
+            
+            if (graphics === 'low') {
+                document.getElementById('graphics-low').classList.add('bg-green-600', 'border-green-500');
+            } else if (graphics === 'medium') {
+                document.getElementById('graphics-medium').classList.add('bg-green-600', 'border-green-500');
+            } else if (graphics === 'high') {
+                document.getElementById('graphics-high').classList.add('bg-green-600', 'border-green-500');
+            }
+            
+            // Display FPS settings
+            const fpsLimit = currentUserData.fpsLimit || 60;
+            document.getElementById('current-fps').textContent = fpsLimit === 0 ? 'Unlimited' : `${fpsLimit} FPS`;
+            
+            // Highlight current FPS setting
+            document.getElementById('fps-30').classList.remove('bg-green-600', 'border-green-500');
+            document.getElementById('fps-60').classList.remove('bg-green-600', 'border-green-500');
+            document.getElementById('fps-unlimited').classList.remove('bg-green-600', 'border-green-500');
+            
+            if (fpsLimit === 30) {
+                document.getElementById('fps-30').classList.add('bg-green-600', 'border-green-500');
+            } else if (fpsLimit === 60) {
+                document.getElementById('fps-60').classList.add('bg-green-600', 'border-green-500');
+            } else if (fpsLimit === 0) {
+                document.getElementById('fps-unlimited').classList.add('bg-green-600', 'border-green-500');
+            }
+            
+            // Display audio volume
+            const audioVolume = currentUserData.audioVolume || 100;
+            document.getElementById('audio-volume').value = audioVolume;
+            document.getElementById('volume-value').textContent = `${audioVolume}%`;
+            
+            settingsModal.classList.remove('hidden');
+        }
+
+        // Graphics settings buttons
+        document.getElementById('graphics-low').addEventListener('click', async () => {
+            await update(ref(db, 'users/' + currentUserData.uid), { graphics: 'low' });
+            currentUserData.graphics = 'low';
+            openSettingsModal(); // Refresh the modal
+            showModal('Graphics quality set to Low');
+        });
+
+        document.getElementById('graphics-medium').addEventListener('click', async () => {
+            await update(ref(db, 'users/' + currentUserData.uid), { graphics: 'medium' });
+            currentUserData.graphics = 'medium';
+            openSettingsModal(); // Refresh the modal
+            showModal('Graphics quality set to Medium');
+        });
+
+        document.getElementById('graphics-high').addEventListener('click', async () => {
+            await update(ref(db, 'users/' + currentUserData.uid), { graphics: 'high' });
+            currentUserData.graphics = 'high';
+            openSettingsModal(); // Refresh the modal
+            showModal('Graphics quality set to High');
+        });
+
+        // FPS limit buttons
+        document.getElementById('fps-30').addEventListener('click', async () => {
+            await update(ref(db, 'users/' + currentUserData.uid), { fpsLimit: 30 });
+            currentUserData.fpsLimit = 30;
+            openSettingsModal(); // Refresh the modal
+            showModal('FPS limit set to 30');
+        });
+
+        document.getElementById('fps-60').addEventListener('click', async () => {
+            await update(ref(db, 'users/' + currentUserData.uid), { fpsLimit: 60 });
+            currentUserData.fpsLimit = 60;
+            openSettingsModal(); // Refresh the modal
+            showModal('FPS limit set to 60');
+        });
+
+        document.getElementById('fps-unlimited').addEventListener('click', async () => {
+            await update(ref(db, 'users/' + currentUserData.uid), { fpsLimit: 0 });
+            currentUserData.fpsLimit = 0;
+            openSettingsModal(); // Refresh the modal
+            showModal('FPS limit set to Unlimited');
+        });
+
+        // Audio volume slider
+        document.getElementById('audio-volume').addEventListener('input', (e) => {
+            const volume = e.target.value;
+            document.getElementById('volume-value').textContent = `${volume}%`;
+        });
+
+        document.getElementById('audio-volume').addEventListener('change', async (e) => {
+            const volume = parseInt(e.target.value);
+            await update(ref(db, 'users/' + currentUserData.uid), { audioVolume: volume });
+            currentUserData.audioVolume = volume;
+            showModal(`Audio volume set to ${volume}%`);
+        });
+
+        // Friends & Alliances System
+        friendsBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openFriendsModal();
+        });
+
+        friendsCloseBtn.addEventListener('click', () => {
+            friendsModal.classList.add('hidden');
+        });
+
+        friendsCloseBtn2.addEventListener('click', () => {
+            friendsModal.classList.add('hidden');
+        });
+
+        function openFriendsModal() {
+            // Set active tab to friends
+            document.getElementById('friends-tab').classList.add('active');
+            document.getElementById('alliances-tab').classList.remove('active');
+            document.getElementById('friends-content').classList.remove('hidden');
+            document.getElementById('alliances-content').classList.add('hidden');
+            
+            loadFriendsList();
+            loadAlliancesList();
+            
+            friendsModal.classList.remove('hidden');
+        }
+
+        async function loadFriendsList() {
+            const friendsList = document.getElementById('friends-list');
+            friendsList.innerHTML = '<p class="text-gray-400 text-center">Loading friends...</p>';
+            
+            const userFriends = currentUserData.friends || [];
+            
+            if (userFriends.length === 0) {
+                friendsList.innerHTML = '<p class="text-gray-400 text-center">You have no friends yet. Search for other players to add them!</p>';
+                return;
+            }
+            
+            friendsList.innerHTML = '';
+            
+            for (const friendId of userFriends) {
+                const friendSnap = await get(ref(db, 'users/' + friendId));
+                if (friendSnap.exists()) {
+                    const friendData = friendSnap.val();
+                    friendsList.innerHTML += `
+                        <div class="player-card p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <img src="${friendData.avatarUrl || 'https://placehold.co/40x40/0d1117/00bcd4?text=U'}" alt="${friendData.clubName}" class="w-10 h-10 rounded-full mr-3">
+                                <div>
+                                    <h4 class="font-bold text-white">${friendData.clubName}</h4>
+                                    <p class="text-sm text-gray-400">Level ${friendData.level || 1}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="challenge-friend-btn py-1 px-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded interactive-button" data-friend="${friendId}">Challenge</button>
+                                <button class="remove-friend-btn py-1 px-3 bg-red-600 hover:bg-red-700 text-white text-sm rounded interactive-button" data-friend="${friendId}">Remove</button>
+                            </div>
+                        </div>`;
+                }
+            }
+            
+            // Add event listeners
+            document.querySelectorAll('.challenge-friend-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const friendId = e.target.getAttribute('data-friend');
+                    await challengeFriend(friendId);
+                });
+            });
+            
+            document.querySelectorAll('.remove-friend-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const friendId = e.target.getAttribute('data-friend');
+                    await removeFriend(friendId);
+                });
+            });
+        }
+
+        async function loadAlliancesList() {
+            const alliancesList = document.getElementById('alliances-list');
+            alliancesList.innerHTML = '<p class="text-gray-400 text-center">Loading alliances...</p>';
+            
+            const userAlliances = currentUserData.alliances || [];
+            
+            if (userAlliances.length === 0) {
+                alliancesList.innerHTML = '<p class="text-gray-400 text-center">You are not in any alliances yet. Create one or search for existing alliances!</p>';
+                return;
+            }
+            
+            alliancesList.innerHTML = '';
+            
+            for (const allianceId of userAlliances) {
+                const allianceSnap = await get(ref(db, 'alliances/' + allianceId));
+                if (allianceSnap.exists()) {
+                    const allianceData = allianceSnap.val();
+                    alliancesList.innerHTML += `
+                        <div class="player-card p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="alliance-badge mr-3">${allianceData.name.charAt(0)}</div>
+                                <div>
+                                    <h4 class="font-bold text-white">${allianceData.name}</h4>
+                                    <p class="text-sm text-gray-400">Members: ${allianceData.members ? Object.keys(allianceData.members).length : 0}</p>
+                                </div>
+                            </div>
+                            <button class="view-alliance-btn py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded interactive-button" data-alliance="${allianceId}">View</button>
+                        </div>`;
+                }
+            }
+        }
+        
+        // Add event listener for create alliance button
+        const createAllianceBtn = document.getElementById('create-alliance-btn');
+        if (createAllianceBtn) {
+            createAllianceBtn.addEventListener('click', () => {
+                openCreateAllianceModal();
+            });
+        }
+        
+        // Add function to open create alliance modal
+        function openCreateAllianceModal() {
+            // Create a modal for creating an alliance
+            const modalHtml = `
+                <div id="create-alliance-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md text-left border-4 border-purple-500 relative">
+                        <button id="create-alliance-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-purple-400 mb-4">Create New Alliance</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">Alliance Name</label>
+                                <input type="text" id="alliance-name" maxlength="30" placeholder="Enter alliance name" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Alliance Tag</label>
+                                <input type="text" id="alliance-tag" maxlength="5" placeholder="Enter alliance tag (max 5 characters)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Description</label>
+                                <textarea id="alliance-description" rows="3" placeholder="Enter alliance description" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"></textarea>
+                            </div>
+                            <div class="flex space-x-3 pt-4">
+                                <button id="cancel-create-alliance-btn" class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                                <button id="confirm-create-alliance-btn" class="flex-1 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Create Alliance</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add the modal to the document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listeners
+            document.getElementById('create-alliance-close-btn').addEventListener('click', closeCreateAllianceModal);
+            document.getElementById('cancel-create-alliance-btn').addEventListener('click', closeCreateAllianceModal);
+            document.getElementById('confirm-create-alliance-btn').addEventListener('click', createAlliance);
+        }
+        
+        // Add function to close create alliance modal
+        function closeCreateAllianceModal() {
+            const modal = document.getElementById('create-alliance-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Add function to create alliance
+        async function createAlliance() {
+            if (!currentUserData) return;
+            
+            const name = document.getElementById('alliance-name').value.trim();
+            const tag = document.getElementById('alliance-tag').value.trim();
+            const description = document.getElementById('alliance-description').value.trim();
+            
+            // Validate inputs
+            if (!name || name.length < 3) {
+                showModal("Alliance name must be at least 3 characters long.");
+                return;
+            }
+            
+            if (!tag || tag.length < 2) {
+                showModal("Alliance tag must be at least 2 characters long.");
+                return;
+            }
+            
+            try {
+                // Create the alliance in Firebase
+                const allianceRef = push(ref(db, 'alliances'));
+                const allianceData = {
+                    name: name,
+                    tag: tag,
+                    description: description,
+                    owner: currentUserData.uid,
+                    ownerName: currentUserData.clubName,
+                    members: {
+                        [currentUserData.uid]: {
+                            name: currentUserData.clubName,
+                            role: 'leader',
+                            joinDate: serverTimestamp()
+                        }
+                    },
+                    createdAt: serverTimestamp(),
+                    memberCount: 1
+                };
+                
+                await set(allianceRef, allianceData);
+                
+                // Add alliance to user's alliances
+                const userAlliances = currentUserData.alliances || [];
+                userAlliances.push(allianceRef.key);
+                
+                await update(ref(db, 'users/' + currentUserData.uid), {
+                    alliances: userAlliances
+                });
+                
+                closeCreateAllianceModal();
+                showModal("Alliance created successfully!");
+                loadAlliancesList(); // Refresh the alliances list
+            } catch (error) {
+                console.error("Error creating alliance:", error);
+                showModal("Failed to create alliance: " + error.message);
+            }
+        }
+
+        async function challengeFriend(friendId) {
+            showModal("Friend challenge feature will be available in the next update!");
+        }
+
+        async function removeFriend(friendId) {
+            if (!currentUserData) return;
+            
+            const friends = currentUserData.friends || [];
+            const updatedFriends = friends.filter(id => id !== friendId);
+            
+            await update(ref(db, 'users/' + currentUserData.uid), {
+                friends: updatedFriends
+            });
+            
+            showModal("Friend removed successfully!");
+            loadFriendsList(); // Refresh the list
+        }
+
         // Store Tabs
         playersTab.addEventListener('click', () => {
             playersTab.classList.add('active');
             packsTab.classList.remove('active');
+            itemsTab.classList.remove('active');
             storeItems.classList.remove('hidden');
             storePacks.classList.add('hidden');
+            storeSpecialItems.classList.add('hidden');
         });
 
         packsTab.addEventListener('click', () => {
             packsTab.classList.add('active');
             playersTab.classList.remove('active');
+            itemsTab.classList.remove('active');
             storePacks.classList.remove('hidden');
             storeItems.classList.add('hidden');
+            storeSpecialItems.classList.add('hidden');
+        });
+
+        itemsTab.addEventListener('click', () => {
+            itemsTab.classList.add('active');
+            playersTab.classList.remove('active');
+            packsTab.classList.remove('active');
+            storeSpecialItems.classList.remove('hidden');
+            storeItems.classList.add('hidden');
+            storePacks.classList.add('hidden');
         });
 
         // Pack Opening Modal Controls
@@ -2382,6 +4072,7 @@
                     break;
                 case 3:
                     // Add bronze pack logic
+                    await openPack('bronze_pack');
                     break;
                 case 4:
                     updates.balance = (currentUserData.balance || 0) + 1000;
@@ -2391,13 +4082,19 @@
                     break;
                 case 6:
                     // Add silver pack logic
+                    await openPack('silver_pack');
                     break;
                 case 7:
                     // Add gold pack logic
+                    await openPack('gold_pack');
                     break;
             }
             
-            await update(ref(db, 'users/' + currentUserData.uid), updates);
+            // Apply updates for non-pack rewards
+            if (Object.keys(updates).length > 0) {
+                await update(ref(db, 'users/' + currentUserData.uid), updates);
+            }
+            
             showModal(`Daily login reward claimed: ${getRewardDescription(day)}`);
         }
 
@@ -2415,6 +4112,188 @@
             return rewards[day - 1] || "Unknown Reward";
         }
 
+        // Club Finances
+        async function loadClubFinances() {
+            const weeklyIncome = calculateWeeklyIncome();
+            const weeklyExpenses = calculateWeeklyExpenses();
+            const netProfit = weeklyIncome - weeklyExpenses;
+            
+            document.getElementById('weekly-income').textContent = `${weeklyIncome} Coins`;
+            document.getElementById('weekly-expenses').textContent = `${weeklyExpenses} Coins`;
+            document.getElementById('net-profit').textContent = `${netProfit} Coins`;
+        }
+
+        function calculateWeeklyIncome() {
+            let income = 0;
+            
+            // Sponsorship income
+            const sponsorships = currentUserData.sponsorshipDeals || {};
+            for (const dealId in sponsorships) {
+                if (sponsorships[dealId].active) {
+                    income += sponsorships[dealId].income || 0;
+                }
+            }
+            
+            // Stadium income based on level
+            const stadiumLevel = currentUserData.clubFacilities?.stadium?.level || 1;
+            income += stadiumLevel * 200;
+            
+            return income;
+        }
+
+        function calculateWeeklyExpenses() {
+            let expenses = 0;
+            
+            // Player salaries based on team power
+            expenses += teamPower * 10;
+            
+            // Facility maintenance
+            const facilities = currentUserData.clubFacilities || {
+                stadium: { level: 1 },
+                trainingGround: { level: 1 },
+                youthAcademy: { level: 1 }
+            };
+            
+            expenses += facilities.stadium.level * 100;
+            expenses += facilities.trainingGround.level * 50;
+            expenses += facilities.youthAcademy.level * 75;
+            
+            return expenses;
+        }
+
+        // Substitution System
+        substitutionBtn.addEventListener('click', () => {
+            openSubstitutionModal();
+        });
+        
+        // Add function to open substitution modal
+        function openSubstitutionModal() {
+            if (!currentUserData || !currentUserData.squad) return;
+            
+            // Create a modal for substitutions
+            const modalHtml = `
+                <div id="substitution-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-4xl text-left border-4 border-purple-500 relative">
+                        <button id="substitution-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-purple-400 mb-4">Substitutions</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-3">Current Players</h3>
+                                <div id="current-players-list" class="space-y-3 max-h-96 overflow-y-auto">
+                                    <!-- Current players will be dynamically inserted here -->
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-3">Substitute Players</h3>
+                                <div id="substitute-players-list" class="space-y-3 max-h-96 overflow-y-auto">
+                                    <!-- Substitute players will be dynamically inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center mt-6">
+                            <button id="close-substitution-btn" class="py-2 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add the modal to the document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Load players
+            loadSubstitutionPlayers();
+            
+            // Add event listeners
+            document.getElementById('substitution-close-btn').addEventListener('click', closeSubstitutionModal);
+            document.getElementById('close-substitution-btn').addEventListener('click', closeSubstitutionModal);
+        }
+        
+        // Add function to close substitution modal
+        function closeSubstitutionModal() {
+            const modal = document.getElementById('substitution-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Add function to load players for substitution
+        async function loadSubstitutionPlayers() {
+            if (!currentUserData || !currentUserData.squad) return;
+            
+            const currentPlayersList = document.getElementById('current-players-list');
+            const substitutePlayersList = document.getElementById('substitute-players-list');
+            
+            if (!currentPlayersList || !substitutePlayersList) return;
+            
+            currentPlayersList.innerHTML = '<p class="text-gray-400">Loading players...</p>';
+            substitutePlayersList.innerHTML = '<p class="text-gray-400">Loading players...</p>';
+            
+            try {
+                // Get all players in squad
+                const playerPromises = currentUserData.squad.map(playerId => get(ref(db, 'players/' + playerId)));
+                const playerSnapshots = await Promise.all(playerPromises);
+                
+                let currentPlayersHtml = '';
+                let substitutePlayersHtml = '';
+                
+                // For demonstration, we'll show the first 5 as current players and the rest as substitutes
+                playerSnapshots.forEach((playerSnap, index) => {
+                    if (playerSnap.exists()) {
+                        const playerData = playerSnap.val();
+                        const playerId = currentUserData.squad[index];
+                        const attributes = playerData.attributes || { pace: 50, shooting: 50, passing: 50, dribbling: 50, defending: 50, physical: 50 };
+                        
+                        const playerHtml = `
+                            <div class="player-card p-3 flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-12 h-12 object-cover rounded-full mr-3 border-2 border-gray-600">
+                                    <div>
+                                        <h4 class="font-bold text-white">${playerData.name}</h4>
+                                        <p class="text-sm text-gray-400">${playerData.position}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-green-400">${playerData.rating}</p>
+                                    <button class="substitute-btn mt-1 px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded" data-player="${playerId}">
+                                        ${index < 5 ? 'Sub Off' : 'Sub On'}
+                                    </button>
+                                </div>
+                            </div>`;
+                        
+                        if (index < 5) {
+                            currentPlayersHtml += playerHtml;
+                        } else {
+                            substitutePlayersHtml += playerHtml;
+                        }
+                    }
+                });
+                
+                currentPlayersList.innerHTML = currentPlayersHtml || '<p class="text-gray-400">No current players.</p>';
+                substitutePlayersList.innerHTML = substitutePlayersHtml || '<p class="text-gray-400">No substitute players.</p>';
+                
+                // Add event listeners to substitute buttons
+                document.querySelectorAll('.substitute-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const playerId = e.target.getAttribute('data-player');
+                        makeSubstitution(playerId);
+                    });
+                });
+            } catch (error) {
+                console.error("Error loading substitution players:", error);
+                currentPlayersList.innerHTML = '<p class="text-red-400">Error loading players.</p>';
+                substitutePlayersList.innerHTML = '<p class="text-red-400">Error loading players.</p>';
+            }
+        }
+        
+        // Add function to make substitution
+        async function makeSubstitution(playerId) {
+            if (!currentUserData) return;
+            
+            // In a real implementation, you would update the match state with the substitution
+            // For now, we'll just show a message
+            showModal(`Substitution made for player ${playerId}!`);
+            closeSubstitutionModal();
+        }
+
         // Add sound effects to buttons
         document.querySelectorAll('.interactive-button').forEach(button => {
             button.addEventListener('click', () => {
@@ -2422,6 +4301,7 @@
             });
         });
 
+        // Navigation
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -2430,6 +4310,493 @@
                 else { navigateToView(targetId + '-view'); }
             });
         });
+        
+        // Tab navigation for new views
+        document.getElementById('friends-tab').addEventListener('click', () => {
+            document.getElementById('friends-tab').classList.add('active');
+            document.getElementById('alliances-tab').classList.remove('active');
+            document.getElementById('friends-content').classList.remove('hidden');
+            document.getElementById('alliances-content').classList.add('hidden');
+        });
+        
+        document.getElementById('alliances-tab').addEventListener('click', () => {
+            document.getElementById('alliances-tab').classList.add('active');
+            document.getElementById('friends-tab').classList.remove('active');
+            document.getElementById('alliances-content').classList.remove('hidden');
+            document.getElementById('friends-content').classList.add('hidden');
+        });
+        
+        document.getElementById('buy-players-tab').addEventListener('click', () => {
+            document.getElementById('buy-players-tab').classList.add('active');
+            document.getElementById('sell-players-tab').classList.remove('active');
+            document.getElementById('buy-players-content').classList.remove('hidden');
+            document.getElementById('sell-players-content').classList.add('hidden');
+        });
+        
+        document.getElementById('sell-players-tab').addEventListener('click', () => {
+            document.getElementById('sell-players-tab').classList.add('active');
+            document.getElementById('buy-players-tab').classList.remove('active');
+            document.getElementById('sell-players-content').classList.remove('hidden');
+            document.getElementById('buy-players-content').classList.add('hidden');
+        });
+        
+        // Add event listeners for the live transfer modal
+        if (liveTransferCloseBtn) {
+            liveTransferCloseBtn.addEventListener('click', () => {
+                liveTransferModal.classList.add('hidden');
+            });
+        }
+
+        if (liveTransferCloseBtn2) {
+            liveTransferCloseBtn2.addEventListener('click', () => {
+                liveTransferModal.classList.add('hidden');
+            });
+        }
+        
+        // Add event listener for the button to open live transfer market
+        const openLiveMarketBtn = document.getElementById('open-live-market-btn');
+        if (openLiveMarketBtn) {
+            openLiveMarketBtn.addEventListener('click', () => {
+                openLiveTransferMarket();
+            });
+        }
+
+        // Add function to open the live transfer market modal
+        function openLiveTransferMarket() {
+            if (liveTransferModal) {
+                liveTransferModal.classList.remove('hidden');
+                loadLiveTransferMarket();
+            }
+        }
+
+        // Add function to load the live transfer market
+        async function loadLiveTransferMarket() {
+            if (!currentUserData) return;
+            
+            // Load players available for buying
+            loadLiveTransferListings();
+            
+            // Load user's players for selling
+            loadSellPlayerListLive();
+        }
+
+        // Add function to load live transfer listings
+        async function loadLiveTransferListings() {
+            const liveTransferListDiv = document.getElementById('live-transfer-list');
+            if (!liveTransferListDiv) return;
+            
+            liveTransferListDiv.innerHTML = '<p class="text-center p-4 text-gray-400">Loading listings...</p>';
+            
+            try {
+                // Get active listings from Firebase
+                const listingsRef = ref(db, 'transferListings');
+                const snapshot = await get(listingsRef);
+                
+                if (snapshot.exists()) {
+                    const listings = snapshot.val();
+                    let listingsHtml = '';
+                    
+                    // Display each listing
+                    for (const listingId in listings) {
+                        const listing = listings[listingId];
+                        // Skip if it's the current user's listing
+                        if (listing.sellerId === currentUserData.uid) continue;
+                        
+                        // Skip if listing has expired
+                        const now = Date.now();
+                        if (listing.endTime && now > listing.endTime) continue;
+                        
+                        // Get player data
+                        const playerRef = ref(db, 'players/' + listing.playerId);
+                        const playerSnap = await get(playerRef);
+                        
+                        if (playerSnap.exists()) {
+                            const playerData = playerSnap.val();
+                            const rarity = playerData.rarity || "bronze";
+                            const rarityClass = rarity === "bronze" ? "bronze" : 
+                                               rarity === "silver" ? "silver" : 
+                                               rarity === "gold" ? "gold" : "special";
+                            
+                            const timeLeft = listing.endTime ? Math.max(0, Math.floor((listing.endTime - now) / (1000 * 60))) : 0;
+                            
+                            listingsHtml += `
+                                <div class="player-card p-4 text-center shadow-lg ${rarityClass} relative">
+                                    <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
+                                    <h4 class="font-bold text-lg text-white">${playerData.name}</h4>
+                                    <p class="text-sm text-gray-400">${playerData.position}</p>
+                                    <p class="text-xl font-bold text-green-400 mt-2">${playerData.rating}</p>
+                                    <div class="mt-3 text-left">
+                                        <p class="text-sm"><span class="font-semibold">Seller:</span> ${listing.sellerName}</p>
+                                        <p class="text-sm"><span class="font-semibold">Starting Bid:</span> ${listing.startingBid || 0} C</p>
+                                        ${listing.buyNowPrice ? `<p class="text-sm"><span class="font-semibold">Buy Now:</span> ${listing.buyNowPrice} C</p>` : ''}
+                                        <p class="text-sm"><span class="font-semibold">Time Left:</span> ${timeLeft} min</p>
+                                    </div>
+                                    <div class="flex space-x-2 mt-3">
+                                        <button onclick="placeBid('${listingId}', ${listing.currentBid || listing.startingBid || 0})" class="flex-1 py-1 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded interactive-button">Bid</button>
+                                        ${listing.buyNowPrice ? `<button onclick="buyNow('${listingId}', ${listing.buyNowPrice})" class="flex-1 py-1 px-2 bg-green-600 hover:bg-green-700 text-white text-xs rounded interactive-button">Buy Now</button>` : ''}
+                                    </div>
+                                </div>`;
+                        }
+                    }
+                    
+                    liveTransferListDiv.innerHTML = listingsHtml || '<p class="text-center p-4 text-gray-400">No active listings found.</p>';
+                } else {
+                    liveTransferListDiv.innerHTML = '<p class="text-center p-4 text-gray-400">No active listings found.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading live transfer listings:", error);
+                liveTransferListDiv.innerHTML = '<p class="text-center p-4 text-red-400">Error loading listings. Please try again.</p>';
+            }
+        }
+
+        // Add function to load user's players for selling
+        async function loadSellPlayerListLive() {
+            const sellPlayerListDiv = document.getElementById('sell-player-list-live');
+            if (!sellPlayerListDiv || !currentUserData || !currentUserData.squad) return;
+            
+            sellPlayerListDiv.innerHTML = '<p class="text-center p-4 text-gray-400">Loading your players...</p>';
+            
+            try {
+                const playerPromises = currentUserData.squad.map(playerId => get(ref(db, 'players/' + playerId)));
+                const playerSnapshots = await Promise.all(playerPromises);
+                
+                let playersHtml = '';
+                playerSnapshots.forEach((playerSnap, index) => {
+                    if (playerSnap.exists()) {
+                        const playerData = playerSnap.val();
+                        const playerId = currentUserData.squad[index];
+                        
+                        playersHtml += `
+                            <div class="player-card p-4 text-center shadow-lg">
+                                <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
+                                <h4 class="font-bold text-lg">${playerData.name}</h4>
+                                <p class="text-sm text-gray-400">${playerData.position}</p>
+                                <p class="text-xl font-bold text-green-400 mt-2">${playerData.rating}</p>
+                                <button onclick="openListPlayerModal('${playerId}')" class="w-full mt-3 py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-md interactive-button">List for Sale</button>
+                            </div>`;
+                    }
+                });
+                
+                sellPlayerListDiv.innerHTML = playersHtml || '<p class="text-center p-4 text-gray-400">No players available to sell.</p>';
+            } catch (error) {
+                console.error("Error loading sell player list:", error);
+                sellPlayerListDiv.innerHTML = '<p class="text-center p-4 text-red-400">Error loading players. Please try again.</p>';
+            }
+        }
+
+        // Add function to open the list player modal
+        function openListPlayerModal(playerId) {
+            // Create a modal for listing a player
+            const modalHtml = `
+                <div id="list-player-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md text-left border-4 border-yellow-500 relative">
+                        <button id="list-player-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-yellow-400 mb-4">List Player for Sale</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">Starting Bid (Coins)</label>
+                                <input type="number" id="starting-bid" min="100" value="1000" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Buy Now Price (optional)</label>
+                                <input type="number" id="buy-now-price" min="0" value="0" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                <p class="text-xs text-gray-500 mt-1">Set to 0 if you don't want a Buy Now option</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Listing Duration</label>
+                                <select id="listing-duration" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                    <option value="60">1 hour</option>
+                                    <option value="120">2 hours</option>
+                                    <option value="240">4 hours</option>
+                                    <option value="480">8 hours</option>
+                                    <option value="1440">24 hours</option>
+                                </select>
+                            </div>
+                            <div class="flex space-x-3 pt-4">
+                                <button id="cancel-list-btn" class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                                <button id="confirm-list-btn" class="flex-1 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button" data-player="${playerId}">List Player</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add the modal to the document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listeners
+            document.getElementById('list-player-close-btn').addEventListener('click', closeListPlayerModal);
+            document.getElementById('cancel-list-btn').addEventListener('click', closeListPlayerModal);
+            document.getElementById('confirm-list-btn').addEventListener('click', async (e) => {
+                const playerId = e.target.getAttribute('data-player');
+                await listPlayerForSale(playerId);
+            });
+        }
+
+        // Add function to close the list player modal
+        function closeListPlayerModal() {
+            const modal = document.getElementById('list-player-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Add function to list a player for sale
+        async function listPlayerForSale(playerId) {
+            if (!currentUserData) return;
+            
+            const startingBid = parseInt(document.getElementById('starting-bid').value) || 1000;
+            const buyNowPrice = parseInt(document.getElementById('buy-now-price').value) || 0;
+            const duration = parseInt(document.getElementById('listing-duration').value) || 60; // in minutes
+            
+            // Validate inputs
+            if (startingBid < 100) {
+                showModal("Starting bid must be at least 100 coins.");
+                return;
+            }
+            
+            if (buyNowPrice > 0 && buyNowPrice <= startingBid) {
+                showModal("Buy Now price must be higher than the starting bid.");
+                return;
+            }
+            
+            try {
+                // Create the listing in Firebase
+                const listingRef = push(ref(db, 'transferListings'));
+                const endTime = Date.now() + (duration * 60 * 1000); // Convert minutes to milliseconds
+                
+                const listingData = {
+                    playerId: playerId,
+                    sellerId: currentUserData.uid,
+                    sellerName: currentUserData.clubName,
+                    startingBid: startingBid,
+                    currentBid: startingBid,
+                    buyNowPrice: buyNowPrice > 0 ? buyNowPrice : null,
+                    endTime: endTime,
+                    createdAt: serverTimestamp(),
+                    bids: {}
+                };
+                
+                await set(listingRef, listingData);
+                
+                // Add to user's active listings
+                const userActiveListings = currentUserData.activeListings || [];
+                userActiveListings.push(listingRef.key);
+                
+                await update(ref(db, 'users/' + currentUserData.uid), {
+                    activeListings: userActiveListings
+                });
+                
+                closeListPlayerModal();
+                showModal("Player listed successfully!");
+                loadSellPlayerListLive(); // Refresh the sell list
+                loadLiveTransferListings(); // Refresh the market listings
+            } catch (error) {
+                console.error("Error listing player:", error);
+                showModal("Failed to list player: " + error.message);
+            }
+        }
+
+        // Add function to place a bid on a listing
+        async function placeBid(listingId, currentBid) {
+            if (!currentUserData) return;
+            
+            // Prompt for bid amount
+            const bidAmount = prompt(`Enter your bid amount (minimum ${currentBid + 100} coins):`, currentBid + 100);
+            if (!bidAmount) return;
+            
+            const bidValue = parseInt(bidAmount);
+            if (isNaN(bidValue) || bidValue < currentBid + 100) {
+                showModal(`Bid must be at least ${currentBid + 100} coins.`);
+                return;
+            }
+            
+            if (bidValue > currentUserData.balance) {
+                showModal("You don't have enough coins for this bid.");
+                return;
+            }
+            
+            try {
+                // Update the listing with the new bid
+                const listingRef = ref(db, 'transferListings/' + listingId);
+                const listingSnap = await get(listingRef);
+                
+                if (!listingSnap.exists()) {
+                    showModal("This listing is no longer available.");
+                    return;
+                }
+                
+                const listing = listingSnap.val();
+                
+                // Check if listing has expired
+                if (listing.endTime && Date.now() > listing.endTime) {
+                    showModal("This listing has expired.");
+                    return;
+                }
+                
+                // Check if there's already a higher bid
+                if (bidValue <= (listing.currentBid || listing.startingBid)) {
+                    showModal("There is already a higher bid on this listing.");
+                    return;
+                }
+                
+                // Update the listing
+                const updates = {
+                    currentBid: bidValue,
+                    [`bids/${currentUserData.uid}`]: {
+                        bidderName: currentUserData.clubName,
+                        bidAmount: bidValue,
+                        timestamp: serverTimestamp()
+                    }
+                };
+                
+                await update(listingRef, updates);
+                
+                // Deduct coins from bidder (will be refunded if outbid)
+                await update(ref(db, 'users/' + currentUserData.uid), {
+                    balance: currentUserData.balance - bidValue
+                });
+                
+                showModal("Bid placed successfully!");
+                loadLiveTransferListings(); // Refresh listings
+            } catch (error) {
+                console.error("Error placing bid:", error);
+                showModal("Failed to place bid: " + error.message);
+            }
+        }
+
+        // Add function to buy a player immediately
+        async function buyNow(listingId, buyNowPrice) {
+            if (!currentUserData) return;
+            
+            if (buyNowPrice > currentUserData.balance) {
+                showModal("You don't have enough coins to buy this player.");
+                return;
+            }
+            
+            // Confirm purchase
+            if (!confirm(`Are you sure you want to buy this player for ${buyNowPrice} coins?`)) {
+                return;
+            }
+            
+            try {
+                // Get the listing
+                const listingRef = ref(db, 'transferListings/' + listingId);
+                const listingSnap = await get(listingRef);
+                
+                if (!listingSnap.exists()) {
+                    showModal("This listing is no longer available.");
+                    return;
+                }
+                
+                const listing = listingSnap.val();
+                
+                // Check if listing has expired
+                if (listing.endTime && Date.now() > listing.endTime) {
+                    showModal("This listing has expired.");
+                    return;
+                }
+                
+                // Check if the buy now price is still valid
+                if (listing.buyNowPrice !== buyNowPrice) {
+                    showModal("The buy now price has changed. Please refresh the page.");
+                    return;
+                }
+                
+                // Process the transfer
+                await processPlayerTransfer(listingId, buyNowPrice, 'buyNow');
+                
+                showModal("Player purchased successfully!");
+                loadLiveTransferListings(); // Refresh listings
+                loadSellPlayerListLive(); // Refresh sell list
+            } catch (error) {
+                console.error("Error buying player:", error);
+                showModal("Failed to buy player: " + error.message);
+            }
+        }
+
+        // Add function to process player transfer
+        async function processPlayerTransfer(listingId, amount, transferType) {
+            if (!currentUserData) return;
+            
+            try {
+                // Get the listing
+                const listingRef = ref(db, 'transferListings/' + listingId);
+                const listingSnap = await get(listingRef);
+                
+                if (!listingSnap.exists()) {
+                    throw new Error("Listing not found");
+                }
+                
+                const listing = listingSnap.val();
+                
+                // Get player data
+                const playerRef = ref(db, 'players/' + listing.playerId);
+                const playerSnap = await get(playerRef);
+                
+                if (!playerSnap.exists()) {
+                    throw new Error("Player not found");
+                }
+                
+                const playerData = playerSnap.val();
+                
+                // Update buyer's squad and balance
+                const buyerSquad = [...(currentUserData.squad || []), listing.playerId];
+                const buyerBalance = currentUserData.balance - amount;
+                
+                // Update seller's balance
+                const sellerRef = ref(db, 'users/' + listing.sellerId);
+                const sellerSnap = await get(sellerRef);
+                
+                if (!sellerSnap.exists()) {
+                    throw new Error("Seller not found");
+                }
+                
+                const sellerData = sellerSnap.val();
+                const sellerBalance = (sellerData.balance || 0) + amount;
+                
+                // Update seller's squad (remove player)
+                let sellerSquad = sellerData.squad || [];
+                sellerSquad = sellerSquad.filter(id => id !== listing.playerId);
+                
+                // Create transaction record
+                const transactionRef = push(ref(db, 'transactions'));
+                const transactionData = {
+                    playerId: listing.playerId,
+                    playerName: playerData.name,
+                    buyerId: currentUserData.uid,
+                    buyerName: currentUserData.clubName,
+                    sellerId: listing.sellerId,
+                    sellerName: listing.sellerName,
+                    amount: amount,
+                    transferType: transferType,
+                    timestamp: serverTimestamp()
+                };
+                
+                // Perform all updates in a single transaction
+                const updates = {};
+                updates[`/users/${currentUserData.uid}/squad`] = buyerSquad;
+                updates[`/users/${currentUserData.uid}/balance`] = buyerBalance;
+                updates[`/users/${listing.sellerId}/squad`] = sellerSquad;
+                updates[`/users/${listing.sellerId}/balance`] = sellerBalance;
+                updates[`/transferListings/${listingId}`] = null; // Remove the listing
+                updates[`/transactions/${transactionRef.key}`] = transactionData;
+                
+                // Remove from seller's active listings
+                if (sellerData.activeListings) {
+                    const updatedListings = sellerData.activeListings.filter(id => id !== listingId);
+                    updates[`/users/${listing.sellerId}/activeListings`] = updatedListings;
+                }
+                
+                await update(ref(db), updates);
+                
+                // Update current user data in memory
+                currentUserData.squad = buyerSquad;
+                currentUserData.balance = buyerBalance;
+            } catch (error) {
+                console.error("Error processing transfer:", error);
+                throw error;
+            }
+        }
         
         document.addEventListener('DOMContentLoaded', () => {
             const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
@@ -2440,6 +4807,14 @@
         document.addEventListener('click', () => {
              if (mainMenuAudio.paused && currentMatchId === null) { playMainMenuMusic(); }
         }, { once: true }); 
+
+    </script>
+</body>
+</html>        }, { once: true }); 
+
+    </script>
+</body>
+</html></html>        }, { once: true }); 
 
     </script>
 </body>

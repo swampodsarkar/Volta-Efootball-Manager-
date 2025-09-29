@@ -3863,6 +3863,40 @@
             });
         }
         
+        // Add event listeners for search buttons
+        const searchFriendBtn = document.getElementById('search-friend-btn');
+        if (searchFriendBtn) {
+            searchFriendBtn.addEventListener('click', () => {
+                searchFriends();
+            });
+        }
+        
+        const searchAllianceBtn = document.getElementById('search-alliance-btn');
+        if (searchAllianceBtn) {
+            searchAllianceBtn.addEventListener('click', () => {
+                searchAlliances();
+            });
+        }
+        
+        // Add event listeners for Enter key press on search inputs
+        const friendSearchInput = document.getElementById('friend-search');
+        if (friendSearchInput) {
+            friendSearchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchFriends();
+                }
+            });
+        }
+        
+        const allianceSearchInput = document.getElementById('alliance-search');
+        if (allianceSearchInput) {
+            allianceSearchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchAlliances();
+                }
+            });
+        }
+        
         // Add function to open create alliance modal
         function openCreateAllianceModal() {
             // Create a modal for creating an alliance
@@ -3968,7 +4002,51 @@
         }
 
         async function challengeFriend(friendId) {
-            showModal("Friend challenge feature will be available in the next update!");
+            if (!currentUserData) return;
+            
+            try {
+                // Get friend data
+                const friendRef = ref(db, `users/${friendId}`);
+                const friendSnap = await get(friendRef);
+                
+                if (!friendSnap.exists()) {
+                    showModal("Friend not found.");
+                    return;
+                }
+                
+                const friendData = friendSnap.val();
+                
+                // Create a friendly match
+                const matchId = push(ref(db, 'matches')).key;
+                
+                const matchData = {
+                    teamA: { uid: currentUserData.uid, clubName: currentUserData.clubName, teamPower: teamPower, squad: currentUserData.squad },
+                    teamB: { uid: friendId, clubName: friendData.clubName, teamPower: friendData.teamPower || 0, squad: friendData.squad || [] },
+                    score: { teamA: 0, teamB: 0 }, 
+                    status: 'starting', 
+                    startTime: serverTimestamp(), 
+                    events: {},
+                    teamAStrategy: 'Balanced', 
+                    teamBStrategy: 'Balanced',
+                    isFriendlyMatch: true
+                };
+                
+                const updates = {};
+                updates[`/matches/${matchId}`] = matchData;
+                updates[`/users/${currentUserData.uid}/currentMatch`] = matchId;
+                updates[`/users/${friendId}/currentMatch`] = matchId;
+                
+                await update(ref(db), updates);
+                
+                showModal(`Challenge sent to ${friendData.clubName}! Match will start shortly.`);
+                
+                // Navigate to match view
+                navigateToView('match-view');
+                
+            } catch (error) {
+                console.error("Error sending challenge:", error);
+                showModal("Error sending challenge. Please try again.");
+            }
         }
 
         async function removeFriend(friendId) {
@@ -3983,6 +4061,259 @@
             
             showModal("Friend removed successfully!");
             loadFriendsList(); // Refresh the list
+        }
+        
+        // Search for friends by club name
+        async function searchFriends() {
+            const searchTerm = document.getElementById('friend-search').value.trim().toLowerCase();
+            if (!searchTerm) {
+                showModal("Please enter a club name to search for.");
+                return;
+            }
+            
+            const friendsList = document.getElementById('friends-list');
+            friendsList.innerHTML = '<p class="text-gray-400 text-center">Searching...</p>';
+            
+            try {
+                // Get all users from database
+                const usersRef = ref(db, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (!snapshot.exists()) {
+                    friendsList.innerHTML = '<p class="text-gray-400 text-center">No users found.</p>';
+                    return;
+                }
+                
+                const users = [];
+                snapshot.forEach(childSnapshot => {
+                    // Don't include current user in search results
+                    if (childSnapshot.key !== currentUserData.uid) {
+                        users.push({ uid: childSnapshot.key, ...childSnapshot.val() });
+                    }
+                });
+                
+                // Filter users by search term
+                const filteredUsers = users.filter(user => 
+                    user.clubName && user.clubName.toLowerCase().includes(searchTerm)
+                );
+                
+                if (filteredUsers.length === 0) {
+                    friendsList.innerHTML = '<p class="text-gray-400 text-center">No users found matching your search.</p>';
+                    return;
+                }
+                
+                // Get current user's friends
+                const userFriends = currentUserData.friends || [];
+                
+                // Display search results
+                friendsList.innerHTML = '';
+                for (const user of filteredUsers) {
+                    // Check if user is already a friend
+                    const isFriend = userFriends.includes(user.uid);
+                    
+                    friendsList.innerHTML += `
+                        <div class="player-card p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <img src="${user.avatarUrl || 'https://placehold.co/40x40/0d1117/00bcd4?text=U'}" alt="${user.clubName}" class="w-10 h-10 rounded-full mr-3">
+                                <div>
+                                    <h4 class="font-bold text-white">${user.clubName}</h4>
+                                    <p class="text-sm text-gray-400">Level ${user.level || 1}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                ${isFriend 
+                                    ? '<button class="py-1 px-3 bg-gray-600 text-white text-sm rounded cursor-not-allowed" disabled>Friend</button>' 
+                                    : `<button class="send-friend-request-btn py-1 px-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded interactive-button" data-user="${user.uid}">Add Friend</button>`}
+                            </div>
+                        </div>`;
+                }
+                
+                // Add event listeners to friend request buttons
+                document.querySelectorAll('.send-friend-request-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const userId = e.target.getAttribute('data-user');
+                        await sendFriendRequest(userId);
+                    });
+                });
+                
+            } catch (error) {
+                console.error("Error searching friends:", error);
+                friendsList.innerHTML = '<p class="text-red-400 text-center">Error searching for friends. Please try again.</p>';
+            }
+        }
+        
+        // Send friend request
+        async function sendFriendRequest(userId) {
+            if (!currentUserData) return;
+            
+            try {
+                // Get target user data
+                const userRef = ref(db, `users/${userId}`);
+                const userSnap = await get(userRef);
+                
+                if (!userSnap.exists()) {
+                    showModal("User not found.");
+                    return;
+                }
+                
+                const targetUser = userSnap.val();
+                
+                // Add friend to current user's friend list
+                const currentUserFriends = currentUserData.friends || [];
+                if (!currentUserFriends.includes(userId)) {
+                    currentUserFriends.push(userId);
+                    await update(ref(db, `users/${currentUserData.uid}`), {
+                        friends: currentUserFriends
+                    });
+                    
+                    // Update current user data in memory
+                    currentUserData.friends = currentUserFriends;
+                }
+                
+                // Add current user to target user's friend list
+                const targetUserFriends = targetUser.friends || [];
+                if (!targetUserFriends.includes(currentUserData.uid)) {
+                    targetUserFriends.push(currentUserData.uid);
+                    await update(ref(db, `users/${userId}`), {
+                        friends: targetUserFriends
+                    });
+                }
+                
+                showModal(`Friend request sent to ${targetUser.clubName}!`);
+                searchFriends(); // Refresh search results
+                
+            } catch (error) {
+                console.error("Error sending friend request:", error);
+                showModal("Error sending friend request. Please try again.");
+            }
+        }
+        
+        // Search for alliances by name
+        async function searchAlliances() {
+            const searchTerm = document.getElementById('alliance-search').value.trim().toLowerCase();
+            if (!searchTerm) {
+                showModal("Please enter an alliance name to search for.");
+                return;
+            }
+            
+            const alliancesList = document.getElementById('alliances-list');
+            alliancesList.innerHTML = '<p class="text-gray-400 text-center">Searching...</p>';
+            
+            try {
+                // Get all alliances from database
+                const alliancesRef = ref(db, 'alliances');
+                const snapshot = await get(alliancesRef);
+                
+                if (!snapshot.exists()) {
+                    alliancesList.innerHTML = '<p class="text-gray-400 text-center">No alliances found.</p>';
+                    return;
+                }
+                
+                const alliances = [];
+                snapshot.forEach(childSnapshot => {
+                    alliances.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+                
+                // Filter alliances by search term
+                const filteredAlliances = alliances.filter(alliance => 
+                    alliance.name && alliance.name.toLowerCase().includes(searchTerm)
+                );
+                
+                if (filteredAlliances.length === 0) {
+                    alliancesList.innerHTML = '<p class="text-gray-400 text-center">No alliances found matching your search.</p>';
+                    return;
+                }
+                
+                // Get current user's alliances
+                const userAlliances = currentUserData.alliances || [];
+                
+                // Display search results
+                alliancesList.innerHTML = '';
+                for (const alliance of filteredAlliances) {
+                    // Check if user is already in this alliance
+                    const isInAlliance = userAlliances.includes(alliance.id);
+                    
+                    alliancesList.innerHTML += `
+                        <div class="player-card p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="alliance-badge mr-3">${alliance.name.charAt(0)}</div>
+                                <div>
+                                    <h4 class="font-bold text-white">${alliance.name}</h4>
+                                    <p class="text-sm text-gray-400">Members: ${alliance.members ? Object.keys(alliance.members).length : 0}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                ${isInAlliance 
+                                    ? '<button class="py-1 px-3 bg-gray-600 text-white text-sm rounded cursor-not-allowed" disabled>Joined</button>' 
+                                    : `<button class="join-alliance-btn py-1 px-3 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded interactive-button" data-alliance="${alliance.id}">Join</button>`}
+                            </div>
+                        </div>`;
+                }
+                
+                // Add event listeners to join alliance buttons
+                document.querySelectorAll('.join-alliance-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const allianceId = e.target.getAttribute('data-alliance');
+                        await joinAlliance(allianceId);
+                    });
+                });
+                
+            } catch (error) {
+                console.error("Error searching alliances:", error);
+                alliancesList.innerHTML = '<p class="text-red-400 text-center">Error searching for alliances. Please try again.</p>';
+            }
+        }
+        
+        // Join an alliance
+        async function joinAlliance(allianceId) {
+            if (!currentUserData) return;
+            
+            try {
+                // Get alliance data
+                const allianceRef = ref(db, `alliances/${allianceId}`);
+                const allianceSnap = await get(allianceRef);
+                
+                if (!allianceSnap.exists()) {
+                    showModal("Alliance not found.");
+                    return;
+                }
+                
+                const alliance = allianceSnap.val();
+                
+                // Add user to alliance members
+                const updatedMembers = {
+                    ...alliance.members,
+                    [currentUserData.uid]: {
+                        name: currentUserData.clubName,
+                        role: 'member',
+                        joinDate: serverTimestamp()
+                    }
+                };
+                
+                await update(ref(db, `alliances/${allianceId}`), {
+                    members: updatedMembers,
+                    memberCount: Object.keys(updatedMembers).length
+                });
+                
+                // Add alliance to user's alliances
+                const userAlliances = currentUserData.alliances || [];
+                if (!userAlliances.includes(allianceId)) {
+                    userAlliances.push(allianceId);
+                    await update(ref(db, `users/${currentUserData.uid}`), {
+                        alliances: userAlliances
+                    });
+                    
+                    // Update current user data in memory
+                    currentUserData.alliances = userAlliances;
+                }
+                
+                showModal(`Successfully joined ${alliance.name}!`);
+                searchAlliances(); // Refresh search results
+                
+            } catch (error) {
+                console.error("Error joining alliance:", error);
+                showModal("Error joining alliance. Please try again.");
+            }
         }
 
         // Store Tabs

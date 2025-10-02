@@ -259,11 +259,43 @@
             justify-content: center;
             font-size: 12px;
         }
+        
+        /* Contract indicator */
+        .contract-indicator {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: rgba(255, 165, 0, 0.8);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        /* Contract expired indicator */
+        .contract-expired-indicator {
+            position: absolute;
+            top: 30px;
+            left: 5px;
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
 
         /* Kit designer styles */
         .kit-preview {
             width: 100px;
-            height: 120px;
+            height: 150px;
             position: relative;
             border: 2px solid #444;
             border-radius: 8px;
@@ -271,7 +303,7 @@
         }
         .kit-jersey {
             width: 100%;
-            height: 80px;
+            height: 70px;
             background-color: #1e40af;
             position: relative;
         }
@@ -280,7 +312,14 @@
             height: 40px;
             background-color: #1e40af;
             position: absolute;
-            bottom: 0;
+            top: 70px;
+        }
+        .kit-socks {
+            width: 100%;
+            height: 30px;
+            background-color: #ffffff;
+            position: absolute;
+            top: 110px;
         }
         .kit-stripe {
             position: absolute;
@@ -307,6 +346,56 @@
             font-size: 14px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+        }
+        
+        /* Player highlighting */
+        .player-icon.ring-4 {
+            box-shadow: 0 0 10px 4px rgba(255, 255, 0, 0.8);
+            z-index: 10;
+        }
+        
+        .player-icon.scale-125 {
+            transform: scale(1.25);
+        }
+        
+        .player-icon.scale-150 {
+            transform: scale(1.5);
+        }
+        
+        /* Transition effects */
+        .transition-transform {
+            transition: transform 0.5s ease-out;
+        }
+        
+        .duration-500 {
+            transition-duration: 500ms;
+        }
+        
+        /* Shot effect */
+        .shot-trail {
+            position: absolute;
+            background: linear-gradient(to right, yellow, orange, red);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        /* Save effect */
+        .ring-2 {
+            box-shadow: 0 0 0 2px;
+        }
+        
+        .ring-green-400 {
+            --tw-ring-color: #4ade80;
+        }
+        
+        .ring-yellow-400 {
+            --tw-ring-color: #facc15;
+        }
+        
+        .ring-red-500 {
+            --tw-ring-color: #ef4444;
         }
 
     </style>
@@ -572,6 +661,7 @@
                         <div class="kit-preview mx-auto">
                             <div id="kit-jersey" class="kit-jersey"></div>
                             <div id="kit-shorts" class="kit-shorts"></div>
+                            <div id="kit-socks" class="kit-socks"></div>
                         </div>
                     </div>
                     
@@ -587,12 +677,34 @@
                                 <input type="color" id="shorts-color" value="#1e40af" class="w-full h-10 rounded">
                             </div>
                             <div>
+                                <label class="block text-left text-gray-300 mb-2">Socks Color</label>
+                                <input type="color" id="socks-color" value="#ffffff" class="w-full h-10 rounded">
+                            </div>
+                            <div>
                                 <label class="block text-left text-gray-300 mb-2">Kit Style</label>
                                 <select id="kit-style" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
                                     <option value="plain">Plain</option>
                                     <option value="stripes">Stripes</option>
                                     <option value="hoops">Hoops</option>
                                     <option value="sash">Sash</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-left text-gray-300 mb-2">Number Style</label>
+                                <select id="number-style" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                    <option value="plain">Plain Numbers</option>
+                                    <option value="outlined">Outlined Numbers</option>
+                                    <option value="shadowed">Shadowed Numbers</option>
+                                    <option value="glow">Glow Numbers</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-left text-gray-300 mb-2">Font Style</label>
+                                <select id="font-style" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                    <option value="default">Default Font</option>
+                                    <option value="bold">Bold Font</option>
+                                    <option value="italic">Italic Font</option>
+                                    <option value="condensed">Condensed Font</option>
                                 </select>
                             </div>
                         </div>
@@ -930,18 +1042,85 @@
                     </div>
                     <div id="match-simulation-screen" class="hidden">
                          <div id="reaction-display-area" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"></div>
-                        <div class="flex justify-between items-center bg-gray-900 bg-opacity-80 p-6 rounded-xl mb-6 shadow-2xl border-b-4 border-green-500">
-                            <div class="flex flex-col items-center w-1/3">
+                        <div class="flex flex-col md:flex-row justify-between items-center bg-gray-900 bg-opacity-80 p-6 rounded-xl mb-6 shadow-2xl border-b-4 border-green-500">
+                            <div class="flex flex-col items-center w-full md:w-1/3 mb-4 md:mb-0">
                                 <img id="teamA-avatar" src="https://placehold.co/60x60/161b22/FFFFFF?text=A" alt="Team A Logo" class="w-12 h-12 rounded-full border-2 border-green-500 object-cover mb-2">
                                 <p id="teamA-name" class="font-bold text-xl md:text-2xl truncate text-green-400">Team A</p>
                                 <p id="teamA-score" class="text-5xl font-extrabold text-white">0</p>
                             </div>
-                            <div class="text-center"><p id="match-timer" class="text-3xl font-mono text-yellow-400 bg-gray-700 px-4 py-2 rounded">01:30</p></div>
-                            <div class="flex flex-col items-center w-1/3">
+                            <div class="text-center mb-4 md:mb-0"><p id="match-timer" class="text-3xl font-mono text-yellow-400 bg-gray-700 px-4 py-2 rounded">00:00</p></div>
+                            <div class="flex flex-col items-center w-full md:w-1/3">
                                 <img id="teamB-avatar" src="https://placehold.co/60x60/161b22/FFFFFF?text=B" alt="Team B Logo" class="w-12 h-12 rounded-full border-2 border-green-500 object-cover mb-2">
                                 <p id="teamB-name" class="font-bold text-xl md:text-2xl truncate text-green-400">Team B</p>
                                 <p id="teamB-score" class="text-5xl font-extrabold text-white">0</p>
                             </div>
+                        </div>
+                        
+                        <!-- Match Pitch Visualization -->
+                        <div id="match-pitch-container" class="w-full p-4 bg-gray-900 rounded-lg mb-6 relative overflow-hidden">
+                            <div id="match-pitch" class="relative w-full h-80 bg-green-700 border-2 border-white rounded-lg overflow-hidden">
+                                <!-- Pitch markings -->
+                                <div class="absolute top-0 left-1/2 w-1 h-full bg-white transform -translate-x-1/2"></div>
+                                <div class="absolute top-1/2 left-1/2 w-20 h-20 border-2 border-white rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+                                <div class="absolute top-0 left-0 w-1/2 h-full border-r border-white"></div>
+                                <div class="absolute top-0 right-0 w-1/2 h-full border-l border-white"></div>
+                                <div class="absolute top-1/4 left-0 w-1/4 h-1/2 border-2 border-white"></div>
+                                <div class="absolute top-1/4 right-0 w-1/4 h-1/2 border-2 border-white"></div>
+                                <div class="absolute top-1/2 left-0 w-2 h-2 bg-white rounded-full transform -translate-y-1/2"></div>
+                                <div class="absolute top-1/2 right-0 w-2 h-2 bg-white rounded-full transform -translate-y-1/2"></div>
+                                
+                                <!-- Ball element -->
+                                <div id="match-ball" class="absolute w-4 h-4 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out shadow-lg" style="top: 50%; left: 50%;"></div>
+                                
+                                <!-- Player positions will be added here dynamically -->
+                            </div>
+                        </div>
+                        
+                        <!-- Match Stats Panel -->
+                        <div id="match-stats-panel" class="w-full p-2 bg-gray-800 rounded-lg mb-6 flex flex-col justify-between">
+                            
+                            <div class="text-center mb-4">
+                                <div class="flex justify-between items-center mt-2 text-sm">
+                                    <span id="home-possession" class="font-bold text-green-400">0%</span>
+                                    <div class="flex-grow mx-2 h-2 bg-red-600 rounded-full overflow-hidden">
+                                        <div id="possession-bar" class="h-2 bg-green-400 transition-all duration-500 ease-out" style="width: 50%;"></div>
+                                    </div>
+                                    <span id="away-possession" class="font-bold text-red-400">0%</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span id="home-shots" class="font-bold">0</span>
+                                    <span class="text-gray-400">Total Shots</span>
+                                    <span id="away-shots" class="font-bold">0</span>
+                                </div>
+                                
+                                <div class="flex justify-between">
+                                    <span id="home-shots-on-target" class="font-bold">0</span>
+                                    <span class="text-gray-400">Shots on Target</span>
+                                    <span id="away-shots-on-target" class="font-bold">0</span>
+                                </div>
+                                
+                                <div class="flex justify-between">
+                                    <span id="home-corners" class="font-bold">0</span>
+                                    <span class="text-gray-400">Corners</span>
+                                    <span id="away-corners" class="font-bold">0</span>
+                                </div>
+                                
+                                <div class="flex justify-between">
+                                    <span id="home-fouls" class="font-bold">0</span>
+                                    <span class="text-gray-400">Fouls</span>
+                                    <span id="away-fouls" class="font-bold">0</span>
+                                </div>
+                                
+                                <div class="flex justify-between">
+                                    <span id="home-cards" class="font-bold">0 (0 Y/ 0 R)</span>
+                                    <span class="text-gray-400">Cards</span>
+                                    <span id="away-cards" class="font-bold">0 (0 Y/ 0 R)</span>
+                                </div>
+                            </div>
+
                         </div>
                         
                         <!-- In-Match Chat -->
@@ -1115,6 +1294,37 @@
                         <p class="mt-4 text-lg text-gray-400">Version: <span class="font-bold text-yellow-400">1.0</span></p>
                     </div>
                 </div>
+                
+                <div id="match-history-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
+                    <h1 class="text-3xl font-bold mb-8 text-green-400">Match History</h1>
+                    
+                    <div class="player-card p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">Your Recent Matches</h2>
+                        <div id="match-history-list" class="space-y-4">
+                            <!-- Match history will be dynamically loaded here -->
+                            <p class="text-gray-400 text-center">Loading match history...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="player-card p-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">Match Statistics</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <p class="text-3xl font-bold text-green-400" id="total-matches">0</p>
+                                <p class="text-gray-400">Total Matches</p>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <p class="text-3xl font-bold text-green-400" id="wins-count">0</p>
+                                <p class="text-gray-400">Wins</p>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <p class="text-3xl font-bold text-green-400" id="win-rate">0%</p>
+                                <p class="text-gray-400">Win Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- New Views for Enhanced Features -->
                 <div id="club-management-view" class="view hidden p-6">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
@@ -1135,6 +1345,11 @@
                             <div class="text-4xl mb-4 text-purple-400"><i class="fas fa-tshirt"></i></div>
                             <h3 class="text-xl font-bold text-white mb-2">Kit Designer</h3>
                             <p class="text-gray-400">Design custom kits for your club</p>
+                        </div>
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="youth-squad-btn">
+                            <div class="text-4xl mb-4 text-green-400"><i class="fas fa-users"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Youth Squad</h3>
+                            <p class="text-gray-400">Manage your youth academy players</p>
                         </div>
                         <div class="player-card p-6 text-center cursor-pointer interactive-button" id="settings-btn">
                             <div class="text-4xl mb-4 text-green-400"><i class="fas fa-cog"></i></div>
@@ -1162,6 +1377,96 @@
                     </div>
                 </div>
                 
+                <div id="youth-squad-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Management</button>
+                    <h1 class="text-3xl font-bold mb-8 text-green-400">Youth Squad</h1>
+                    
+                    <div class="player-card p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">Youth Academy Players</h2>
+                        <p class="text-gray-400 mb-4">Train your young talents and prepare them for the first team.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6" id="youth-players-container">
+                            <!-- Youth players will be dynamically loaded here -->
+                        </div>
+                        
+                        <div class="text-center">
+                            <button id="generate-youth-player-btn" class="py-2 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">
+                                <i class="fas fa-plus-circle mr-2"></i>Generate New Youth Player (500 Coins)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="player-card p-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">Training Focus</h2>
+                        <p class="text-gray-400 mb-4">Select a training focus to improve specific attributes of your youth players. Higher level Youth Academy facilities provide better training results.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="bg-gray-800 p-4 rounded-lg cursor-pointer training-focus-option border-2 border-transparent hover:border-green-500" data-focus="pace">
+                                <h3 class="text-lg font-bold text-white mb-2">Speed Training</h3>
+                                <p class="text-gray-400 text-sm mb-3">Focus on improving player pace and acceleration</p>
+                                <div class="flex items-center text-green-400">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>
+                                    <span>Improves Pace attribute</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg cursor-pointer training-focus-option border-2 border-transparent hover:border-green-500" data-focus="shooting">
+                                <h3 class="text-lg font-bold text-white mb-2">Finishing Training</h3>
+                                <p class="text-gray-400 text-sm mb-3">Focus on improving player shooting and finishing</p>
+                                <div class="flex items-center text-red-400">
+                                    <i class="fas fa-bullseye mr-2"></i>
+                                    <span>Improves Shooting attribute</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg cursor-pointer training-focus-option border-2 border-transparent hover:border-green-500" data-focus="passing">
+                                <h3 class="text-lg font-bold text-white mb-2">Passing Training</h3>
+                                <p class="text-gray-400 text-sm mb-3">Focus on improving player passing and vision</p>
+                                <div class="flex items-center text-blue-400">
+                                    <i class="fas fa-exchange-alt mr-2"></i>
+                                    <span>Improves Passing attribute</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-gray-800 p-4 rounded-lg cursor-pointer training-focus-option border-2 border-transparent hover:border-green-500" data-focus="dribbling">
+                                <h3 class="text-lg font-bold text-white mb-2">Ball Skills</h3>
+                                <p class="text-gray-400 text-sm mb-3">Focus on improving player dribbling and ball control</p>
+                                <div class="flex items-center text-yellow-400">
+                                    <i class="fas fa-futbol mr-2"></i>
+                                    <span>Improves Dribbling attribute</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg cursor-pointer training-focus-option border-2 border-transparent hover:border-green-500" data-focus="defending">
+                                <h3 class="text-lg font-bold text-white mb-2">Defensive Training</h3>
+                                <p class="text-gray-400 text-sm mb-3">Focus on improving player defending and positioning</p>
+                                <div class="flex items-center text-purple-400">
+                                    <i class="fas fa-shield-alt mr-2"></i>
+                                    <span>Improves Defending attribute</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg cursor-pointer training-focus-option border-2 border-transparent hover:border-green-500" data-focus="physical">
+                                <h3 class="text-lg font-bold text-white mb-2">Fitness Training</h3>
+                                <p class="text-gray-400 text-sm mb-3">Focus on improving player stamina and strength</p>
+                                <div class="flex items-center text-orange-400">
+                                    <i class="fas fa-dumbbell mr-2"></i>
+                                    <span>Improves Physical attribute</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-gray-800 rounded-lg">
+                            <h3 class="text-lg font-bold text-white mb-2">Training Progress</h3>
+                            <div class="flex items-center">
+                                <div class="flex-1 bg-gray-700 rounded-full h-4 mr-4">
+                                    <div id="training-progress-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-4 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="training-progress-text" class="text-white font-bold">0%</span>
+                            </div>
+                            <p class="text-gray-400 text-sm mt-2">Training sessions are applied automatically. Higher Youth Academy level increases training effectiveness.</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="social-view" class="view hidden p-6">
                     <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
                     <h1 class="text-3xl font-bold mb-8 text-green-400">Social Features</h1>
@@ -1172,10 +1477,20 @@
                             <h3 class="text-xl font-bold text-white mb-2">Friends & Alliances</h3>
                             <p class="text-gray-400">Connect with friends and join alliances</p>
                         </div>
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="alliance-wars-btn">
+                            <div class="text-4xl mb-4 text-red-400"><i class="fas fa-fist-raised"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Alliance Wars</h3>
+                            <p class="text-gray-400">Compete against other alliances in tournaments</p>
+                        </div>
                         <div class="player-card p-6 text-center cursor-pointer interactive-button" id="private-leagues-btn">
                             <div class="text-4xl mb-4 text-purple-400"><i class="fas fa-trophy"></i></div>
                             <h3 class="text-xl font-bold text-white mb-2">Private Leagues</h3>
                             <p class="text-gray-400">Create or join private leagues with friends</p>
+                        </div>
+                        <div class="player-card p-6 text-center cursor-pointer interactive-button" id="custom-tournaments-btn">
+                            <div class="text-4xl mb-4 text-yellow-400"><i class="fas fa-medal"></i></div>
+                            <h3 class="text-xl font-bold text-white mb-2">Custom Tournaments</h3>
+                            <p class="text-gray-400">Create or join custom tournaments</p>
                         </div>
                     </div>
                     
@@ -1183,6 +1498,56 @@
                         <h2 class="text-2xl font-bold text-green-400 mb-4">Recent Friend Activity</h2>
                         <div id="friend-activity-list" class="space-y-4">
                             <!-- Friend activity will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="alliance-wars-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Social</button>
+                    <h1 class="text-3xl font-bold mb-8 text-green-400">Alliance Wars</h1>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="player-card p-6 lg:col-span-2">
+                            <h2 class="text-2xl font-bold text-green-400 mb-4">Active Alliance Wars</h2>
+                            <div id="active-wars-list" class="space-y-4">
+                                <!-- Active wars will be dynamically loaded here -->
+                                <p class="text-gray-400 text-center">No active alliance wars at the moment.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="player-card p-6">
+                            <h2 class="text-2xl font-bold text-green-400 mb-4">Your Alliance</h2>
+                            <div id="alliance-info" class="text-center">
+                                <!-- Alliance info will be dynamically loaded here -->
+                                <p class="text-gray-400">You are not currently in an alliance.</p>
+                                <button id="join-alliance-wars-btn" class="mt-4 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">
+                                    Join an Alliance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-card p-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">War Tournament Bracket</h2>
+                        <div class="bg-gray-800 rounded-lg p-6 text-center">
+                            <p class="text-gray-400 mb-4">Tournament bracket will appear here when a war is active.</p>
+                            <div class="flex justify-center space-x-8">
+                                <div class="text-center">
+                                    <div class="w-24 h-24 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <span class="text-gray-500">Alliance A</span>
+                                    </div>
+                                    <p class="text-sm text-gray-400">0 pts</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl text-gray-600 my-8">VS</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-24 h-24 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <span class="text-gray-500">Alliance B</span>
+                                    </div>
+                                    <p class="text-sm text-gray-400">0 pts</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1210,6 +1575,45 @@
                         </div>
                     </div>
                 </div>
+                
+                <div id="custom-tournaments-view" class="view hidden p-6">
+                    <button class="back-to-home nav-link mb-6 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg interactive-button">&larr; Back to Home</button>
+                    <h1 class="text-3xl font-bold mb-8 text-green-400">Custom Tournaments</h1>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="player-card p-6 lg:col-span-2">
+                            <h2 class="text-2xl font-bold text-green-400 mb-4">Active Tournaments</h2>
+                            <div id="active-tournaments-list" class="space-y-4">
+                                <!-- Active tournaments will be dynamically loaded here -->
+                                <p class="text-gray-400 text-center">No active tournaments at the moment.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="player-card p-6">
+                            <h2 class="text-2xl font-bold text-green-400 mb-4">Create Tournament</h2>
+                            <p class="text-gray-400 mb-4">Create your own custom tournament with friends.</p>
+                            <button id="create-tournament-btn" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button mb-4">
+                                <i class="fas fa-plus-circle mr-2"></i>Create New Tournament
+                            </button>
+                            <div class="mt-6">
+                                <h3 class="text-lg font-bold text-white mb-3">Tournament Types</h3>
+                                <ul class="space-y-2 text-gray-400 text-sm">
+                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> Knockout Tournament</li>
+                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> League Tournament</li>
+                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> Group Stage + Knockout</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-card p-6">
+                        <h2 class="text-2xl font-bold text-green-400 mb-4">Your Tournaments</h2>
+                        <div id="my-tournaments-list" class="space-y-4">
+                            <!-- User's tournaments will be dynamically loaded here -->
+                            <p class="text-gray-400 text-center">You haven't created or joined any tournaments yet.</p>
+                        </div>
+                    </div>
+                </div>
             </main>
 
             <footer class="bottom-nav fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around z-40">
@@ -1218,6 +1622,7 @@
                  <a href="#transfers" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Transfers"><i class="fas fa-exchange-alt text-2xl"></i><span class="text-xs mt-1 font-semibold">Transfers</span></a>
                  <a href="#store" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Store"><i class="fas fa-store text-2xl"></i><span class="text-xs mt-1 font-semibold">Store</span></a>
                  <a href="#season-pass" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Season Pass"><i class="fas fa-ticket-alt text-2xl"></i><span class="text-xs mt-1 font-semibold">Season Pass</span></a>
+                 <a href="#match-history" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Match History"><i class="fas fa-history text-2xl"></i><span class="text-xs mt-1 font-semibold">History</span></a>
                  <a href="#club-management" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Club Management"><i class="fas fa-cog text-2xl"></i><span class="text-xs mt-1 font-semibold">Management</span></a>
                  <a href="#social" class="nav-link flex flex-col items-center text-gray-300 p-2" title="Social"><i class="fas fa-users text-2xl"></i><span class="text-xs mt-1 font-semibold">Social</span></a>
             </footer>
@@ -1355,6 +1760,9 @@
         const friendsBtn = document.getElementById('friends-btn');
         const privateLeaguesBtn = document.getElementById('private-leagues-btn');
         const substitutionBtn = document.getElementById('substitution-btn');
+        const youthSquadBtn = document.getElementById('youth-squad-btn');
+        const allianceWarsBtn = document.getElementById('alliance-wars-btn');
+        const customTournamentsBtn = document.getElementById('custom-tournaments-btn');
 
         function playSound(sound) {
             sound.currentTime = 0;
@@ -1759,9 +2167,18 @@
                     const isInjured = playerData.injury && playerData.injury > 0;
                     const stamina = playerData.stamina || 100;
                     
+                    // Check for player contract expiration
+                    const contractExpiration = playerData.contractExpiration || 0;
+                    const currentDate = new Date().getTime();
+                    const daysUntilExpiration = Math.ceil((contractExpiration - currentDate) / (1000 * 60 * 60 * 24));
+                    const isContractExpiring = contractExpiration > 0 && daysUntilExpiration <= 7;
+                    const isContractExpired = contractExpiration > 0 && currentDate > contractExpiration;
+                    
                     squadListDiv.innerHTML += `
                         <div class="player-card p-4 text-center shadow-lg ${rarityClass} relative">
                             ${isInjured ? '<div class="injury-indicator" title="Injured"><i class="fas fa-first-aid"></i></div>' : ''}
+                            ${isContractExpiring ? '<div class="contract-indicator" title="Contract expiring soon"><i class="fas fa-file-contract"></i></div>' : ''}
+                            ${isContractExpired ? '<div class="contract-expired-indicator" title="Contract expired"><i class="fas fa-exclamation-triangle"></i></div>' : ''}
                             <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
                             <h4 class="font-bold text-lg text-white">${playerData.name}</h4>
                             <p class="text-sm text-gray-400">${playerData.position}</p>
@@ -1778,6 +2195,10 @@
                                 <div class="flex justify-between text-xs"><span>Stamina:</span><span>${stamina}%</span></div>
                                 <div class="stamina-bar"><div class="stamina-fill" style="width: ${stamina}%"></div></div>
                             </div>
+                            ${contractExpiration > 0 ? `<div class="mt-2 text-xs text-gray-500">
+                                <div class="flex justify-between"><span>Contract:</span><span>${daysUntilExpiration > 0 ? daysUntilExpiration + ' days' : 'Expired'}</span></div>
+                            </div>` : ''}
+                            ${(isContractExpiring || isContractExpired) ? `<button onclick="renewContract('${playerId}')" class="mt-2 py-1 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded">Renew Contract</button>` : ''}
                         </div>`;
                 }
             });
@@ -1878,6 +2299,124 @@
                 loadEvents(); 
             } catch (error) { showModal("Failed to claim reward: " + error.message); }
         };
+        
+        window.renewContract = async (playerId) => {
+            if (!currentUserData) return showModal("User data not loaded.");
+            
+            // Get player data
+            const playerRef = ref(db, 'players/' + playerId);
+            const playerSnap = await get(playerRef);
+            
+            if (!playerSnap.exists()) {
+                showModal("Player not found.");
+                return;
+            }
+            
+            const playerData = playerSnap.val();
+            const contractCost = playerData.value || 1000; // Default cost if not set
+            
+            // Create contract renewal modal
+            const modalHtml = `
+                <div id="contract-renewal-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md text-left border-4 border-blue-500 relative">
+                        <button id="contract-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-blue-400 mb-4">Renew Contract</h2>
+                        <div class="player-card p-4 mb-4">
+                            <div class="flex items-center">
+                                <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-16 h-16 object-cover rounded-full mr-4 border-2 border-gray-600">
+                                <div>
+                                    <h3 class="font-bold text-lg text-white">${playerData.name}</h3>
+                                    <p class="text-gray-400">${playerData.position}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">Contract Length</label>
+                            <select id="contract-length" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                <option value="30">1 Month (30 days) - ${Math.round(contractCost * 0.1)} coins</option>
+                                <option value="90">3 Months (90 days) - ${Math.round(contractCost * 0.25)} coins</option>
+                                <option value="180" selected>6 Months (180 days) - ${Math.round(contractCost * 0.45)} coins</option>
+                                <option value="365">1 Year (365 days) - ${contractCost} coins</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-300">Total Cost:</span>
+                            <span id="contract-cost" class="font-bold text-yellow-400">${Math.round(contractCost * 0.45)} coins</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button id="cancel-contract-btn" class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                            <button id="confirm-contract-btn" class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button" data-player="${playerId}">Renew Contract</button>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add the modal to the document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listeners
+            document.getElementById('contract-close-btn').addEventListener('click', closeContractModal);
+            document.getElementById('cancel-contract-btn').addEventListener('click', closeContractModal);
+            
+            // Update cost when contract length changes
+            document.getElementById('contract-length').addEventListener('change', (e) => {
+                const length = parseInt(e.target.value);
+                let costMultiplier = 0.45; // Default for 6 months
+                
+                switch(length) {
+                    case 30: costMultiplier = 0.1; break;
+                    case 90: costMultiplier = 0.25; break;
+                    case 180: costMultiplier = 0.45; break;
+                    case 365: costMultiplier = 1.0; break;
+                }
+                
+                const totalCost = Math.round(contractCost * costMultiplier);
+                document.getElementById('contract-cost').textContent = `${totalCost} coins`;
+            });
+            
+            document.getElementById('confirm-contract-btn').addEventListener('click', async (e) => {
+                const playerId = e.target.getAttribute('data-player');
+                const length = parseInt(document.getElementById('contract-length').value);
+                let costMultiplier = 0.45; // Default for 6 months
+                
+                switch(length) {
+                    case 30: costMultiplier = 0.1; break;
+                    case 90: costMultiplier = 0.25; break;
+                    case 180: costMultiplier = 0.45; break;
+                    case 365: costMultiplier = 1.0; break;
+                }
+                
+                const totalCost = Math.round(contractCost * costMultiplier);
+                
+                // Check if user has enough coins
+                if (currentUserData.balance < totalCost) {
+                    showModal(`You don't have enough coins to renew this contract. Required: ${totalCost} coins.`);
+                    return;
+                }
+                
+                // Calculate new contract expiration
+                const newExpiration = new Date().getTime() + (length * 24 * 60 * 60 * 1000);
+                
+                // Update player contract expiration
+                await update(playerRef, { contractExpiration: newExpiration });
+                
+                // Deduct coins from user
+                await update(ref(db, 'users/' + currentUserData.uid), { 
+                    balance: currentUserData.balance - totalCost 
+                });
+                
+                closeContractModal();
+                showModal(`Contract renewed for ${playerData.name} for ${length} days!`);
+                loadSquad(currentUserData.squad); // Refresh the squad view
+            });
+        };
+        
+        // Function to close contract modal
+        function closeContractModal() {
+            const modal = document.getElementById('contract-renewal-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
 
         async function loadStoreItems() {
             const storeItemsDiv = document.getElementById('store-items');
@@ -2090,22 +2629,240 @@
             if (coinsPrice > 0) updates.balance = currentUserData.balance - coinsPrice;
             if (gemsPrice > 0) updates.gems = currentUserData.gems - gemsPrice;
             
-            // Add item to user's inventory
-            const inventory = currentUserData.inventory || {};
-            if (!inventory[itemId]) {
-                inventory[itemId] = 1;
-            } else {
-                inventory[itemId] += 1;
-            }
-            updates.inventory = inventory;
-            
             try {
                 await update(ref(db, 'users/' + currentUserData.uid), updates);
-                showModal("Item purchased successfully!");
+                useSpecialItem(itemId);
             } catch (error) {
                 showModal("Failed to purchase item: " + error.message);
             }
         };
+        
+        window.changeTrainingFocus = async (playerId) => {
+            if (!currentUserData) return;
+            
+            // Get player data
+            const playerRef = ref(db, `users/${currentUserData.uid}/youthPlayers/${playerId}`);
+            const playerSnap = await get(playerRef);
+            
+            if (!playerSnap.exists()) {
+                showModal("Player not found.");
+                return;
+            }
+            
+            const playerData = playerSnap.val();
+            
+            // Create training focus modal
+            const focusOptions = [
+                { value: 'pace', label: 'Speed Training', icon: 'tachometer-alt', color: 'green' },
+                { value: 'shooting', label: 'Finishing Training', icon: 'bullseye', color: 'red' },
+                { value: 'passing', label: 'Passing Training', icon: 'exchange-alt', color: 'blue' },
+                { value: 'dribbling', label: 'Ball Skills', icon: 'futbol', color: 'yellow' },
+                { value: 'defending', label: 'Defensive Training', icon: 'shield-alt', color: 'purple' },
+                { value: 'physical', label: 'Fitness Training', icon: 'dumbbell', color: 'orange' }
+            ];
+            
+            let optionsHtml = '';
+            focusOptions.forEach(option => {
+                const isSelected = playerData.trainingFocus === option.value;
+                optionsHtml += `
+                    <div class="training-focus-option p-3 rounded-lg cursor-pointer border-2 ${isSelected ? 'border-yellow-400 bg-gray-700' : 'border-gray-600 bg-gray-800'} hover:border-green-500" data-focus="${option.value}">
+                        <div class="flex items-center">
+                            <i class="fas fa-${option.icon} text-${option.color}-400 mr-3"></i>
+                            <span class="font-medium text-white">${option.label}</span>
+                            ${isSelected ? '<i class="fas fa-check-circle text-green-400 ml-auto"></i>' : ''}
+                        </div>
+                    </div>`;
+            });
+            
+            const modalHtml = `
+                <div id="training-focus-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md text-left border-4 border-blue-500 relative">
+                        <button id="focus-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-blue-400 mb-4">Change Training Focus</h2>
+                        <div class="player-card p-4 mb-4">
+                            <div class="flex items-center">
+                                <img src="${playerData.imageUrl || 'https://placehold.co/96x96/161b22/FFFFFF?text=Y'}" alt="${playerData.name}" class="w-16 h-16 object-cover rounded-full mr-4 border-2 border-gray-600">
+                                <div>
+                                    <h3 class="font-bold text-lg text-white">${playerData.name}</h3>
+                                    <p class="text-gray-400">Current Focus: <span class="capitalize">${playerData.trainingFocus || 'balanced'}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-6">
+                            ${optionsHtml}
+                        </div>
+                        <div class="flex space-x-3">
+                            <button id="cancel-focus-btn" class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                            <button id="confirm-focus-btn" class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button" data-player="${playerId}">Apply Focus</button>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add the modal to the document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listeners
+            document.getElementById('focus-close-btn').addEventListener('click', closeFocusModal);
+            document.getElementById('cancel-focus-btn').addEventListener('click', closeFocusModal);
+            
+            // Add click listeners to focus options
+            document.querySelectorAll('.training-focus-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove selection from all options
+                    document.querySelectorAll('.training-focus-option').forEach(opt => {
+                        opt.classList.remove('border-yellow-400', 'bg-gray-700');
+                        opt.classList.add('border-gray-600', 'bg-gray-800');
+                        // Remove check icon if exists
+                        const checkIcon = opt.querySelector('.fa-check-circle');
+                        if (checkIcon) checkIcon.remove();
+                    });
+                    
+                    // Add selection to clicked option
+                    option.classList.remove('border-gray-600', 'bg-gray-800');
+                    option.classList.add('border-yellow-400', 'bg-gray-700');
+                    
+                    // Add check icon
+                    const iconContainer = option.querySelector('div');
+                    iconContainer.innerHTML += '<i class="fas fa-check-circle text-green-400 ml-auto"></i>';
+                });
+            });
+            
+            document.getElementById('confirm-focus-btn').addEventListener('click', async (e) => {
+                const playerId = e.target.getAttribute('data-player');
+                const selectedFocus = document.querySelector('.training-focus-option.border-yellow-400');
+                
+                if (!selectedFocus) {
+                    showModal("Please select a training focus.");
+                    return;
+                }
+                
+                const focusValue = selectedFocus.getAttribute('data-focus');
+                
+                // Update player training focus
+                await update(playerRef, { trainingFocus: focusValue });
+                
+                closeFocusModal();
+                showModal(`Training focus for ${playerData.name} changed to ${focusValue}!`);
+                loadYouthPlayers(); // Refresh the youth players list
+            });
+        };
+        
+        // Function to close focus modal
+        function closeFocusModal() {
+            const modal = document.getElementById('training-focus-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Update the setTrainingFocus function
+        async function setTrainingFocus(focus) {
+            if (!currentUserData) return;
+            
+            try {
+                // Save training focus to user data
+                await update(ref(db, 'users/' + currentUserData.uid), { 
+                    youthTrainingFocus: focus 
+                });
+                
+                // Update UI to show selected focus
+                document.querySelectorAll('.training-focus-option').forEach(option => {
+                    option.classList.remove('border-2', 'border-yellow-400');
+                    if (option.getAttribute('data-focus') === focus) {
+                        option.classList.add('border-2', 'border-yellow-400');
+                    }
+                });
+                
+                showModal(`Training focus set to ${focus}! All new youth players will have this focus.`);
+            } catch (error) {
+                console.error("Error setting training focus:", error);
+                showModal("Error setting training focus. Please try again.");
+            }
+        }
+        
+        // Add auto-training functionality
+        async function autoTrainYouthPlayers() {
+            if (!currentUserData) return;
+            
+            try {
+                // Get user's youth players from database
+                const youthPlayersRef = ref(db, `users/${currentUserData.uid}/youthPlayers`);
+                const snapshot = await get(youthPlayersRef);
+                
+                if (snapshot.exists()) {
+                    const youthPlayers = snapshot.val();
+                    const updates = {};
+                    let trainingApplied = false;
+                    
+                    // Get youth academy level for training effectiveness
+                    const youthAcademyLevel = currentUserData.clubFacilities?.youthAcademy?.level || 1;
+                    const trainingEffectiveness = 1 + (youthAcademyLevel * 0.1); // 10% bonus per level
+                    
+                    for (const playerId in youthPlayers) {
+                        const player = youthPlayers[playerId];
+                        const attributes = player.attributes || { pace: 50, shooting: 50, passing: 50, dribbling: 50, defending: 50, physical: 50 };
+                        const trainingFocus = player.trainingFocus || 'balanced';
+                        let trainingProgress = player.trainingProgress || 0;
+                        
+                        // Apply training progress
+                        trainingProgress = Math.min(100, trainingProgress + (2 * trainingEffectiveness));
+                        
+                        // If training is complete, improve the focused attribute
+                        if (trainingProgress >= 100) {
+                            trainingProgress = 0; // Reset progress
+                            
+                            // Improve the focused attribute (max 99)
+                            if (trainingFocus !== 'balanced' && attributes[trainingFocus] < 99) {
+                                attributes[trainingFocus] = Math.min(99, attributes[trainingFocus] + 1);
+                                trainingApplied = true;
+                            } else {
+                                // If balanced or attribute is maxed, improve a random attribute
+                                const attributeKeys = ['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
+                                const randomAttribute = attributeKeys[Math.floor(Math.random() * attributeKeys.length)];
+                                if (attributes[randomAttribute] < 99) {
+                                    attributes[randomAttribute] = Math.min(99, attributes[randomAttribute] + 1);
+                                    trainingApplied = true;
+                                }
+                            }
+                        }
+                        
+                        // Update player data
+                        updates[`users/${currentUserData.uid}/youthPlayers/${playerId}`] = {
+                            ...player,
+                            attributes: attributes,
+                            trainingProgress: trainingProgress
+                        };
+                    }
+                    
+                    // Apply all updates
+                    if (Object.keys(updates).length > 0) {
+                        await update(ref(db), updates);
+                        
+                        // Show notification if training was applied
+                        if (trainingApplied) {
+                            // Only show notification if user is on the youth squad view
+                            if (!document.getElementById('youth-squad-view').classList.contains('hidden')) {
+                                showModal("Youth players have improved their skills through training!");
+                            }
+                        }
+                        
+                        // Refresh youth players display if on youth squad view
+                        if (!document.getElementById('youth-squad-view').classList.contains('hidden')) {
+                            loadYouthPlayers();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error in auto training:", error);
+            }
+        }
+        
+        // Set up periodic auto-training (every 10 minutes)
+        setInterval(() => {
+            if (currentUserData) {
+                autoTrainYouthPlayers();
+            }
+        }, 10 * 60 * 1000); // 10 minutes
 
         async function openPack(packId) {
             const playersRef = ref(db, 'players');
@@ -2221,8 +2978,47 @@
                 await update(ref(db, `matches/${currentMatchId}`), { [strategyPath]: newStrategy });
                 let seconds = matchData.startTime ? Math.floor((Date.now() - matchData.startTime) / 1000) : 0;
                 push(ref(db, `matches/${currentMatchId}/events`), { time: `${seconds}'`, text: `🔄 ${currentUserData.clubName} changed strategy to ${newStrategy}.` });
+                
+                // Update player positions based on new strategy/formation
+                updatePlayerPositions(matchData, newStrategy);
             });
         });
+        
+        // Update player positions based on strategy/formation
+        function updatePlayerPositions(matchData, strategy) {
+            // In a real implementation, you would adjust player positions based on the strategy
+            // For now, we'll just move players slightly to simulate tactical changes
+            const players = document.querySelectorAll('.player-icon');
+            players.forEach(player => {
+                // Add a small animation to show tactical change
+                player.classList.add('transition-transform', 'duration-500');
+                
+                // Get current position
+                const currentTop = parseFloat(player.style.top);
+                const currentLeft = parseFloat(player.style.left);
+                
+                // Adjust position slightly based on strategy
+                let newTop = currentTop;
+                let newLeft = currentLeft;
+                
+                if (strategy === 'Attack') {
+                    // Move players forward
+                    newTop = player.classList.contains('teamA') ? currentTop - 5 : currentTop + 5;
+                } else if (strategy === 'Defense') {
+                    // Move players back
+                    newTop = player.classList.contains('teamA') ? currentTop + 5 : currentTop - 5;
+                }
+                
+                // Apply new position
+                player.style.top = `${newTop}%`;
+                player.style.left = `${newLeft}%`;
+                
+                // Remove animation class after transition
+                setTimeout(() => {
+                    player.classList.remove('transition-transform', 'duration-500');
+                }, 500);
+            });
+        }
 
         const cancelMatchmakingBtn = document.getElementById('cancel-matchmaking-btn');
 
@@ -2605,7 +3401,7 @@
                 } 
                 else { timerDisplay.textContent = '01:30'; }
 
-                if(currentUserData && matchData.status === 'starting' && (matchData.teamA.uid === currentUserData.uid || matchData.isSinglePlayer)){
+                if(currentUserData && matchData.status === 'starting' && (matchData.teamA.uid === currentUserData.uid || matchData.teamB.uid === currentUserData.uid || matchData.isSinglePlayer)){
                      runMatchSimulation(matchId, matchData, teamA_PlayerNames, teamB_PlayerNames);
                 }
             });
@@ -2696,6 +3492,73 @@
             }
         }
         
+        // Match Stats System
+        // This system tracks real-time match statistics and visual elements
+        let matchStats = {
+            time: 0,
+            teamA: {
+                score: 0,
+                possession: 0,
+                shots: 0,
+                shotsOnTarget: 0,
+                corners: 0,
+                fouls: 0,
+                yellowCards: 0,
+                redCards: 0
+            },
+            teamB: {
+                score: 0,
+                possession: 0,
+                shots: 0,
+                shotsOnTarget: 0,
+                corners: 0,
+                fouls: 0,
+                yellowCards: 0,
+                redCards: 0
+            }
+        };
+        
+        function updateMatchStatsUI() {
+            console.log('Updating match stats UI:', matchStats);
+            
+            // Update match time
+            const minutes = Math.floor(matchStats.time / 60);
+            const seconds = matchStats.time % 60;
+            document.getElementById('match-timer').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            // Update main score display
+            document.getElementById('teamA-score').textContent = matchStats.teamA.score;
+            document.getElementById('teamB-score').textContent = matchStats.teamB.score;
+
+            // Update possession
+            let totalTime = matchStats.time > 0 ? matchStats.time : 1; // Avoid division by zero
+            let teamAPct = Math.round((matchStats.teamA.possession / totalTime) * 100);
+            let teamBPct = 100 - teamAPct;
+            
+            document.getElementById('home-possession').textContent = `${teamAPct}%`;
+            document.getElementById('away-possession').textContent = `${teamBPct}%`;
+            document.getElementById('possession-bar').style.width = `${teamAPct}%`;
+            
+            // Update other stats
+            document.getElementById('home-shots').textContent = matchStats.teamA.shots;
+            document.getElementById('away-shots').textContent = matchStats.teamB.shots;
+            
+            document.getElementById('home-shots-on-target').textContent = matchStats.teamA.shotsOnTarget;
+            document.getElementById('away-shots-on-target').textContent = matchStats.teamB.shotsOnTarget;
+            
+            document.getElementById('home-corners').textContent = matchStats.teamA.corners;
+            document.getElementById('away-corners').textContent = matchStats.teamB.corners;
+            
+            document.getElementById('home-fouls').textContent = matchStats.teamA.fouls;
+            document.getElementById('away-fouls').textContent = matchStats.teamB.fouls;
+            
+            // Update cards
+            const teamACardsText = `${matchStats.teamA.yellowCards + matchStats.teamA.redCards} (${matchStats.teamA.yellowCards} Y/ ${matchStats.teamA.redCards} R)`;
+            const teamBCardsText = `${matchStats.teamB.yellowCards + matchStats.teamB.redCards} (${matchStats.teamB.yellowCards} Y/ ${matchStats.teamB.redCards} R)`;
+            document.getElementById('home-cards').textContent = teamACardsText;
+            document.getElementById('away-cards').textContent = teamBCardsText;
+        }
+        
         // Show victory screen with animation
         function showVictoryScreen() {
             const victoryScreen = document.getElementById('victory-screen');
@@ -2730,11 +3593,224 @@
             }
         }
 
+        // Initialize pitch visualization with player positions
+        function initializePitchVisualization(matchData) {
+            const pitch = document.getElementById('match-pitch');
+            if (!pitch) return;
+            
+            // Clear existing players
+            const existingPlayers = pitch.querySelectorAll('.player-icon');
+            existingPlayers.forEach(player => player.remove());
+            
+            // Define formations (4-4-2 as default)
+            const teamAFormation = getFormationPositions(matchData.teamA.formation || '4-4-2', 'teamA');
+            const teamBFormation = getFormationPositions(matchData.teamB.formation || '4-4-2', 'teamB');
+            
+            // Add Team A players (attacking from left to right)
+            if (matchData.teamA.squad && Array.isArray(matchData.teamA.squad)) {
+                console.log('Team A squad:', matchData.teamA.squad);
+                matchData.teamA.squad.forEach((playerId, index) => {
+                    if (index < 11) { // Only first 11 players
+                        const position = teamAFormation[index] || { top: 50, left: 30 };
+                        console.log(`Adding Team A player ${playerId} at position ${position.top}%, ${position.left}%`);
+                        addPlayerToPitch(playerId, position.top, position.left, 'teamA', index + 1);
+                    }
+                });
+            }
+            
+            // Add Team B players (attacking from right to left)
+            if (matchData.teamB.squad && Array.isArray(matchData.teamB.squad)) {
+                console.log('Team B squad:', matchData.teamB.squad);
+                matchData.teamB.squad.forEach((playerId, index) => {
+                    if (index < 11) { // Only first 11 players
+                        const position = teamBFormation[index] || { top: 50, left: 70 };
+                        console.log(`Adding Team B player ${playerId} at position ${position.top}%, ${position.left}%`);
+                        addPlayerToPitch(playerId, position.top, position.left, 'teamB', index + 1);
+                    }
+                });
+            }
+            
+            // Log total players added
+            const totalPlayers = pitch.querySelectorAll('.player-icon').length;
+            console.log(`Total players added to pitch: ${totalPlayers}`);
+        }
+        
+        // Get player positions based on formation
+        function getFormationPositions(formation, team) {
+            // Base positions for different formations
+            const formations = {
+                '4-4-2': [
+                    // Goalkeeper
+                    { top: 10, left: team === 'teamA' ? 10 : 90 },
+                    // Defenders
+                    { top: 30, left: team === 'teamA' ? 20 : 80 },
+                    { top: 50, left: team === 'teamA' ? 20 : 80 },
+                    { top: 70, left: team === 'teamA' ? 20 : 80 },
+                    { top: 90, left: team === 'teamA' ? 20 : 80 },
+                    // Midfielders
+                    { top: 30, left: team === 'teamA' ? 40 : 60 },
+                    { top: 50, left: team === 'teamA' ? 40 : 60 },
+                    { top: 70, left: team === 'teamA' ? 40 : 60 },
+                    { top: 90, left: team === 'teamA' ? 40 : 60 },
+                    // Forwards
+                    { top: 40, left: team === 'teamA' ? 70 : 30 },
+                    { top: 80, left: team === 'teamA' ? 70 : 30 }
+                ],
+                '4-3-3': [
+                    // Goalkeeper
+                    { top: 10, left: team === 'teamA' ? 10 : 90 },
+                    // Defenders
+                    { top: 30, left: team === 'teamA' ? 20 : 80 },
+                    { top: 50, left: team === 'teamA' ? 20 : 80 },
+                    { top: 70, left: team === 'teamA' ? 20 : 80 },
+                    { top: 90, left: team === 'teamA' ? 20 : 80 },
+                    // Midfielders
+                    { top: 40, left: team === 'teamA' ? 50 : 50 },
+                    { top: 60, left: team === 'teamA' ? 50 : 50 },
+                    { top: 80, left: team === 'teamA' ? 50 : 50 },
+                    // Forwards
+                    { top: 30, left: team === 'teamA' ? 80 : 20 },
+                    { top: 60, left: team === 'teamA' ? 80 : 20 },
+                    { top: 90, left: team === 'teamA' ? 80 : 20 }
+                ],
+                '3-5-2': [
+                    // Goalkeeper
+                    { top: 10, left: team === 'teamA' ? 10 : 90 },
+                    // Defenders
+                    { top: 40, left: team === 'teamA' ? 20 : 80 },
+                    { top: 60, left: team === 'teamA' ? 20 : 80 },
+                    { top: 80, left: team === 'teamA' ? 20 : 80 },
+                    // Midfielders
+                    { top: 20, left: team === 'teamA' ? 40 : 60 },
+                    { top: 40, left: team === 'teamA' ? 40 : 60 },
+                    { top: 60, left: team === 'teamA' ? 40 : 60 },
+                    { top: 80, left: team === 'teamA' ? 40 : 60 },
+                    { top: 100, left: team === 'teamA' ? 40 : 60 },
+                    // Forwards
+                    { top: 40, left: team === 'teamA' ? 70 : 30 },
+                    { top: 80, left: team === 'teamA' ? 70 : 30 }
+                ]
+            };
+            
+            return formations[formation] || formations['4-4-2'];
+        }
+        
+        // Add a player to the pitch
+        function addPlayerToPitch(playerId, top, left, team, jerseyNumber) {
+            const pitch = document.getElementById('match-pitch');
+            if (!pitch) return;
+            
+            const playerElement = document.createElement('div');
+            playerElement.id = `player-${playerId}`;
+            playerElement.className = `player-icon absolute w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ease-out ${team === 'teamA' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'} ${team}`;
+            playerElement.style.top = `${top}%`;
+            playerElement.style.left = `${left}%`;
+            playerElement.innerHTML = `<span class="player-jersey-number">${jerseyNumber}</span>`;
+            playerElement.dataset.jerseyNumber = jerseyNumber;
+            playerElement.dataset.team = team;
+            
+            pitch.appendChild(playerElement);
+        }
+        
+        // Highlight a player
+        function highlightPlayer(playerId) {
+            const playerElement = document.getElementById(`player-${playerId}`);
+            if (playerElement) {
+                playerElement.classList.add('ring-4', 'ring-yellow-400', 'scale-125');
+                setTimeout(() => {
+                    playerElement.classList.remove('ring-4', 'ring-yellow-400', 'scale-125');
+                }, 1000);
+            }
+        }
+        
+        // Move a player to a new position
+        function movePlayer(playerId, top, left) {
+            const playerElement = document.getElementById(`player-${playerId}`);
+            if (playerElement) {
+                playerElement.style.top = `${top}%`;
+                playerElement.style.left = `${left}%`;
+            }
+        }
+        
+        // Move the ball
+        function moveBall(top, left) {
+            const ballElement = document.getElementById('match-ball');
+            if (ballElement) {
+                console.log(`Moving ball to ${top}%, ${left}%`);
+                ballElement.style.top = `${top}%`;
+                ballElement.style.left = `${left}%`;
+            }
+        }
+        
+        // Create a shot effect
+        function createShotEffect(startTop, startLeft, endTop, endLeft) {
+            const pitch = document.getElementById('match-pitch');
+            if (!pitch) return;
+            
+            // Create shot trail
+            const shotTrail = document.createElement('div');
+            shotTrail.className = 'shot-trail';
+            shotTrail.style.width = '4px';
+            shotTrail.style.height = '4px';
+            shotTrail.style.top = `${startTop}%`;
+            shotTrail.style.left = `${startLeft}%`;
+            shotTrail.style.transition = 'all 0.5s ease-out';
+            
+            pitch.appendChild(shotTrail);
+            
+            // Animate the shot
+            setTimeout(() => {
+                shotTrail.style.top = `${endTop}%`;
+                shotTrail.style.left = `${endLeft}%`;
+                shotTrail.style.opacity = '0';
+                shotTrail.style.width = '2px';
+                shotTrail.style.height = '2px';
+            }, 10);
+            
+            // Remove trail after animation
+            setTimeout(() => {
+                if (shotTrail.parentNode) {
+                    shotTrail.parentNode.removeChild(shotTrail);
+                }
+            }, 500);
+        }
+        
         async function runMatchSimulation(matchId, initialMatchData, teamA_Players, teamB_Players){
             if (!currentUserData) return;
             if(matchSimulationInterval) clearInterval(matchSimulationInterval);
             playMatchMusic(); 
             await update(ref(db, `matches/${matchId}`), { status: 'ongoing', startTime: serverTimestamp() });
+            
+            // Reset match stats
+            matchStats = {
+                time: 0,
+                teamA: {
+                    score: 0,
+                    possession: 0,
+                    shots: 0,
+                    shotsOnTarget: 0,
+                    corners: 0,
+                    fouls: 0,
+                    yellowCards: 0,
+                    redCards: 0
+                },
+                teamB: {
+                    score: 0,
+                    possession: 0,
+                    shots: 0,
+                    shotsOnTarget: 0,
+                    corners: 0,
+                    fouls: 0,
+                    yellowCards: 0,
+                    redCards: 0
+                }
+            };
+            
+            // Initialize stats UI
+            updateMatchStatsUI();
+            
+            // Initialize pitch visualization
+            initializePitchVisualization(initialMatchData);
             
             let seconds = 0;
             const matchDuration = 90; const attackBonus = 0.2; const defenseBonus = 0.2;
@@ -2743,6 +3819,15 @@
 
             matchSimulationInterval = setInterval(async () => {
                 seconds += 1;
+                matchStats.time = seconds;
+                
+                // Update possession (random for demo purposes)
+                if (Math.random() > 0.5) {
+                    matchStats.teamA.possession++;
+                } else {
+                    matchStats.teamB.possession++;
+                }
+                
                 const matchSnapshot = await get(ref(db, `matches/${matchId}`));
                 if (!matchSnapshot.exists()) { clearInterval(matchSimulationInterval); return; }
                 let matchData = matchSnapshot.val();
@@ -2754,17 +3839,100 @@
                     const sA = matchData.teamAStrategy || 'Balanced', sB = matchData.teamBStrategy || 'Balanced';
                     const offA = (pA / totalP) * baseC * getOffenseModifier(sA);
                     
+                    // Visual: Move ball to random position to simulate play
+                    moveBall(30 + Math.random() * 40, 20 + Math.random() * 60);
+                    
                     if (Math.random() < offA) {
                         const defB = (pB / totalP) * getDefenseModifier(sB);
                         if(Math.random() > defB){
                             matchData.score.teamA++; scoreUpdated = true;
+                            matchStats.teamA.score = matchData.score.teamA;
+                            matchStats.teamA.shots++;
+                            matchStats.teamA.shotsOnTarget++;
+                            
+                            // 20% chance of corner kick
+                            if (Math.random() < 0.2) {
+                                matchStats.teamA.corners++;
+                                eventText += " Corner for " + matchData.teamA.clubName + ".";
+                            }
+                            
                             const scorer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players) : matchData.teamA.clubName;
                             const otherPlayer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players.filter(p => p !== scorer)) : matchData.teamA.clubName;
                             eventText = getRandomCommentary('goal', matchData.teamA.clubName, scorer, otherPlayer);
+                            
+                            // Visual updates for goal
+                            if (scorer && typeof scorer === 'string') {
+                                // Highlight the scorer
+                                const scorerElement = Array.from(document.querySelectorAll('.player-icon')).find(el => 
+                                    el.dataset.team === 'teamA' && 
+                                    Array.from(el.parentNode.children).indexOf(el) < 11
+                                );
+                                if (scorerElement) {
+                                    scorerElement.classList.add('ring-4', 'ring-yellow-400', 'scale-150');
+                                    setTimeout(() => {
+                                        scorerElement.classList.remove('ring-4', 'ring-yellow-400', 'scale-150');
+                                    }, 2000);
+                                }
+                            }
+                            
+                            // Move ball to goal area
+                            moveBall(5, matchData.teamA.uid === currentUserData.uid ? 95 : 5);
+                            
+                            // Create shot effect
+                            createShotEffect(50, 50, 5, matchData.teamA.uid === currentUserData.uid ? 95 : 5);
                         } else { 
+                            matchStats.teamA.shots++;
+                            matchStats.teamB.fouls++;
+                            
                             const teamAPlayer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players) : matchData.teamA.clubName;
                             const teamBPlayer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players) : matchData.teamB.clubName;
+                            
+                            // 10% chance of yellow card, 2% chance of red card
+                            if (Math.random() < 0.1) {
+                                matchStats.teamB.yellowCards++;
+                                eventText += " Yellow card for " + matchData.teamB.clubName + ".";
+                                
+                                // Visual effect for yellow card
+                                const foulPlayer = Array.from(document.querySelectorAll('.player-icon.teamB')).find(el => 
+                                    el.dataset.team === 'teamB' && 
+                                    Array.from(el.parentNode.children).indexOf(el) < 11
+                                );
+                                if (foulPlayer) {
+                                    foulPlayer.classList.add('ring-2', 'ring-yellow-400');
+                                    setTimeout(() => {
+                                        foulPlayer.classList.remove('ring-2', 'ring-yellow-400');
+                                    }, 2000);
+                                }
+                            } else if (Math.random() < 0.02) {
+                                matchStats.teamB.redCards++;
+                                eventText += " Red card for " + matchData.teamB.clubName + ".";
+                                
+                                // Visual effect for red card
+                                const foulPlayer = Array.from(document.querySelectorAll('.player-icon.teamB')).find(el => 
+                                    el.dataset.team === 'teamB' && 
+                                    Array.from(el.parentNode.children).indexOf(el) < 11
+                                );
+                                if (foulPlayer) {
+                                    foulPlayer.classList.add('ring-2', 'ring-red-500');
+                                    setTimeout(() => {
+                                        foulPlayer.classList.remove('ring-2', 'ring-red-500');
+                                    }, 2000);
+                                }
+                            }
+                            
                             eventText = getRandomCommentary('save', matchData.teamB.clubName, teamAPlayer, teamBPlayer); 
+                            
+                            // Visual effect for save
+                            const savePlayer = Array.from(document.querySelectorAll('.player-icon.teamB')).find(el => 
+                                el.dataset.team === 'teamB' && 
+                                Array.from(el.parentNode.children).indexOf(el) < 11
+                            );
+                            if (savePlayer) {
+                                savePlayer.classList.add('ring-2', 'ring-green-400');
+                                setTimeout(() => {
+                                    savePlayer.classList.remove('ring-2', 'ring-green-400');
+                                }, 1000);
+                            } 
                         }
                     } else {
                         const offB = (pB / totalP) * baseC * getOffenseModifier(sB);
@@ -2772,19 +3940,110 @@
                             const defA = (pA / totalP) * getDefenseModifier(sA);
                             if(Math.random() > defA){
                                 matchData.score.teamB++; scoreUpdated = true;
+                                matchStats.teamB.score = matchData.score.teamB;
+                                matchStats.teamB.shots++;
+                                matchStats.teamB.shotsOnTarget++;
+                                
+                                // 20% chance of corner kick
+                                if (Math.random() < 0.2) {
+                                    matchStats.teamB.corners++;
+                                    eventText += " Corner for " + matchData.teamB.clubName + ".";
+                                }
+                                
                                 const scorer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players) : matchData.teamB.clubName;
                                 const otherPlayer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players.filter(p => p !== scorer)) : matchData.teamB.clubName;
                                 eventText = getRandomCommentary('goal', matchData.teamB.clubName, scorer, otherPlayer);
+                                
+                                // Visual updates for goal
+                                if (scorer && typeof scorer === 'string') {
+                                    // Highlight the scorer
+                                    const scorerElement = Array.from(document.querySelectorAll('.player-icon')).find(el => 
+                                        el.dataset.team === 'teamB' && 
+                                        Array.from(el.parentNode.children).indexOf(el) < 11
+                                    );
+                                    if (scorerElement) {
+                                        scorerElement.classList.add('ring-4', 'ring-yellow-400', 'scale-150');
+                                        setTimeout(() => {
+                                            scorerElement.classList.remove('ring-4', 'ring-yellow-400', 'scale-150');
+                                        }, 2000);
+                                    }
+                                }
+                                
+                                // Move ball to goal area
+                                moveBall(95, matchData.teamB.uid === currentUserData.uid ? 95 : 5);
+                                
+                                // Create shot effect
+                                createShotEffect(50, 50, 95, matchData.teamB.uid === currentUserData.uid ? 95 : 5);
                             } else { 
+                                matchStats.teamB.shots++;
+                                matchStats.teamA.fouls++;
+                                
                                 const teamBPlayer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players) : matchData.teamB.clubName;
                                 const teamAPlayer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players) : matchData.teamA.clubName;
+                                
+                                // 10% chance of yellow card, 2% chance of red card
+                                if (Math.random() < 0.1) {
+                                    matchStats.teamA.yellowCards++;
+                                    eventText += " Yellow card for " + matchData.teamA.clubName + ".";
+                                    
+                                    // Visual effect for yellow card
+                                    const foulPlayer = Array.from(document.querySelectorAll('.player-icon.teamA')).find(el => 
+                                        el.dataset.team === 'teamA' && 
+                                        Array.from(el.parentNode.children).indexOf(el) < 11
+                                    );
+                                    if (foulPlayer) {
+                                        foulPlayer.classList.add('ring-2', 'ring-yellow-400');
+                                        setTimeout(() => {
+                                            foulPlayer.classList.remove('ring-2', 'ring-yellow-400');
+                                        }, 2000);
+                                    }
+                                } else if (Math.random() < 0.02) {
+                                    matchStats.teamA.redCards++;
+                                    eventText += " Red card for " + matchData.teamA.clubName + ".";
+                                    
+                                    // Visual effect for red card
+                                    const foulPlayer = Array.from(document.querySelectorAll('.player-icon.teamA')).find(el => 
+                                        el.dataset.team === 'teamA' && 
+                                        Array.from(el.parentNode.children).indexOf(el) < 11
+                                    );
+                                    if (foulPlayer) {
+                                        foulPlayer.classList.add('ring-2', 'ring-red-500');
+                                        setTimeout(() => {
+                                            foulPlayer.classList.remove('ring-2', 'ring-red-500');
+                                        }, 2000);
+                                    }
+                                }
+                                
                                 eventText = getRandomCommentary('save', matchData.teamA.clubName, teamBPlayer, teamAPlayer); 
+                                
+                                // Visual effect for save
+                                const savePlayer = Array.from(document.querySelectorAll('.player-icon.teamA')).find(el => 
+                                    el.dataset.team === 'teamA' && 
+                                    Array.from(el.parentNode.children).indexOf(el) < 11
+                                );
+                                if (savePlayer) {
+                                    savePlayer.classList.add('ring-2', 'ring-green-400');
+                                    setTimeout(() => {
+                                        savePlayer.classList.remove('ring-2', 'ring-green-400');
+                                    }, 1000);
+                                }
                             }
-                        } else { eventText = getRandomCommentary('midfield'); }
+                        } else { 
+                            // Midfield event
+                            matchStats.teamA.shots++;
+                            matchStats.teamB.shots++;
+                            eventText = getRandomCommentary('midfield'); 
+                            
+                            // Visual update for pass
+                            moveBall(50, 50);
+                        }
                     }
                     await push(ref(db, `matches/${matchId}/events`), { time: `${seconds}'`, text: eventText });
                     if(scoreUpdated) await update(ref(db, `matches/${matchId}/score`), matchData.score);
                 }
+
+                // Update UI with current stats
+                updateMatchStatsUI();
 
                 if (seconds >= matchDuration) {
                     clearInterval(matchSimulationInterval);
@@ -2832,6 +4091,32 @@
                             await updatePlayerStatsAfterMatch(matchData.teamA.uid, "draw");
                             await updatePlayerStatsAfterMatch(matchData.teamB.uid, "draw");
                         }
+                    }
+                    
+                    // Save match data to match history for both players
+                    const matchHistoryData = {
+                        id: matchId,
+                        opponent: matchData.teamA.uid === currentUserData.uid ? matchData.teamB.clubName : matchData.teamA.clubName,
+                        result: winnerUid === currentUserData.uid ? 'win' : (loserUid === currentUserData.uid ? 'loss' : 'draw'),
+                        score: `${matchData.score.teamA}-${matchData.score.teamB}`,
+                        date: new Date().toISOString(),
+                        goals: [] // In a real implementation, you would track actual goals
+                    };
+                    
+                    // Save to both players' match history
+                    if (!matchData.isSinglePlayer) {
+                        // For PvP matches, save to both players
+                        updates[`/users/${matchData.teamA.uid}/matchHistory/${matchId}`] = matchHistoryData;
+                        
+                        // Create a separate match history entry for teamB with reversed score
+                        const teamBMatchHistoryData = {...matchHistoryData};
+                        teamBMatchHistoryData.opponent = matchData.teamA.clubName;
+                        teamBMatchHistoryData.result = winnerUid === matchData.teamB.uid ? 'win' : (loserUid === matchData.teamB.uid ? 'loss' : 'draw');
+                        teamBMatchHistoryData.score = `${matchData.score.teamB}-${matchData.score.teamA}`;
+                        updates[`/users/${matchData.teamB.uid}/matchHistory/${matchId}`] = teamBMatchHistoryData;
+                    } else {
+                        // For single player matches, only save to the real user
+                        updates[`/users/${matchData.teamB.uid}/matchHistory/${matchId}`] = matchHistoryData;
                     }
                     
                     if(winnerUid) {
@@ -3678,13 +4963,19 @@
         kitSaveBtn.addEventListener('click', async () => {
             const jerseyColor = document.getElementById('jersey-color').value;
             const shortsColor = document.getElementById('shorts-color').value;
+            const socksColor = document.getElementById('socks-color').value;
             const kitStyle = document.getElementById('kit-style').value;
+            const numberStyle = document.getElementById('number-style').value;
+            const fontStyle = document.getElementById('font-style').value;
             
             await update(ref(db, 'users/' + currentUserData.uid), {
                 kitDesign: {
                     jerseyColor: jerseyColor,
                     shortsColor: shortsColor,
-                    style: kitStyle
+                    socksColor: socksColor,
+                    style: kitStyle,
+                    numberStyle: numberStyle,
+                    fontStyle: fontStyle
                 }
             });
             
@@ -3696,40 +4987,792 @@
             const kitDesign = currentUserData.kitDesign || {
                 jerseyColor: "#1e40af",
                 shortsColor: "#1e40af",
-                style: "plain"
+                socksColor: "#ffffff",
+                style: "plain",
+                numberStyle: "plain",
+                fontStyle: "default"
             };
             
             // Set current values
             document.getElementById('jersey-color').value = kitDesign.jerseyColor;
             document.getElementById('shorts-color').value = kitDesign.shortsColor;
+            document.getElementById('socks-color').value = kitDesign.socksColor;
             document.getElementById('kit-style').value = kitDesign.style;
+            document.getElementById('number-style').value = kitDesign.numberStyle;
+            document.getElementById('font-style').value = kitDesign.fontStyle;
             
             // Update kit preview
-            updateKitPreview(kitDesign.jerseyColor, kitDesign.shortsColor, kitDesign.style);
+            updateKitPreview(kitDesign.jerseyColor, kitDesign.shortsColor, kitDesign.socksColor, kitDesign.style);
             
             // Add event listeners for real-time preview
             document.getElementById('jersey-color').addEventListener('input', (e) => {
-                updateKitPreview(e.target.value, document.getElementById('shorts-color').value, document.getElementById('kit-style').value);
+                updateKitPreview(e.target.value, document.getElementById('shorts-color').value, document.getElementById('socks-color').value, document.getElementById('kit-style').value);
             });
             
             document.getElementById('shorts-color').addEventListener('input', (e) => {
-                updateKitPreview(document.getElementById('jersey-color').value, e.target.value, document.getElementById('kit-style').value);
+                updateKitPreview(document.getElementById('jersey-color').value, e.target.value, document.getElementById('socks-color').value, document.getElementById('kit-style').value);
+            });
+            
+            document.getElementById('socks-color').addEventListener('input', (e) => {
+                updateKitPreview(document.getElementById('jersey-color').value, document.getElementById('shorts-color').value, e.target.value, document.getElementById('kit-style').value);
             });
             
             document.getElementById('kit-style').addEventListener('change', (e) => {
-                updateKitPreview(document.getElementById('jersey-color').value, document.getElementById('shorts-color').value, e.target.value);
+                updateKitPreview(document.getElementById('jersey-color').value, document.getElementById('shorts-color').value, document.getElementById('socks-color').value, e.target.value);
             });
             
             kitDesignerModal.classList.remove('hidden');
         }
+        
+        // Youth Squad System
+        async function openYouthSquadView() {
+            // Navigate to youth squad view
+            navigateToView('youth-squad-view');
+            
+            // Load youth players
+            await loadYouthPlayers();
+        }
+        
+        async function loadYouthPlayers() {
+            const youthPlayersContainer = document.getElementById('youth-players-container');
+            youthPlayersContainer.innerHTML = '<p class="text-gray-400 text-center">Loading youth players...</p>';
+            
+            try {
+                // Get user's youth players from database
+                const youthPlayersRef = ref(db, `users/${currentUserData.uid}/youthPlayers`);
+                const snapshot = await get(youthPlayersRef);
+                
+                if (snapshot.exists()) {
+                    const youthPlayers = snapshot.val();
+                    let playersHtml = '';
+                    
+                    for (const playerId in youthPlayers) {
+                        const player = youthPlayers[playerId];
+                        const attributes = player.attributes || { pace: 50, shooting: 50, passing: 50, dribbling: 50, defending: 50, physical: 50 };
+                        
+                        // Calculate overall rating
+                        const overallRating = Math.round(
+                            (attributes.pace + attributes.shooting + attributes.passing + 
+                             attributes.dribbling + attributes.defending + attributes.physical) / 6
+                        );
+                        
+                        // Get training focus
+                        const trainingFocus = player.trainingFocus || 'balanced';
+                        
+                        // Calculate training progress (0-100%)
+                        const trainingProgress = player.trainingProgress || 0;
+                        
+                        playersHtml += `
+                            <div class="player-card p-4 text-center relative" data-player-id="${playerId}">
+                                <div class="absolute top-2 right-2">
+                                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded capitalize">${trainingFocus}</span>
+                                </div>
+                                <img src="${player.imageUrl || 'https://placehold.co/96x96/161b22/FFFFFF?text=Y'}" alt="${player.name}" class="w-24 h-24 object-cover rounded-full mx-auto mb-3 border-2 border-gray-600">
+                                <h4 class="font-bold text-lg text-white">${player.name}</h4>
+                                <p class="text-sm text-gray-400">${player.position || 'ANY'} | Age: ${player.age || 'N/A'}</p>
+                                <p class="text-2xl font-black text-green-400 mt-2">${overallRating}</p>
+                                <div class="mt-2 text-xs text-gray-500">
+                                    <div class="flex justify-between"><span>Pace:</span><span>${attributes.pace}</span></div>
+                                    <div class="attribute-bar"><div class="attribute-fill pace-fill" style="width: ${attributes.pace}%"></div></div>
+                                    <div class="flex justify-between"><span>Shooting:</span><span>${attributes.shooting}</span></div>
+                                    <div class="attribute-bar"><div class="attribute-fill shooting-fill" style="width: ${attributes.shooting}%"></div></div>
+                                    <div class="flex justify-between"><span>Passing:</span><span>${attributes.passing}</span></div>
+                                    <div class="attribute-bar"><div class="attribute-fill passing-fill" style="width: ${attributes.passing}%"></div></div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span>Training Progress:</span>
+                                        <span>${trainingProgress}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full" style="width: ${trainingProgress}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex justify-center space-x-2">
+                                    <button onclick="promoteYouthPlayer('${playerId}')" class="py-1 px-3 bg-green-600 hover:bg-green-700 text-white text-xs rounded">Promote</button>
+                                    <button onclick="releaseYouthPlayer('${playerId}')" class="py-1 px-3 bg-red-600 hover:bg-red-700 text-white text-xs rounded">Release</button>
+                                    <button onclick="changeTrainingFocus('${playerId}')" class="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded">Focus</button>
+                                </div>
+                            </div>`;
+                    }
+                    
+                    youthPlayersContainer.innerHTML = playersHtml;
+                } else {
+                    youthPlayersContainer.innerHTML = '<p class="text-gray-400 text-center">No youth players in your academy. Generate some players to get started!</p>';
+                }
+            } catch (error) {
+                console.error("Error loading youth players:", error);
+                youthPlayersContainer.innerHTML = '<p class="text-red-400 text-center">Error loading youth players. Please try again.</p>';
+            }
+        }
+        
+        async function generateYouthPlayer() {
+            if (!currentUserData) return;
+            
+            try {
+                // Check if user has enough coins (cost: 500 coins)
+                if (currentUserData.balance < 500) {
+                    showModal("You don't have enough coins to generate a youth player. Required: 500 coins.");
+                    return;
+                }
+                
+                // Generate random player attributes
+                const positions = ['GK', 'DEF', 'MID', 'ATT'];
+                const position = positions[Math.floor(Math.random() * positions.length)];
+                
+                // Base attributes based on position
+                let attributes = {
+                    pace: Math.floor(Math.random() * 30) + 40, // 40-70
+                    shooting: Math.floor(Math.random() * 30) + 40,
+                    passing: Math.floor(Math.random() * 30) + 40,
+                    dribbling: Math.floor(Math.random() * 30) + 40,
+                    defending: Math.floor(Math.random() * 30) + 40,
+                    physical: Math.floor(Math.random() * 30) + 40
+                };
+                
+                // Adjust attributes based on position
+                switch(position) {
+                    case 'GK':
+                        attributes.pace = Math.floor(Math.random() * 20) + 30; // Lower pace for GK
+                        attributes.shooting = Math.floor(Math.random() * 20) + 30;
+                        attributes.passing = Math.floor(Math.random() * 30) + 50;
+                        attributes.dribbling = Math.floor(Math.random() * 20) + 30;
+                        attributes.defending = Math.floor(Math.random() * 20) + 50;
+                        attributes.physical = Math.floor(Math.random() * 30) + 50;
+                        break;
+                    case 'DEF':
+                        attributes.pace = Math.floor(Math.random() * 20) + 60;
+                        attributes.shooting = Math.floor(Math.random() * 20) + 30;
+                        attributes.passing = Math.floor(Math.random() * 20) + 50;
+                        attributes.dribbling = Math.floor(Math.random() * 20) + 40;
+                        attributes.defending = Math.floor(Math.random() * 30) + 60; // Higher defending
+                        attributes.physical = Math.floor(Math.random() * 30) + 60;
+                        break;
+                    case 'MID':
+                        attributes.pace = Math.floor(Math.random() * 20) + 60;
+                        attributes.shooting = Math.floor(Math.random() * 20) + 50;
+                        attributes.passing = Math.floor(Math.random() * 30) + 60; // Higher passing
+                        attributes.dribbling = Math.floor(Math.random() * 20) + 60;
+                        attributes.defending = Math.floor(Math.random() * 20) + 50;
+                        attributes.physical = Math.floor(Math.random() * 20) + 60;
+                        break;
+                    case 'ATT':
+                        attributes.pace = Math.floor(Math.random() * 30) + 70; // Higher pace
+                        attributes.shooting = Math.floor(Math.random() * 30) + 60; // Higher shooting
+                        attributes.passing = Math.floor(Math.random() * 20) + 50;
+                        attributes.dribbling = Math.floor(Math.random() * 30) + 60;
+                        attributes.defending = Math.floor(Math.random() * 20) + 30;
+                        attributes.physical = Math.floor(Math.random() * 20) + 50;
+                        break;
+                }
+                
+                // Generate player name
+                const firstNames = ['Alex', 'Jamie', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Morgan', 'Cameron', 'Drew', 'Quinn'];
+                const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const playerName = `${firstName} ${lastName}`;
+                
+                // Calculate overall rating
+                const overallRating = Math.round(
+                    (attributes.pace + attributes.shooting + attributes.passing + 
+                     attributes.dribbling + attributes.defending + attributes.physical) / 6
+                );
+                
+                // Create player object
+                const youthPlayer = {
+                    name: playerName,
+                    position: position,
+                    attributes: attributes,
+                    overall: overallRating,
+                    potential: Math.min(99, overallRating + Math.floor(Math.random() * 20) + 5), // 5-25 points higher potential
+                    age: Math.floor(Math.random() * 5) + 15, // 15-19 years old
+                    trainingFocus: 'balanced',
+                    createdAt: serverTimestamp(),
+                    imageUrl: `https://placehold.co/96x96/161b22/FFFFFF?text=${firstName.charAt(0)}${lastName.charAt(0)}`
+                };
+                
+                // Add player to user's youth players
+                const youthPlayersRef = ref(db, `users/${currentUserData.uid}/youthPlayers`);
+                const newPlayerRef = push(youthPlayersRef);
+                await set(newPlayerRef, youthPlayer);
+                
+                // Deduct coins
+                await update(ref(db, 'users/' + currentUserData.uid), { 
+                    balance: currentUserData.balance - 500 
+                });
+                
+                showModal(`${playerName} has been added to your youth academy!`);
+                
+                // Refresh the youth players list
+                await loadYouthPlayers();
+            } catch (error) {
+                console.error("Error generating youth player:", error);
+                showModal("Error generating youth player. Please try again.");
+            }
+        }
+        
+        // Alliance Wars System
+        function openAllianceWarsView() {
+            // Navigate to alliance wars view
+            navigateToView('alliance-wars-view');
+            
+            // Load alliance wars data
+            loadAllianceWars();
+        }
+        
+        async function loadAllianceWars() {
+            const activeWarsList = document.getElementById('active-wars-list');
+            const allianceInfo = document.getElementById('alliance-info');
+            
+            activeWarsList.innerHTML = '<p class="text-gray-400 text-center">Loading active wars...</p>';
+            
+            try {
+                // Check if user is in an alliance
+                if (currentUserData.alliances && currentUserData.alliances.length > 0) {
+                    // Get user's alliance
+                    const allianceId = currentUserData.alliances[0];
+                    const allianceRef = ref(db, `alliances/${allianceId}`);
+                    const allianceSnap = await get(allianceRef);
+                    
+                    if (allianceSnap.exists()) {
+                        const allianceData = allianceSnap.val();
+                        
+                        // Update alliance info
+                        allianceInfo.innerHTML = `
+                            <div class="alliance-badge mx-auto mb-3">${allianceData.name.charAt(0)}</div>
+                            <h3 class="text-xl font-bold text-white">${allianceData.name}</h3>
+                            <p class="text-gray-400 mb-2">Members: ${allianceData.members ? Object.keys(allianceData.members).length : 0}</p>
+                            <p class="text-gray-400 mb-4">Points: ${allianceData.warPoints || 0}</p>
+                            <button id="participate-war-btn" class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg interactive-button">
+                                Participate in War
+                            </button>
+                        `;
+                        
+                        // Add event listener for participate button
+                        document.getElementById('participate-war-btn').addEventListener('click', () => {
+                            participateInWar(allianceId);
+                        });
+                    }
+                } else {
+                    // User not in alliance
+                    allianceInfo.innerHTML = `
+                        <p class="text-gray-400">You are not currently in an alliance.</p>
+                        <button id="join-alliance-wars-btn-2" class="mt-4 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">
+                            Join an Alliance
+                        </button>
+                    `;
+                    
+                    // Add event listener for join button
+                    document.getElementById('join-alliance-wars-btn-2').addEventListener('click', () => {
+                        // Navigate to friends & alliances view
+                        navigateToView('social-view');
+                        // Then click on friends button to show alliances
+                        setTimeout(() => {
+                            document.getElementById('friends-btn').click();
+                            // Switch to alliances tab
+                            setTimeout(() => {
+                                document.getElementById('alliances-tab').click();
+                            }, 100);
+                        }, 100);
+                    });
+                }
+                
+                // Load active wars
+                const warsRef = ref(db, 'allianceWars');
+                const warsSnap = await get(warsRef);
+                
+                if (warsSnap.exists()) {
+                    const wars = warsSnap.val();
+                    let warsHtml = '';
+                    
+                    for (const warId in wars) {
+                        const war = wars[warId];
+                        
+                        // Only show active wars
+                        if (war.status === 'active') {
+                            warsHtml += `
+                                <div class="player-card p-4">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h3 class="text-lg font-bold text-white">${war.name || 'Alliance War'}</h3>
+                                        <span class="px-2 py-1 bg-red-600 text-white text-xs rounded">Active</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-gray-400">${war.allianceA.name}</span>
+                                        <span class="text-gray-400">vs</span>
+                                        <span class="text-gray-400">${war.allianceB.name}</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm mb-3">
+                                        <span class="font-bold text-green-400">${war.allianceA.points || 0} pts</span>
+                                        <span class="font-bold text-green-400">${war.allianceB.points || 0} pts</span>
+                                    </div>
+                                    <button onclick="viewWarDetails('${warId}')" class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">
+                                        View Details
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    if (warsHtml) {
+                        activeWarsList.innerHTML = warsHtml;
+                    } else {
+                        activeWarsList.innerHTML = '<p class="text-gray-400 text-center">No active alliance wars at the moment.</p>';
+                    }
+                } else {
+                    activeWarsList.innerHTML = '<p class="text-gray-400 text-center">No active alliance wars at the moment.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading alliance wars:", error);
+                activeWarsList.innerHTML = '<p class="text-red-400 text-center">Error loading alliance wars. Please try again.</p>';
+                allianceInfo.innerHTML = '<p class="text-red-400 text-center">Error loading alliance info.</p>';
+            }
+        }
+        
+        function participateInWar(allianceId) {
+            showModal("You have been registered for the next alliance war! You will receive a notification when the war begins.");
+        }
+        
+        window.viewWarDetails = (warId) => {
+            showModal(`War details for war ID: ${warId}\n\nThis would show the full war details, bracket, and match schedule.`);
+        };
+        
+        // Custom Tournaments System
+        function openCustomTournamentsView() {
+            // Navigate to custom tournaments view
+            navigateToView('custom-tournaments-view');
+            
+            // Load custom tournaments data
+            loadCustomTournaments();
+        }
+        
+        async function loadCustomTournaments() {
+            const activeTournamentsList = document.getElementById('active-tournaments-list');
+            const myTournamentsList = document.getElementById('my-tournaments-list');
+            
+            activeTournamentsList.innerHTML = '<p class="text-gray-400 text-center">Loading active tournaments...</p>';
+            myTournamentsList.innerHTML = '<p class="text-gray-400 text-center">Loading your tournaments...</p>';
+            
+            try {
+                // Load active tournaments
+                const tournamentsRef = ref(db, 'customTournaments');
+                const tournamentsSnap = await get(tournamentsRef);
+                
+                if (tournamentsSnap.exists()) {
+                    const tournaments = tournamentsSnap.val();
+                    let activeTournamentsHtml = '';
+                    let myTournamentsHtml = '';
+                    
+                    for (const tournamentId in tournaments) {
+                        const tournament = tournaments[tournamentId];
+                        
+                        // Format tournament data
+                        const formattedTournament = {
+                            id: tournamentId,
+                            name: tournament.name || 'Custom Tournament',
+                            type: tournament.type || 'knockout',
+                            status: tournament.status || 'pending',
+                            creator: tournament.creatorName || 'Unknown',
+                            participants: tournament.participants ? Object.keys(tournament.participants).length : 0,
+                            maxParticipants: tournament.maxParticipants || 8,
+                            entryFee: tournament.entryFee || 0,
+                            prize: tournament.prize || 0
+                        };
+                        
+                        // Check if user is participating in this tournament
+                        const isUserParticipant = tournament.participants && tournament.participants[currentUserData.uid];
+                        
+                        // Add to active tournaments if it's active
+                        if (formattedTournament.status === 'active' || formattedTournament.status === 'registration') {
+                            activeTournamentsHtml += `
+                                <div class="player-card p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="text-lg font-bold text-white">${formattedTournament.name}</h3>
+                                        <span class="px-2 py-1 bg-green-600 text-white text-xs rounded">${formattedTournament.status.charAt(0).toUpperCase() + formattedTournament.status.slice(1)}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-400 mb-1">
+                                        <i class="fas fa-user mr-1"></i> Created by ${formattedTournament.creator}
+                                    </div>
+                                    <div class="text-sm text-gray-400 mb-3">
+                                        <i class="fas fa-users mr-1"></i> ${formattedTournament.participants}/${formattedTournament.maxParticipants} participants
+                                    </div>
+                                    <div class="flex justify-between mb-3">
+                                        <div>
+                                            <span class="text-gray-400 text-sm">Entry:</span>
+                                            <span class="text-yellow-400 font-bold ml-1">${formattedTournament.entryFee} coins</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-sm">Prize:</span>
+                                            <span class="text-green-400 font-bold ml-1">${formattedTournament.prize} coins</span>
+                                        </div>
+                                    </div>
+                                    ${isUserParticipant 
+                                        ? '<button class="w-full py-2 px-4 bg-gray-600 text-white font-bold rounded-lg cursor-not-allowed">Already Joined</button>' 
+                                        : `<button onclick="joinTournament('${tournamentId}')" class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Join Tournament</button>`}
+                                </div>
+                            `;
+                        }
+                        
+                        // Add to user's tournaments if they're participating
+                        if (isUserParticipant) {
+                            myTournamentsHtml += `
+                                <div class="player-card p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="text-lg font-bold text-white">${formattedTournament.name}</h3>
+                                        <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded">${formattedTournament.type}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-400 mb-1">
+                                        <i class="fas fa-user mr-1"></i> Created by ${formattedTournament.creator}
+                                    </div>
+                                    <div class="text-sm text-gray-400 mb-3">
+                                        <i class="fas fa-users mr-1"></i> ${formattedTournament.participants}/${formattedTournament.maxParticipants} participants
+                                    </div>
+                                    <div class="flex justify-between mb-3">
+                                        <div>
+                                            <span class="text-gray-400 text-sm">Status:</span>
+                                            <span class="text-green-400 font-bold ml-1">${formattedTournament.status.charAt(0).toUpperCase() + formattedTournament.status.slice(1)}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-sm">Prize:</span>
+                                            <span class="text-green-400 font-bold ml-1">${formattedTournament.prize} coins</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="viewTournamentDetails('${tournamentId}')" class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg interactive-button">
+                                        View Details
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    if (activeTournamentsHtml) {
+                        activeTournamentsList.innerHTML = activeTournamentsHtml;
+                    } else {
+                        activeTournamentsList.innerHTML = '<p class="text-gray-400 text-center">No active tournaments at the moment.</p>';
+                    }
+                    
+                    if (myTournamentsHtml) {
+                        myTournamentsList.innerHTML = myTournamentsHtml;
+                    } else {
+                        myTournamentsList.innerHTML = '<p class="text-gray-400 text-center">You haven\'t created or joined any tournaments yet.</p>';
+                    }
+                } else {
+                    activeTournamentsList.innerHTML = '<p class="text-gray-400 text-center">No active tournaments at the moment.</p>';
+                    myTournamentsList.innerHTML = '<p class="text-gray-400 text-center">You haven\'t created or joined any tournaments yet.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading custom tournaments:", error);
+                activeTournamentsList.innerHTML = '<p class="text-red-400 text-center">Error loading tournaments. Please try again.</p>';
+                myTournamentsList.innerHTML = '<p class="text-red-400 text-center">Error loading your tournaments. Please try again.</p>';
+            }
+        }
+        
+        function openCreateTournamentModal() {
+            // Create tournament modal
+            const modalHtml = `
+                <div id="create-tournament-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+                    <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md text-left border-4 border-yellow-500 relative">
+                        <button id="close-create-tournament-modal" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
+                        <h2 class="text-2xl font-bold text-yellow-400 mb-4">Create Custom Tournament</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">Tournament Name</label>
+                                <input type="text" id="tournament-name" placeholder="Enter tournament name" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Tournament Type</label>
+                                <select id="tournament-type" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                    <option value="knockout">Knockout Tournament</option>
+                                    <option value="league">League Tournament</option>
+                                    <option value="group_knockout">Group Stage + Knockout</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Maximum Participants</label>
+                                <select id="max-participants" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                                    <option value="4">4</option>
+                                    <option value="8" selected>8</option>
+                                    <option value="16">16</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Entry Fee (Coins)</label>
+                                <input type="number" id="entry-fee" min="0" value="0" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Prize Pool (Coins)</label>
+                                <input type="number" id="prize-pool" min="0" value="1000" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                            </div>
+                            <div class="flex space-x-3 pt-4">
+                                <button id="cancel-create-tournament" class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Cancel</button>
+                                <button id="confirm-create-tournament" class="flex-1 py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg interactive-button">Create Tournament</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add modal to document
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listeners
+            document.getElementById('close-create-tournament-modal').addEventListener('click', closeCreateTournamentModal);
+            document.getElementById('cancel-create-tournament').addEventListener('click', closeCreateTournamentModal);
+            document.getElementById('confirm-create-tournament').addEventListener('click', createTournament);
+        }
+        
+        function closeCreateTournamentModal() {
+            const modal = document.getElementById('create-tournament-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function createTournament() {
+            if (!currentUserData) return;
+            
+            try {
+                // Get form values
+                const name = document.getElementById('tournament-name').value.trim();
+                const type = document.getElementById('tournament-type').value;
+                const maxParticipants = parseInt(document.getElementById('max-participants').value);
+                const entryFee = parseInt(document.getElementById('entry-fee').value);
+                const prizePool = parseInt(document.getElementById('prize-pool').value);
+                
+                // Validate inputs
+                if (!name) {
+                    showModal("Please enter a tournament name.");
+                    return;
+                }
+                
+                if (entryFee < 0) {
+                    showModal("Entry fee cannot be negative.");
+                    return;
+                }
+                
+                if (prizePool <= 0) {
+                    showModal("Prize pool must be greater than zero.");
+                    return;
+                }
+                
+                // Check if user has enough coins for prize pool
+                if (currentUserData.balance < prizePool) {
+                    showModal(`You don't have enough coins for the prize pool. Required: ${prizePool} coins.`);
+                    return;
+                }
+                
+                // Create tournament in database
+                const tournamentsRef = ref(db, 'customTournaments');
+                const newTournamentRef = push(tournamentsRef);
+                
+                const tournamentData = {
+                    name: name,
+                    type: type,
+                    status: 'registration',
+                    creatorId: currentUserData.uid,
+                    creatorName: currentUserData.clubName,
+                    maxParticipants: maxParticipants,
+                    entryFee: entryFee,
+                    prize: prizePool,
+                    participants: {
+                        [currentUserData.uid]: {
+                            clubName: currentUserData.clubName,
+                            joinedAt: serverTimestamp()
+                        }
+                    },
+                    createdAt: serverTimestamp()
+                };
+                
+                await set(newTournamentRef, tournamentData);
+                
+                // Deduct prize pool from user's balance
+                await update(ref(db, 'users/' + currentUserData.uid), { 
+                    balance: currentUserData.balance - prizePool 
+                });
+                
+                // Close modal and show success message
+                closeCreateTournamentModal();
+                showModal(`Tournament "${name}" created successfully!`);
+                
+                // Refresh tournaments list
+                loadCustomTournaments();
+            } catch (error) {
+                console.error("Error creating tournament:", error);
+                showModal("Error creating tournament. Please try again.");
+            }
+        }
+        
+        window.joinTournament = async (tournamentId) => {
+            if (!currentUserData) return;
+            
+            try {
+                // Get tournament data
+                const tournamentRef = ref(db, `customTournaments/${tournamentId}`);
+                const tournamentSnap = await get(tournamentRef);
+                
+                if (!tournamentSnap.exists()) {
+                    showModal("Tournament not found.");
+                    return;
+                }
+                
+                const tournament = tournamentSnap.val();
+                
+                // Check if tournament is still in registration phase
+                if (tournament.status !== 'registration') {
+                    showModal(`This tournament is no longer accepting new participants.`);
+                    return;
+                }
+                
+                // Check if user is already participating
+                if (tournament.participants && tournament.participants[currentUserData.uid]) {
+                    showModal("You are already participating in this tournament.");
+                    return;
+                }
+                
+                // Check if tournament is full
+                const participantCount = tournament.participants ? Object.keys(tournament.participants).length : 0;
+                if (participantCount >= tournament.maxParticipants) {
+                    showModal("This tournament is already full.");
+                    return;
+                }
+                
+                // Check if user has enough coins for entry fee
+                if (currentUserData.balance < (tournament.entryFee || 0)) {
+                    showModal(`You don't have enough coins to join this tournament. Required: ${tournament.entryFee || 0} coins.`);
+                    return;
+                }
+                
+                // Add user to tournament participants
+                const updatedParticipants = {
+                    ...tournament.participants,
+                    [currentUserData.uid]: {
+                        clubName: currentUserData.clubName,
+                        joinedAt: serverTimestamp()
+                    }
+                };
+                
+                await update(tournamentRef, { participants: updatedParticipants });
+                
+                // Deduct entry fee from user's balance
+                if (tournament.entryFee > 0) {
+                    await update(ref(db, 'users/' + currentUserData.uid), { 
+                        balance: currentUserData.balance - tournament.entryFee 
+                    });
+                }
+                
+                showModal(`You have successfully joined the tournament!`);
+                
+                // Refresh tournaments list
+                loadCustomTournaments();
+            } catch (error) {
+                console.error("Error joining tournament:", error);
+                showModal("Error joining tournament. Please try again.");
+            }
+        };
+        
+        window.viewTournamentDetails = (tournamentId) => {
+            showModal(`Tournament details for ID: ${tournamentId}\n\nThis would show the full tournament details, bracket, and match schedule.`);
+        };
+        
+        // Set initial state for custom tournaments
+        if (document.getElementById('custom-tournaments-view') && !document.getElementById('custom-tournaments-view').classList.contains('hidden')) {
+            loadCustomTournaments();
+        }
+        
+        window.promoteYouthPlayer = async (playerId) => {
+            if (!currentUserData) return;
+            
+            try {
+                // Get the youth player
+                const playerRef = ref(db, `users/${currentUserData.uid}/youthPlayers/${playerId}`);
+                const playerSnap = await get(playerRef);
+                
+                if (!playerSnap.exists()) {
+                    showModal("Player not found.");
+                    return;
+                }
+                
+                const playerData = playerSnap.val();
+                
+                // Check if user has space in squad (max 20 players)
+                if (currentUserData.squad && currentUserData.squad.length >= 20) {
+                    showModal("You have reached the maximum squad size (20 players). Release some players first.");
+                    return;
+                }
+                
+                // Add player to main squad
+                const newSquad = [...(currentUserData.squad || []), playerId];
+                
+                // Move player from youth players to main players database
+                const mainPlayerRef = ref(db, `players/${playerId}`);
+                await set(mainPlayerRef, {
+                    name: playerData.name,
+                    position: playerData.position,
+                    rating: playerData.overall,
+                    value: playerData.overall * 100, // Simple valuation
+                    imageUrl: playerData.imageUrl,
+                    attributes: playerData.attributes,
+                    rarity: "bronze" // Youth players start as bronze
+                });
+                
+                // Remove from youth players
+                await remove(playerRef);
+                
+                // Update user squad
+                await update(ref(db, 'users/' + currentUserData.uid), { 
+                    squad: newSquad 
+                });
+                
+                showModal(`${playerData.name} has been promoted to your main squad!`);
+                
+                // Refresh the youth players list
+                await loadYouthPlayers();
+            } catch (error) {
+                console.error("Error promoting youth player:", error);
+                showModal("Error promoting youth player. Please try again.");
+            }
+        };
+        
+        window.releaseYouthPlayer = async (playerId) => {
+            if (!currentUserData) return;
+            
+            // Confirm release
+            if (!confirm("Are you sure you want to release this player? This action cannot be undone.")) {
+                return;
+            }
+            
+            try {
+                // Remove player from youth players
+                const playerRef = ref(db, `users/${currentUserData.uid}/youthPlayers/${playerId}`);
+                await remove(playerRef);
+                
+                showModal("Player has been released from the youth academy.");
+                
+                // Refresh the youth players list
+                await loadYouthPlayers();
+            } catch (error) {
+                console.error("Error releasing youth player:", error);
+                showModal("Error releasing youth player. Please try again.");
+            }
+        };
+        
+        // Set initial training focus if exists
+        if (currentUserData && currentUserData.youthTrainingFocus) {
+            document.querySelectorAll('.training-focus-option').forEach(option => {
+                if (option.getAttribute('data-focus') === currentUserData.youthTrainingFocus) {
+                    option.classList.add('border-2', 'border-yellow-400');
+                }
+            });
+        }
 
-        function updateKitPreview(jerseyColor, shortsColor, style) {
+        function updateKitPreview(jerseyColor, shortsColor, socksColor, style) {
             const kitJersey = document.getElementById('kit-jersey');
             const kitShorts = document.getElementById('kit-shorts');
+            const kitSocks = document.getElementById('kit-socks');
             
             // Reset styles
             kitJersey.style.backgroundColor = jerseyColor;
             kitShorts.style.backgroundColor = shortsColor;
+            kitSocks.style.backgroundColor = socksColor;
             
             // Clear existing stripes
             const existingStripes = kitJersey.querySelectorAll('.kit-stripe');
@@ -3781,6 +5824,160 @@
         document.getElementById('header-settings-btn').addEventListener('click', () => {
             if (!currentUserData) return;
             openSettingsModal();
+        });
+        
+        // Match History System
+        async function loadMatchHistory() {
+            if (!currentUserData) return;
+            
+            const matchHistoryList = document.getElementById('match-history-list');
+            matchHistoryList.innerHTML = '<p class="text-gray-400 text-center">Loading match history...</p>';
+            
+            try {
+                // Load real match history from the database
+                
+                // Get user's match statistics
+                const totalMatches = currentUserData.matchesPlayed || 0;
+                const wins = currentUserData.wins || 0;
+                const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+                
+                // Update statistics
+                document.getElementById('total-matches').textContent = totalMatches;
+                document.getElementById('wins-count').textContent = wins;
+                document.getElementById('win-rate').textContent = `${winRate}%`;
+                
+                // Load match history from database
+                const matchHistoryRef = ref(db, `users/${currentUserData.uid}/matchHistory`);
+                const matchHistorySnap = await get(matchHistoryRef);
+                
+                if (matchHistorySnap.exists()) {
+                    const matchHistory = matchHistorySnap.val();
+                    let matchHistoryHtml = '';
+                    
+                    // Convert object to array and sort by date (newest first)
+                    const matches = Object.values(matchHistory);
+                    matches.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    matches.forEach(match => {
+                        const resultClass = match.result === 'win' ? 'text-green-400' : 
+                                          match.result === 'loss' ? 'text-red-400' : 'text-yellow-400';
+                        const resultText = match.result === 'win' ? 'Victory' : 
+                                         match.result === 'loss' ? 'Defeat' : 'Draw';
+                        
+                        // Format date
+                        const matchDate = new Date(match.date);
+                        const formattedDate = matchDate.toLocaleDateString();
+                        
+                        matchHistoryHtml += `
+                            <div class="player-card p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-bold text-white">vs ${match.opponent}</h3>
+                                    <span class="px-2 py-1 ${resultClass} text-xs font-bold rounded">${resultText}</span>
+                                </div>
+                                <div class="text-sm text-gray-400 mb-2">
+                                    <i class="fas fa-calendar-alt mr-1"></i> ${formattedDate}
+                                </div>
+                                <div class="text-xl font-bold text-center my-3">
+                                    <span class="text-white">${currentUserData.clubName}</span>
+                                    <span class="mx-2 text-gray-400">${match.score}</span>
+                                    <span class="text-white">${match.opponent}</span>
+                                </div>
+                                <div class="mt-3">
+                                    <h4 class="text-sm font-bold text-gray-400 mb-1">Goals:</h4>
+                                    <div class="flex flex-wrap gap-1">
+                                        ${match.goals ? match.goals.map(goal => `<span class="px-2 py-1 bg-gray-700 text-xs rounded">${goal}</span>`).join('') : '<span class="px-2 py-1 bg-gray-700 text-xs rounded">No goals recorded</span>'}
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex justify-center">
+                                    <button onclick="replayMatch('${match.id}')" class="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded interactive-button">
+                                        <i class="fas fa-play mr-1"></i> Watch Replay
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    if (matchHistoryHtml) {
+                        matchHistoryList.innerHTML = matchHistoryHtml;
+                    } else {
+                        matchHistoryList.innerHTML = '<p class="text-gray-400 text-center">No match history found.</p>';
+                    }
+                } else {
+                    matchHistoryList.innerHTML = '<p class="text-gray-400 text-center">No match history found.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading match history:", error);
+                matchHistoryList.innerHTML = '<p class="text-red-400 text-center">Error loading match history. Please try again.</p>';
+            }
+        }
+        
+        window.replayMatch = (matchId) => {
+            showModal(`Replaying match ${matchId}.\n\nIn a real implementation, this would show a replay of the match with commentary and key moments.`);
+        };
+        
+        // Add navigation handler for match history
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add click handler for match history nav link
+            const matchHistoryNavLink = document.querySelector('a[href="#match-history"]');
+            if (matchHistoryNavLink) {
+                matchHistoryNavLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigateToView('match-history-view');
+                    loadMatchHistory();
+                });
+            }
+        });
+        
+        // Youth Squad System
+        youthSquadBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openYouthSquadView();
+        });
+        
+        // Add event listener for generate youth player button
+        document.getElementById('generate-youth-player-btn').addEventListener('click', async () => {
+            if (!currentUserData) return;
+            await generateYouthPlayer();
+        });
+        
+        // Add event listeners for training focus options
+        document.querySelectorAll('.training-focus-option').forEach(option => {
+            option.addEventListener('click', async (e) => {
+                if (!currentUserData) return;
+                const focus = e.currentTarget.getAttribute('data-focus');
+                await setTrainingFocus(focus);
+            });
+        });
+        
+        // Alliance Wars System
+        allianceWarsBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openAllianceWarsView();
+        });
+        
+        // Add event listener for join alliance wars button
+        document.getElementById('join-alliance-wars-btn').addEventListener('click', () => {
+            // Navigate to friends & alliances view
+            navigateToView('social-view');
+            // Then click on friends button to show alliances
+            setTimeout(() => {
+                document.getElementById('friends-btn').click();
+                // Switch to alliances tab
+                setTimeout(() => {
+                    document.getElementById('alliances-tab').click();
+                }, 100);
+            }, 100);
+        });
+        
+        // Custom Tournaments System
+        customTournamentsBtn.addEventListener('click', () => {
+            if (!currentUserData) return;
+            openCustomTournamentsView();
+        });
+        
+        // Add event listener for create tournament button
+        document.getElementById('create-tournament-btn').addEventListener('click', () => {
+            openCreateTournamentModal();
         });
 
         settingsCloseBtn.addEventListener('click', () => {
@@ -4712,7 +6909,7 @@
                 <div id="substitution-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
                     <div class="bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-4xl text-left border-4 border-purple-500 relative">
                         <button id="substitution-close-btn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-white">&times;</button>
-                        <h2 class="text-2xl font-bold text-purple-400 mb-4">Substitutions</h2>
+                        <h2 class="text-2xl font-bold text-purple-400 mb-4">In-Match Substitutions</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <h3 class="text-xl font-bold text-white mb-3">Current Players</h3>
@@ -4726,6 +6923,14 @@
                                     <!-- Substitute players will be dynamically inserted here -->
                                 </div>
                             </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                            <h4 class="text-lg font-bold text-white mb-2">Substitution Rules</h4>
+                            <ul class="text-sm text-gray-300 list-disc pl-5 space-y-1">
+                                <li>Players with low stamina (&lt;30%) should be substituted</li>
+                                <li>Injured players cannot be substituted on</li>
+                                <li>Only 3 substitutions allowed per match</li>
+                            </ul>
                         </div>
                         <div class="flex justify-center mt-6">
                             <button id="close-substitution-btn" class="py-2 px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg interactive-button">Close</button>
@@ -4779,18 +6984,27 @@
                         const playerId = currentUserData.squad[index];
                         const attributes = playerData.attributes || { pace: 50, shooting: 50, passing: 50, dribbling: 50, defending: 50, physical: 50 };
                         
+                        // Check for player injuries and stamina
+                        const isInjured = playerData.injury && playerData.injury > 0;
+                        const stamina = playerData.stamina || 100;
+                        
                         const playerHtml = `
-                            <div class="player-card p-3 flex items-center justify-between">
+                            <div class="player-card p-3 flex items-center justify-between relative">
+                                ${isInjured ? '<div class="injury-indicator" title="Injured"><i class="fas fa-first-aid"></i></div>' : ''}
                                 <div class="flex items-center">
                                     <img src="${playerData.imageUrl}" alt="${playerData.name}" class="w-12 h-12 object-cover rounded-full mr-3 border-2 border-gray-600">
                                     <div>
                                         <h4 class="font-bold text-white">${playerData.name}</h4>
                                         <p class="text-sm text-gray-400">${playerData.position}</p>
+                                        <div class="mt-1">
+                                            <div class="flex justify-between text-xs"><span>Stamina:</span><span>${stamina}%</span></div>
+                                            <div class="stamina-bar"><div class="stamina-fill" style="width: ${stamina}%"></div></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="text-right">
                                     <p class="font-bold text-green-400">${playerData.rating}</p>
-                                    <button class="substitute-btn mt-1 px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded" data-player="${playerId}">
+                                    <button class="substitute-btn mt-1 px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded ${isInjured ? 'opacity-50 cursor-not-allowed' : ''}" data-player="${playerId}" ${isInjured ? 'disabled' : ''}>
                                         ${index < 5 ? 'Sub Off' : 'Sub On'}
                                     </button>
                                 </div>
@@ -4823,12 +7037,91 @@
         
         // Add function to make substitution
         async function makeSubstitution(playerId) {
-            if (!currentUserData) return;
+            if (!currentUserData || !currentMatchId) return;
+            
+            // Get match data
+            const matchRef = ref(db, `matches/${currentMatchId}`);
+            const matchSnap = await get(matchRef);
+            
+            if (!matchSnap.exists()) {
+                showModal("Match not found.");
+                return;
+            }
+            
+            const matchData = matchSnap.val();
+            
+            // Determine which team the current user is on
+            let userTeam, opponentTeam;
+            if (currentUserData.uid === matchData.teamA.uid) {
+                userTeam = 'teamA';
+                opponentTeam = 'teamB';
+            } else if (currentUserData.uid === matchData.teamB.uid) {
+                userTeam = 'teamB';
+                opponentTeam = 'teamA';
+            } else {
+                showModal("You are not part of this match.");
+                return;
+            }
+            
+            // Check if player is in user's squad
+            const playerIndex = matchData[userTeam].squad.indexOf(playerId);
+            const isPlayerInStartingEleven = playerIndex >= 0 && playerIndex < 5;
+            const isPlayerSubstitute = playerIndex >= 5;
+            
+            if (!matchData[userTeam].squad.includes(playerId)) {
+                showModal("You can only substitute your own players.");
+                return;
+            }
+            
+            // Get player data
+            const playerRef = ref(db, `players/${playerId}`);
+            const playerSnap = await get(playerRef);
+            
+            if (!playerSnap.exists()) {
+                showModal("Player not found.");
+                return;
+            }
+            
+            const playerData = playerSnap.val();
+            
+            // Check if player is injured
+            const isInjured = playerData.injury && playerData.injury > 0;
+            if (isInjured && !isPlayerInStartingEleven) {
+                showModal("Cannot substitute an injured player on.");
+                return;
+            }
+            
+            // Check substitution count (max 3 per match)
+            const substitutionsMade = matchData[userTeam].substitutions || 0;
+            if (substitutionsMade >= 3 && isPlayerInStartingEleven) {
+                showModal("Maximum substitutions (3) already made.");
+                return;
+            }
             
             // In a real implementation, you would update the match state with the substitution
-            // For now, we'll just show a message
-            showModal(`Substitution made for player ${playerId}!`);
-            closeSubstitutionModal();
+            // For now, we'll just show a message and update the UI
+            if (playerSnap.exists()) {
+                // Add a commentary event for the substitution
+                const seconds = matchData.startTime ? Math.floor((Date.now() - matchData.startTime) / 1000) : 0;
+                await push(ref(db, `matches/${currentMatchId}/events`), { 
+                    time: `${seconds}'`, 
+                    text: `🔄 ${matchData[userTeam].clubName} makes a substitution: ${playerData.name} comes on.` 
+                });
+                
+                // Update substitution count
+                if (isPlayerInStartingEleven) {
+                    await update(matchRef, {
+                        [`${userTeam}.substitutions`]: substitutionsMade + 1
+                    });
+                }
+                
+                showModal(`Substitution made for player ${playerData.name}!`);
+            } else {
+                showModal(`Substitution made for player ${playerId}!`);
+            }
+            
+            // Refresh the substitution modal
+            loadSubstitutionPlayers();
         }
 
         // Add sound effects to buttons
@@ -5345,6 +7638,27 @@
              if (mainMenuAudio.paused && currentMatchId === null) { playMainMenuMusic(); }
         }, { once: true }); 
 
+    </script>
+</body>
+</html>
+                throw error;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
+            if(balancedBtn) balancedBtn.classList.add('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');
+            if (!auth.currentUser) {} else { navigateToView('home-view'); }
+        });
+        
+        document.addEventListener('click', () => {
+             if (mainMenuAudio.paused && currentMatchId === null) { playMainMenuMusic(); }
+        }, { once: true }); 
+
+    </script>
+</body>
+</html>
+        
         document.addEventListener('DOMContentLoaded', () => {
             const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
             if(balancedBtn) balancedBtn.classList.add('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');

@@ -917,6 +917,18 @@
                          </div>
                     </div>
                 </div>
+                <!-- Track Selection -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-music text-green-400"></i>
+                    <select id="track-selector" class="bg-gray-800 text-white px-3 py-1 rounded-lg text-sm border border-gray-600">
+                        <option value="1">Track 1</option>
+                        <option value="2">Track 2</option>
+                        <option value="3">Track 3</option>
+                        <option value="4">Track 4</option>
+                        <option value="5">Track 5</option>
+                        <option value="6">Track 6</option>
+                    </select>
+                </div>
                 <div class="flex items-center space-x-4 bg-gray-900 px-4 py-1 rounded-full">
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-coins text-yellow-400"></i>
@@ -1704,6 +1716,52 @@
         const whistleSound = document.getElementById('whistle-sound');
         const buttonSound = document.getElementById('button-sound');
         const packOpenSound = document.getElementById('pack-open-sound');
+        
+        // Track selection
+        const trackSelector = document.getElementById('track-selector');
+        const trackFiles = [
+            'asset/main menu.mp3',
+            'asset/track2.mp3',
+            'asset/track3.mp3',
+            'asset/track4.mp3',
+            'asset/track5.mp3',
+            'asset/track6.mp3'
+        ];
+        
+        // Function to check if a file exists
+        function fileExists(url) {
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('HEAD', url, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        resolve(xhr.status === 200);
+                    }
+                };
+                xhr.onerror = function() {
+                    resolve(false);
+                };
+                xhr.send();
+            });
+        }
+        
+        // Function to get a fallback track if the selected one doesn't exist
+        async function getAvailableTrack(selectedTrack) {
+            // First check if the selected track exists
+            if (await fileExists(trackFiles[selectedTrack - 1])) {
+                return trackFiles[selectedTrack - 1];
+            }
+            
+            // If not, try to find any available track
+            for (let i = 0; i < trackFiles.length; i++) {
+                if (await fileExists(trackFiles[i])) {
+                    return trackFiles[i];
+                }
+            }
+            
+            // If no tracks exist, return the default track (even if it doesn't exist)
+            return trackFiles[0];
+        }
 
         // New feature elements
         const trainingBtn = document.getElementById('training-btn');
@@ -1787,6 +1845,30 @@
                 });
             }
         }
+        
+        // Override the existing playMainMenuMusic function to handle track selection
+        const originalPlayMainMenuMusic = playMainMenuMusic;
+        playMainMenuMusic = async function() {
+            // Check if a specific track is selected
+            const selectedTrack = trackSelector ? parseInt(trackSelector.value) : 1;
+            if (selectedTrack >= 1 && selectedTrack <= 6) {
+                // Check for available track
+                const trackUrl = await getAvailableTrack(selectedTrack);
+                
+                const source = mainMenuAudio.querySelector('source');
+                if (source && source.src !== window.location.href + trackUrl) {
+                    source.src = trackUrl;
+                    mainMenuAudio.load();
+                }
+            }
+            
+            pauseMatchMusic();
+            if (mainMenuAudio.paused) {
+                mainMenuAudio.play().catch(error => {
+                    console.warn("Main Menu Audio playback failed (Autoplay likely blocked):", error);
+                });
+            }
+        }
 
         function pauseMainMenuMusic() { mainMenuAudio.pause(); }
 
@@ -1803,6 +1885,9 @@
         function pauseMatchMusic() {
             matchAudio.pause();
             matchAudio.currentTime = 0; 
+            
+            // Also pause main menu music during matches
+            mainMenuAudio.pause();
         }
 
         function navigateToView(viewId) {
@@ -3270,6 +3355,29 @@
                     document.getElementById('match-initial-screen').classList.remove('hidden');
                 }
             });
+            
+            // Track selection event listener
+            if (trackSelector) {
+                trackSelector.addEventListener('change', async function() {
+                    const selectedTrack = parseInt(this.value);
+                    if (selectedTrack >= 1 && selectedTrack <= 6) {
+                        // Check for available track
+                        const trackUrl = await getAvailableTrack(selectedTrack);
+                        
+                        // Update the main menu audio source
+                        const source = mainMenuAudio.querySelector('source');
+                        if (source) {
+                            source.src = trackUrl;
+                            mainMenuAudio.load();
+                            
+                            // Play the new track if not in a match
+                            if (!currentMatchId) {
+                                playMainMenuMusic();
+                            }
+                        }
+                    }
+                });
+            }
         }
         
         async function handleWalkover(matchId, disconnectedOpponentUid) {
@@ -7771,6 +7879,15 @@
             const balancedBtn = document.querySelector('#in-match-strategy-control [data-strategy="Balanced"]');
             if(balancedBtn) balancedBtn.classList.add('border-2', 'border-yellow-400', 'ring-2', 'ring-yellow-400');
             if (!auth.currentUser) {} else { navigateToView('home-view'); }
+            
+            // Initialize track selector
+            if (trackSelector) {
+                // Set the default track
+                trackSelector.value = '1';
+                
+                // Play an available track
+                playMainMenuMusic();
+            }
         });
         
         document.addEventListener('click', () => {

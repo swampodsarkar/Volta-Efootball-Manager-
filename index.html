@@ -3312,10 +3312,43 @@
             document.getElementById('live-commentary').innerHTML = '';
             pauseMainMenuMusic();
             
+            // Reset match stats
+            matchStats = {
+                time: 0,
+                teamA: {
+                    score: 0,
+                    possession: 0,
+                    shots: 0,
+                    shotsOnTarget: 0,
+                    corners: 0,
+                    fouls: 0,
+                    yellowCards: 0,
+                    redCards: 0
+                },
+                teamB: {
+                    score: 0,
+                    possession: 0,
+                    shots: 0,
+                    shotsOnTarget: 0,
+                    corners: 0,
+                    fouls: 0,
+                    yellowCards: 0,
+                    redCards: 0
+                }
+            };
+            
+            // Initialize stats UI
+            updateMatchStatsUI();
+            
             const matchRef = ref(db, `matches/${matchId}`);
             const initialSnap = await get(matchRef);
             if (!initialSnap.exists()) return;
             const initialMatchData = initialSnap.val();
+            
+            // Ensure initial match data has proper score structure
+            if (!initialMatchData.score) {
+                initialMatchData.score = { teamA: 0, teamB: 0 };
+            }
             
             // Only set up opponent status listener if it's not a single player match
             if (!initialMatchData.isSinglePlayer) {
@@ -3342,6 +3375,26 @@
                 document.getElementById('teamB-name').textContent = matchData.teamB.clubName;
                 document.getElementById('teamA-score').textContent = matchData.score.teamA;
                 document.getElementById('teamB-score').textContent = matchData.score.teamB;
+                
+                // Update match stats from Firebase data
+                matchStats.teamA.score = matchData.score.teamA;
+                matchStats.teamB.score = matchData.score.teamB;
+                // Initialize other stats if not already set
+                if (matchStats.teamA.possession === undefined) matchStats.teamA.possession = 0;
+                if (matchStats.teamA.shots === undefined) matchStats.teamA.shots = 0;
+                if (matchStats.teamA.shotsOnTarget === undefined) matchStats.teamA.shotsOnTarget = 0;
+                if (matchStats.teamA.corners === undefined) matchStats.teamA.corners = 0;
+                if (matchStats.teamA.fouls === undefined) matchStats.teamA.fouls = 0;
+                if (matchStats.teamA.yellowCards === undefined) matchStats.teamA.yellowCards = 0;
+                if (matchStats.teamA.redCards === undefined) matchStats.teamA.redCards = 0;
+                if (matchStats.teamB.possession === undefined) matchStats.teamB.possession = 0;
+                if (matchStats.teamB.shots === undefined) matchStats.teamB.shots = 0;
+                if (matchStats.teamB.shotsOnTarget === undefined) matchStats.teamB.shotsOnTarget = 0;
+                if (matchStats.teamB.corners === undefined) matchStats.teamB.corners = 0;
+                if (matchStats.teamB.fouls === undefined) matchStats.teamB.fouls = 0;
+                if (matchStats.teamB.yellowCards === undefined) matchStats.teamB.yellowCards = 0;
+                if (matchStats.teamB.redCards === undefined) matchStats.teamB.redCards = 0;
+                updateMatchStatsUI();
                 
                 // Load team avatars
                 if (matchData.teamA.uid !== 'ai_opponent') {
@@ -3519,44 +3572,62 @@
         };
         
         function updateMatchStatsUI() {
-            console.log('Updating match stats UI:', matchStats);
-            
             // Update match time
             const minutes = Math.floor(matchStats.time / 60);
             const seconds = matchStats.time % 60;
-            document.getElementById('match-timer').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const timerDisplay = document.getElementById('match-timer');
+            if (timerDisplay) {
+                timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
             
             // Update main score display
-            document.getElementById('teamA-score').textContent = matchStats.teamA.score;
-            document.getElementById('teamB-score').textContent = matchStats.teamB.score;
+            const teamAScoreDisplay = document.getElementById('teamA-score');
+            const teamBScoreDisplay = document.getElementById('teamB-score');
+            if (teamAScoreDisplay) teamAScoreDisplay.textContent = matchStats.teamA.score;
+            if (teamBScoreDisplay) teamBScoreDisplay.textContent = matchStats.teamB.score;
 
             // Update possession
             let totalTime = matchStats.time > 0 ? matchStats.time : 1; // Avoid division by zero
             let teamAPct = Math.round((matchStats.teamA.possession / totalTime) * 100);
             let teamBPct = 100 - teamAPct;
             
-            document.getElementById('home-possession').textContent = `${teamAPct}%`;
-            document.getElementById('away-possession').textContent = `${teamBPct}%`;
-            document.getElementById('possession-bar').style.width = `${teamAPct}%`;
+            const homePossessionDisplay = document.getElementById('home-possession');
+            const awayPossessionDisplay = document.getElementById('away-possession');
+            const possessionBar = document.getElementById('possession-bar');
+            
+            if (homePossessionDisplay) homePossessionDisplay.textContent = `${teamAPct}%`;
+            if (awayPossessionDisplay) awayPossessionDisplay.textContent = `${teamBPct}%`;
+            if (possessionBar) possessionBar.style.width = `${teamAPct}%`;
             
             // Update other stats
-            document.getElementById('home-shots').textContent = matchStats.teamA.shots;
-            document.getElementById('away-shots').textContent = matchStats.teamB.shots;
+            const homeShotsDisplay = document.getElementById('home-shots');
+            const awayShotsDisplay = document.getElementById('away-shots');
+            if (homeShotsDisplay) homeShotsDisplay.textContent = matchStats.teamA.shots;
+            if (awayShotsDisplay) awayShotsDisplay.textContent = matchStats.teamB.shots;
             
-            document.getElementById('home-shots-on-target').textContent = matchStats.teamA.shotsOnTarget;
-            document.getElementById('away-shots-on-target').textContent = matchStats.teamB.shotsOnTarget;
+            const homeShotsOnTargetDisplay = document.getElementById('home-shots-on-target');
+            const awayShotsOnTargetDisplay = document.getElementById('away-shots-on-target');
+            if (homeShotsOnTargetDisplay) homeShotsOnTargetDisplay.textContent = matchStats.teamA.shotsOnTarget;
+            if (awayShotsOnTargetDisplay) awayShotsOnTargetDisplay.textContent = matchStats.teamB.shotsOnTarget;
             
-            document.getElementById('home-corners').textContent = matchStats.teamA.corners;
-            document.getElementById('away-corners').textContent = matchStats.teamB.corners;
+            const homeCornersDisplay = document.getElementById('home-corners');
+            const awayCornersDisplay = document.getElementById('away-corners');
+            if (homeCornersDisplay) homeCornersDisplay.textContent = matchStats.teamA.corners;
+            if (awayCornersDisplay) awayCornersDisplay.textContent = matchStats.teamB.corners;
             
-            document.getElementById('home-fouls').textContent = matchStats.teamA.fouls;
-            document.getElementById('away-fouls').textContent = matchStats.teamB.fouls;
+            const homeFoulsDisplay = document.getElementById('home-fouls');
+            const awayFoulsDisplay = document.getElementById('away-fouls');
+            if (homeFoulsDisplay) homeFoulsDisplay.textContent = matchStats.teamA.fouls;
+            if (awayFoulsDisplay) awayFoulsDisplay.textContent = matchStats.teamB.fouls;
             
             // Update cards
             const teamACardsText = `${matchStats.teamA.yellowCards + matchStats.teamA.redCards} (${matchStats.teamA.yellowCards} Y/ ${matchStats.teamA.redCards} R)`;
             const teamBCardsText = `${matchStats.teamB.yellowCards + matchStats.teamB.redCards} (${matchStats.teamB.yellowCards} Y/ ${matchStats.teamB.redCards} R)`;
-            document.getElementById('home-cards').textContent = teamACardsText;
-            document.getElementById('away-cards').textContent = teamBCardsText;
+            
+            const homeCardsDisplay = document.getElementById('home-cards');
+            const awayCardsDisplay = document.getElementById('away-cards');
+            if (homeCardsDisplay) homeCardsDisplay.textContent = teamACardsText;
+            if (awayCardsDisplay) awayCardsDisplay.textContent = teamBCardsText;
         }
         
         // Show victory screen with animation
@@ -3781,11 +3852,11 @@
             playMatchMusic(); 
             await update(ref(db, `matches/${matchId}`), { status: 'ongoing', startTime: serverTimestamp() });
             
-            // Reset match stats
+            // Reset match stats with initial scores
             matchStats = {
                 time: 0,
                 teamA: {
-                    score: 0,
+                    score: initialMatchData.score.teamA || 0,
                     possession: 0,
                     shots: 0,
                     shotsOnTarget: 0,
@@ -3795,7 +3866,7 @@
                     redCards: 0
                 },
                 teamB: {
-                    score: 0,
+                    score: initialMatchData.score.teamB || 0,
                     possession: 0,
                     shots: 0,
                     shotsOnTarget: 0,
@@ -3821,16 +3892,48 @@
                 seconds += 1;
                 matchStats.time = seconds;
                 
-                // Update possession (random for demo purposes)
-                if (Math.random() > 0.5) {
+                // Update possession based on team strategies and power
+                const teamAPower = matchData.teamA.teamPower || 50;
+                const teamBPower = matchData.teamB.teamPower || 50;
+                const totalPower = teamAPower + teamBPower;
+                
+                // Team A possession chance based on relative power
+                const teamAPossessionChance = teamAPower / totalPower;
+                
+                if (Math.random() < teamAPossessionChance) {
                     matchStats.teamA.possession++;
                 } else {
                     matchStats.teamB.possession++;
                 }
                 
+                // Occasionally track fouls and cards during regular play (1% chance per second)
+                if (Math.random() < 0.01) {
+                    // 70% chance it's a foul on team A, 30% on team B
+                    if (Math.random() < 0.7) {
+                        matchStats.teamA.fouls++;
+                        // 10% chance of yellow card, 2% chance of red card
+                        if (Math.random() < 0.1) {
+                            matchStats.teamA.yellowCards++;
+                        } else if (Math.random() < 0.02) {
+                            matchStats.teamA.redCards++;
+                        }
+                    } else {
+                        matchStats.teamB.fouls++;
+                        // 10% chance of yellow card, 2% chance of red card
+                        if (Math.random() < 0.1) {
+                            matchStats.teamB.yellowCards++;
+                        } else if (Math.random() < 0.02) {
+                            matchStats.teamB.redCards++;
+                        }
+                    }
+                }
+                
+                // Update UI with current stats
+                updateMatchStatsUI();
+                
                 const matchSnapshot = await get(ref(db, `matches/${matchId}`));
                 if (!matchSnapshot.exists()) { clearInterval(matchSimulationInterval); return; }
-                let matchData = matchSnapshot.val();
+                matchData = matchSnapshot.val(); // Use var to make it accessible in the possession calculation
                 let scoreUpdated = false;
 
                 if (seconds % 10 === 0 && seconds <= matchDuration) {
@@ -3882,6 +3985,7 @@
                             createShotEffect(50, 50, 5, matchData.teamA.uid === currentUserData.uid ? 95 : 5);
                         } else { 
                             matchStats.teamA.shots++;
+                            matchStats.teamA.shotsOnTarget++; // Shot was on target but saved
                             matchStats.teamB.fouls++;
                             
                             const teamAPlayer = (teamA_Players && teamA_Players.length > 0) ? getRandomItem(teamA_Players) : matchData.teamA.clubName;
@@ -3976,6 +4080,7 @@
                                 createShotEffect(50, 50, 95, matchData.teamB.uid === currentUserData.uid ? 95 : 5);
                             } else { 
                                 matchStats.teamB.shots++;
+                                matchStats.teamB.shotsOnTarget++; // Shot was on target but saved
                                 matchStats.teamA.fouls++;
                                 
                                 const teamBPlayer = (teamB_Players && teamB_Players.length > 0) ? getRandomItem(teamB_Players) : matchData.teamB.clubName;
@@ -4032,6 +4137,15 @@
                             // Midfield event
                             matchStats.teamA.shots++;
                             matchStats.teamB.shots++;
+                            
+                            // 30% chance of shots on target for both teams during midfield events
+                            if (Math.random() < 0.3) {
+                                matchStats.teamA.shotsOnTarget++;
+                            }
+                            if (Math.random() < 0.3) {
+                                matchStats.teamB.shotsOnTarget++;
+                            }
+                            
                             eventText = getRandomCommentary('midfield'); 
                             
                             // Visual update for pass
@@ -4040,10 +4154,18 @@
                     }
                     await push(ref(db, `matches/${matchId}/events`), { time: `${seconds}'`, text: eventText });
                     if(scoreUpdated) await update(ref(db, `matches/${matchId}/score`), matchData.score);
+                    
+                    // Update UI immediately after events
+                    updateMatchStatsUI();
                 }
 
-                // Update UI with current stats
-                updateMatchStatsUI();
+                // Update match scores from Firebase data to ensure consistency
+                const matchSnap = await get(ref(db, `matches/${matchId}`));
+                if (matchSnap.exists()) {
+                    const updatedMatchData = matchSnap.val();
+                    matchStats.teamA.score = updatedMatchData.score.teamA;
+                    matchStats.teamB.score = updatedMatchData.score.teamB;
+                }
 
                 if (seconds >= matchDuration) {
                     clearInterval(matchSimulationInterval);
@@ -7668,6 +7790,10 @@
         document.addEventListener('click', () => {
              if (mainMenuAudio.paused && currentMatchId === null) { playMainMenuMusic(); }
         }, { once: true }); 
+
+    </script>
+</body>
+</html>
 
     </script>
 </body>
